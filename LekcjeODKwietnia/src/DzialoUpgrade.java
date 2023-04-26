@@ -119,8 +119,8 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     }
 
 
-    public void naciagnij() {
-        addMouseMotionListener(this);
+    public void setUpgrade(boolean upgrade) {
+        this.upgrade = upgrade;
 
     }
 
@@ -265,8 +265,9 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
 class Myframe extends JFrame implements KeyListener {
 
-    public Myframe() {
-
+    Dzialo dzialo;
+    public Myframe(Dzialo dzialo) {
+        this.dzialo = dzialo;
         addKeyListener(this);
 
     }
@@ -280,7 +281,7 @@ class Myframe extends JFrame implements KeyListener {
     public void keyPressed(KeyEvent e) {
 
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-
+            this.dzialo.setUpgrade(true);
             System.out.println(" SPACJA! ");
         }
 
@@ -298,17 +299,18 @@ class Myframe extends JFrame implements KeyListener {
 public class DzialoUpgrade {
     public static void main(String[] args) throws InterruptedException {
 
-        Myframe obwod = new Myframe();
-        Dzialo gierka = new Dzialo();
-        obwod.getContentPane().add(gierka);
+
+        Dzialo dzialo = new Dzialo();
+        Myframe obwod = new Myframe(dzialo);
+        obwod.getContentPane().add(dzialo);
 
         obwod.setVisible(true);
-        obwod.add(gierka);
+        obwod.add(dzialo);
         obwod.pack();
         obwod.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         while (true) {
-            gierka.strzal();
+            dzialo.strzal();
             Thread.sleep(50);
         }
     }
