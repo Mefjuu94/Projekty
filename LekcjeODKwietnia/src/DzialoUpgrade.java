@@ -256,11 +256,11 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     @Override
     public void mouseMoved(MouseEvent e) {
         System.out.println("MOVED!!");
-
     }
 }
 
 //dowaolna zmiana w kodzie
+//ta
 
 
 class Myframe extends JFrame implements KeyListener {
