@@ -258,8 +258,6 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         System.out.println("MOVED!!");
 
     }
-
-
 }
 
 //dowaolna zmiana w kodzie
