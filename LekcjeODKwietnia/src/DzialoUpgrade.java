@@ -21,6 +21,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     int y;
     //dodatkowe upgrade!!
     int dodatkowe = 2;
+    int startXD = (int) x;
     int[] xD = new int[dodatkowe];
     int[] yD = new int [dodatkowe];
 
@@ -51,14 +52,14 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     boolean upgrade = false;
     boolean strzelaj = false;
     boolean dragging = false;
+    int count = 0; // info o upgrade
+    boolean afterShoot = false;
 
-    ///kostrukltor\
+    ///kostruktor
     public Dzialo(){
         addMouseListener(this);
         addMouseMotionListener(this);
     }
-
-
 
     Random rand= new Random();
 
@@ -107,21 +108,33 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             g2d.fillOval(xTarget[i],yTarget[i],targetSize,targetSize);
         }
 
-        if (upgrade && strzelaj){
+
+        //jeśli spełni warunek 3 zdobytych piłek oraz naciśnięta spacja to:
+        //-wystrzeli 2 niebieskie piłki
+        if (upgrade) {
+//            System.out.println("wszedłem w upgrade"); //info dziala
             g2d.setColor(Color.blue);
-            for (int i = 0; i < 2 ; i++) {
-                xD[i] = (int) x;
-                yD[i] = y;
-                g2d.fillOval(xD[i] - wielkosc /2,yD[i] - wielkosc/2,wielkosc,wielkosc);
+            if (strzelaj) {
+//                System.out.println("Wszedłem w strzał - niebieskie pilki"); //info dziala
+
+                for (int i = 0; i < 2; i++) {
+                    yD[i] = y;
+                    g2d.fillOval(xD[i] - wielkosc / 2, yD[i] - wielkosc / 2, wielkosc, wielkosc);
+                }
+                afterShoot = true;
             }
         }
 
     }
 
-
+//konstruktory -> do instancji do odwołania się  w key listenerze
     public void setUpgrade(boolean upgrade) {
         this.upgrade = upgrade;
 
+    }
+
+    public void setStrzal(boolean strzelaj){
+        this.strzelaj = strzelaj;
     }
 
     public void Trafienie(){
@@ -140,9 +153,14 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             }
         }
 
-        if (celeTrafione >= 3){
+        if (celeTrafione >= 3) {
             upgrade = true;
-            System.out.println(" Możesz Wystrzelić UPGRADE");
+
+            if (count < 1) {
+                System.out.println(" Możesz Wystrzelić UPGRADE");
+                System.out.println("upgrade = " + upgrade);
+                count= count + 1;
+            }
         }
 
     }
@@ -165,7 +183,11 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
        //poruszanie się dodatkowych piłek
 
 
-        for (int i = 0; i < dodatkowe; i++) {
+        if (strzelaj && !afterShoot) {
+            xD[0] = (int) x;
+            xD[1] = (int) x;
+        }
+        if (afterShoot){
             xD[0] += 1;
             xD[1] -= 1;
         }
@@ -173,7 +195,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         //sprawdz czy trafiłeś
         Trafienie();
 
-        //jak wypadnie poza ekran pilka nie leci dalej
+        //jak wypadnie poza ekran pilka nie leci dalej, lokuje sie w "x", "y" -200
         if (x < -150 && y < -150){
             x = -200;
             y= -200;
@@ -211,6 +233,9 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         x = e.getX();
         y = e.getY();
 
+        strzelaj = false;
+        upgrade = false;
+
         startx = e.getX() ;
 
         if (x < srodekProcy) {
@@ -246,8 +271,9 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         x = e.getX();
         y = e.getY();
 
-        System.out.println(x);
-        System.out.println(y);
+        //wspórzędne kliku
+//        System.out.println(x);
+//        System.out.println(y);
 
 
         repaint();
@@ -255,19 +281,17 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        //System.out.println("MOVED!!");
+        //System.out.println("MOVED!!"); //sprawdza czy działa event listener
     }
 }
-
-//test zmiany kodu dla GItHub
 
 
 class Myframe extends JFrame implements KeyListener {
 
-    Dzialo dzialo;
+    Dzialo dzialo;  //Klasa Dzialo o nazwie dzialo
     public Myframe(Dzialo dzialo) {
-        this.dzialo = dzialo;
-        addKeyListener(this);
+        this.dzialo = dzialo;       //konstruktor dla Myframe to dzialo (stworzone wyzej) przypisane do dzialo (z Jpanela)
+        addKeyListener(this);       // dodany do tego keyListener
 
     }
 
@@ -281,6 +305,7 @@ class Myframe extends JFrame implements KeyListener {
 
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             this.dzialo.setUpgrade(true);
+            this.dzialo.setStrzal(true);
             System.out.println(" SPACJA! ");
         }
 
@@ -291,8 +316,6 @@ class Myframe extends JFrame implements KeyListener {
 
     }
 }
-
-
 
 
 public class DzialoUpgrade {
