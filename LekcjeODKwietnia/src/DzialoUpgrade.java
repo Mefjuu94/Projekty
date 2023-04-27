@@ -187,6 +187,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
     @Override
     public Dimension getPreferredSize() {
+
         return new Dimension(Width,Height);
     }
 
@@ -257,6 +258,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         System.out.println("MOVED!!");
 
     }
+
 
 }
 
