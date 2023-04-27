@@ -259,6 +259,8 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     }
 }
 
+//test zmiany kodu dla GItHub
+
 
 class Myframe extends JFrame implements KeyListener {
 
