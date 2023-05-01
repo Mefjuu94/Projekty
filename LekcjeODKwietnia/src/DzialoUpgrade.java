@@ -58,6 +58,11 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         this.stworzCele(ilosCeli);
     }
 
+    public void odPoczatku(int iloscCeli) {
+        this.stworzCele(iloscCeli);
+
+    }
+
     private void stworzCele(int ilosCeli) {
         Random rand = new Random();
         this.balls = new Ball[ilosCeli];
@@ -113,6 +118,22 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             }
         }
 
+        if (this.celeTrafione == this.balls.length) {
+            System.out.println("Gratulacje, trafiłeś wszystkie Cele!");
+            // pytanie czy chce zagrać jescze raz?
+            int dialogButton = JOptionPane.showConfirmDialog(null,
+                    "Czy chcesz zagrać jeszcze raz?", "WARNING", JOptionPane.YES_NO_OPTION);
+            // YES =0 NO = 1
+            if (dialogButton == 1) {
+                System.exit(0);
+            } else if (dialogButton == 0) {
+                // tu ma być wywołanie na nowo!!!!
+                int iloscCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
+
+                this.odPoczatku(iloscCeli);
+            }
+        }
+
     }
 
     // konstruktory -> do instancji do odwołania się w key listenerze
@@ -128,12 +149,18 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     public void Trafienie() {
         for (int i = 0; i < this.balls.length; i++) {
             boolean trafienie1 = this.balls[i].trafienie(wielkosc, (int) x, y);
-            boolean trafienie2 = this.balls[i].trafienie(wielkosc, (int) xD[0], yD[0]);
-            boolean trafienie3 = this.balls[i].trafienie(wielkosc, (int) xD[1], yD[1]);
+            boolean trafienie2 = false;
+            boolean trafienie3 = false;
+            if (this.upgrade) {
+                trafienie2 = this.balls[i].trafienie(wielkosc, (int) xD[0], yD[0]);
+                trafienie3 = this.balls[i].trafienie(wielkosc, (int) xD[1], yD[1]);
+            }
+
             if (trafienie1 || trafienie2 || trafienie3) {
                 this.celeTrafione++;
             }
-            System.out.println("cele trafione = " + celeTrafione + " / " + this.balls.length);
+            // System.out.println("cele trafione = " + celeTrafione + " / " +
+            // this.balls.length);
         }
 
         // jak Trafione zostanie 1/3 WSZYSTKICH celów to odblokowuje UPGRADE
@@ -185,20 +212,6 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
         repaint();
 
-        if (celeTrafione == this.balls.length) {
-            System.out.println("Gratulacje, trafiłeś wszystkie Cele!");
-            // pytanie czy chce zagrać jescze raz?
-            int dialogButton = JOptionPane.showConfirmDialog(null,
-                    "Czy chcesz zagrać jeszcze raz?", "WARNING", JOptionPane.YES_NO_OPTION);
-            // YES =0 NO = 1
-            if (dialogButton == 1) {
-                System.exit(0);
-            } else if (dialogButton == 0) {
-                // tu ma być wywołanie na nowo!!!!
-                System.exit(0);
-            }
-        }
-
     }
 
     @Override
@@ -219,6 +232,9 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         x = e.getX();
         y = e.getY();
         dragging = true;
+        szybkoscPoruszaniaY = 0;
+        szybkoscPoruszaniaX = 0;
+        strzelaj = false;
     }
 
     @Override
@@ -342,9 +358,9 @@ class Myframe extends JFrame implements KeyListener {
 public class DzialoUpgrade {
     public static void main(String[] args) throws InterruptedException {
 
-        int ilosCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
+        int iloscCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
 
-        Dzialo dzialo = new Dzialo(ilosCeli);
+        Dzialo dzialo = new Dzialo(iloscCeli);
         Myframe obwod = new Myframe(dzialo);
         obwod.getContentPane().add(dzialo);
 
