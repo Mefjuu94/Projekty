@@ -8,31 +8,31 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     int Width = 1000;
     int Height = 500;
 
-    //proca
+    // proca
 
-    int prawa = Width/2 + 100;
-    int lewa = Width/2 - 100;
-    int procay = Height-200;
+    int prawa = Width / 2 + 100;
+    int lewa = Width / 2 - 100;
+    int procay = Height - 200;
 
-    //rysowana kulka
+    // rysowana kulka
     boolean rysKulke = false;
     int wielkosc = 30;
     double x;
     int y;
-    //dodatkowe upgrade!!
+    // dodatkowe upgrade!!
     int dodatkowe = 2;
     int startXD = (int) x;
     int[] xD = new int[dodatkowe];
-    int[] yD = new int [dodatkowe];
+    int[] yD = new int[dodatkowe];
 
-    //cieciwa
+    // cieciwa
 
     int ciecProcaLewa = lewa;
     int ciecProcaPrawa = prawa;
-//    int koniecCieciwyPr = (int) (x + wielkosc/2);
-//    int koniecCieciwyLw = (int) (x - wielkosc/2);
+    // int koniecCieciwyPr = (int) (x + wielkosc/2);
+    // int koniecCieciwyLw = (int) (x - wielkosc/2);
     int odlegosc;
-    int srodekProcy = Width/2;
+    int srodekProcy = Width / 2;
     int koniecy = procay;
     boolean rysCieciwe = true;
 
@@ -40,12 +40,9 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     double szybkoscPoruszaniaY;
     double szybkoscPoruszaniaX;
 
-    //ilsoc celow
-    int cele = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
-    int targetSize = 40;
+    // nasze cele
+    Ball balls[];
 
-    int[] xTarget = new int[cele];
-    int[] yTarget = new int[cele];
     // TRAFIONE
     int celeTrafione;
     boolean upgrade = false;
@@ -54,23 +51,21 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     int count = 0; // info o upgrade
     boolean afterShoot = false;
 
-    ///kostruktor
-    public Dzialo(){
+    /// kostruktor
+    public Dzialo(int ilosCeli) {
         addMouseListener(this);
         addMouseMotionListener(this);
+        this.stworzCele(ilosCeli);
     }
 
-    //losowanie współrzednych celów
-    Random rand= new Random();
-    {
-        for (int i = 0; i < cele; i++) {
-            xTarget[i] = rand.nextInt(Width - targetSize);
-        }
-        for (int i = 0; i < cele; i++) {
-            yTarget[i] = rand.nextInt(procay - targetSize);
+    private void stworzCele(int ilosCeli) {
+        Random rand = new Random();
+        this.balls = new Ball[ilosCeli];
+        for (int i = 0; i < ilosCeli; i++) {
+            int ballSize = 40;
+            this.balls[i] = new Ball(ballSize, rand.nextInt(Width - ballSize), rand.nextInt(procay - ballSize));
         }
     }
-
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -79,9 +74,9 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(3));
 
-        g2d.drawLine(Width/2,Height-10,Width/2,Height-120);
-        g2d.drawLine(Width/2,Height-120,lewa,procay);
-        g2d.drawLine(Width/2,Height-120,prawa,procay);
+        g2d.drawLine(Width / 2, Height - 10, Width / 2, Height - 120);
+        g2d.drawLine(Width / 2, Height - 120, lewa, procay);
+        g2d.drawLine(Width / 2, Height - 120, prawa, procay);
 
         if (rysKulke) {
             g2d.fillOval((int) (x - wielkosc / 2), y - wielkosc / 2, wielkosc, wielkosc);
@@ -94,24 +89,22 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             if (rysCieciwe) {
                 g2d.drawLine(ciecProcaLewa, procay, (int) (x - wielkosc / 2), y);
                 g2d.drawLine(ciecProcaPrawa, procay, (int) (x + wielkosc / 2), y);
-//                g2d.drawLine(ciecProcaLewa, procay, (int) (x), y+84);
-//                g2d.drawLine(ciecProcaPrawa, procay, (int) (x + 9), y+84);
+                // g2d.drawLine(ciecProcaLewa, procay, (int) (x), y+84);
+                // g2d.drawLine(ciecProcaPrawa, procay, (int) (x + 9), y+84);
             }
         }
 
-        for (int i = 0; i < cele; i++) {
-            g2d.setStroke(new BasicStroke(3));
-            g2d.setColor(Color.gray);
-            g2d.fillOval(xTarget[i],yTarget[i],targetSize,targetSize);
+        for (int i = 0; i < this.balls.length; i++) {
+            this.balls[i].paint(g2d);
         }
 
-        //jeśli spełni warunek 3 zdobytych piłek oraz naciśnięta spacja to:
-        //-wystrzeli 2 niebieskie piłki z tej pierwotnej
+        // jeśli spełni warunek 3 zdobytych piłek oraz naciśnięta spacja to:
+        // -wystrzeli 2 niebieskie piłki z tej pierwotnej
         if (upgrade) {
-//            System.out.println("wszedłem w upgrade"); //info dziala
+            // System.out.println("wszedłem w upgrade"); //info dziala
             g2d.setColor(Color.blue);
             if (upgrade && strzelaj) {
-//                System.out.println("Wszedłem w strzał - niebieskie pilki"); //info dziala
+                // System.out.println("Wszedłem w strzał - niebieskie pilki"); //info dziala
                 for (int i = 0; i < 2; i++) {
                     yD[i] = y;
                     g2d.fillOval(xD[i] - wielkosc / 2, yD[i] - wielkosc / 2, wielkosc, wielkosc);
@@ -122,62 +115,34 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
     }
 
-//konstruktory -> do instancji do odwołania się  w key listenerze
+    // konstruktory -> do instancji do odwołania się w key listenerze
     public void setUpgrade(boolean upgrade) {
         this.upgrade = upgrade;
 
     }
 
-    public void setStrzal(boolean strzelaj){
+    public void setStrzal(boolean strzelaj) {
         this.strzelaj = strzelaj;
     }
 
-    public void Trafienie(){
-        //odl euklidesowa
-
-        for (int i = 0; i < cele; i++){
-            int odleglosc;
-            int odlegloscD1;
-            int odlegloscD2;
-            odleglosc = (int) Math.sqrt(Math.pow(((x - (wielkosc/2)) - xTarget[i]), 2) + Math.pow((y-(wielkosc/2) - yTarget[i]), 2));
-            odlegloscD1 = (int) Math.sqrt(Math.pow(((xD[0] - (wielkosc/2)) - xTarget[i]), 2) + Math.pow((yD[0]-(wielkosc/2) - yTarget[i]), 2));
-            odlegloscD2 = (int) Math.sqrt(Math.pow(((xD[1] - (wielkosc/2)) - xTarget[i]), 2) + Math.pow((yD[1]-(wielkosc/2) - yTarget[i]), 2));
-//            System.out.println(odleglosc + " kulka : " + i );
-            if (odleglosc < 35) {
-                System.out.println("Trafiłeś!!!!!!!!!!!!!!");
-                xTarget[i] = -151150; // Jak trafiles to wyrzuc poza ekran
-                yTarget[i] = 151150;
-                celeTrafione +=1;
-                System.out.println("cele trafione = " + celeTrafione + " / " + cele);
+    public void Trafienie() {
+        for (int i = 0; i < this.balls.length; i++) {
+            boolean trafienie1 = this.balls[i].trafienie(wielkosc, (int) x, y);
+            boolean trafienie2 = this.balls[i].trafienie(wielkosc, (int) xD[0], yD[0]);
+            boolean trafienie3 = this.balls[i].trafienie(wielkosc, (int) xD[1], yD[1]);
+            if (trafienie1 || trafienie2 || trafienie3) {
+                this.celeTrafione++;
             }
-
-            //sprawdzenie czy pierwsza DODATKOWA pilka trafiła
-            if (odlegloscD1 < 35) {
-                System.out.println("Trafiłeś dodatkową piłką!!!!!");
-                xTarget[i] = -151150; // Jak trafiles to wyrzuc poza ekran
-                yTarget[i] = 151150;
-                celeTrafione +=1;
-                System.out.println("cele trafione = " + celeTrafione  + " / " + cele);
-            }
-
-            //sprawdzenie czy DRUGA DODATKOWA pilka trafiła
-            if (odlegloscD2 < 35) {
-                System.out.println("Trafiłeś dodatkową piłką!!!!!");
-                xTarget[i] = -151150; // Jak trafiles to wyrzuc poza ekran
-                yTarget[i] = 151150;
-                celeTrafione +=1;
-                System.out.println("cele trafione = " + celeTrafione  + " / " + cele);
-            }
+            System.out.println("cele trafione = " + celeTrafione + " / " + this.balls.length);
         }
 
-
-        //jak Trafione zostanie 1/3 WSZYSTKICH celów to odblokowuje UPGRADE
-        if (celeTrafione >= (cele/3)) {
+        // jak Trafione zostanie 1/3 WSZYSTKICH celów to odblokowuje UPGRADE
+        if (celeTrafione >= (this.balls.length / 3)) {
             upgrade = true;
             if (count < 1) {
                 System.out.println(" Możesz Wystrzelić UPGRADE");
                 System.out.println("upgrade = " + upgrade);
-                count= count + 1;
+                count = count + 1;
             }
         }
 
@@ -188,49 +153,48 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
         y -= szybkoscPoruszaniaY;
 
-        //oblicz kąt ( z jaką predkoscia x bedzie sie przemieszcał
+        // oblicz kąt ( z jaką predkoscia x bedzie sie przemieszcał
 
-        if (startx > Width/2){
-            x =  x - szybkoscPoruszaniaX;
-        }else {
+        if (startx > Width / 2) {
+            x = x - szybkoscPoruszaniaX;
+        } else {
             x = x + szybkoscPoruszaniaX;
         }
 
-       //poruszanie się dodatkowych piłek
-
+        // poruszanie się dodatkowych piłek
 
         if (strzelaj && !afterShoot) {
             xD[0] = (int) x;
             xD[1] = (int) x;
         }
-        if (afterShoot){
+        if (afterShoot) {
             xD[0] += 5;
             xD[1] -= 5;
         }
 
-        //sprawdz czy trafiłeś
+        // sprawdz czy trafiłeś
         Trafienie();
 
-        //jak wypadnie poza ekran pilka nie leci dalej, lokuje sie w "x", "y" -200
-        if (x < -150 && y < -150){
+        // jak wypadnie poza ekran pilka nie leci dalej, lokuje sie w "x", "y" -200
+        if (x < -150 && y < -150) {
             x = -200;
-            y= -200;
+            y = -200;
             szybkoscPoruszaniaX = 0;
             szybkoscPoruszaniaY = 0;
         }
 
         repaint();
 
-        if (celeTrafione == cele) {
+        if (celeTrafione == this.balls.length) {
             System.out.println("Gratulacje, trafiłeś wszystkie Cele!");
             // pytanie czy chce zagrać jescze raz?
             int dialogButton = JOptionPane.showConfirmDialog(null,
-                    "Czy chcesz zagrać jeszcze raz?", "WARNING",JOptionPane.YES_NO_OPTION);
-            //YES =0    NO = 1
-            if (dialogButton == 1){
+                    "Czy chcesz zagrać jeszcze raz?", "WARNING", JOptionPane.YES_NO_OPTION);
+            // YES =0 NO = 1
+            if (dialogButton == 1) {
                 System.exit(0);
-            }else if (dialogButton == 0){
-                //tu ma być wywołanie na nowo!!!!
+            } else if (dialogButton == 0) {
+                // tu ma być wywołanie na nowo!!!!
                 System.exit(0);
             }
         }
@@ -240,7 +204,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     @Override
     public Dimension getPreferredSize() {
 
-        return new Dimension(Width,Height);
+        return new Dimension(Width, Height);
     }
 
     @Override
@@ -266,17 +230,16 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         strzelaj = false;
         upgrade = false;
 
-        startx = e.getX() ;
+        startx = e.getX();
 
         if (x < srodekProcy) {
             odlegosc = srodekProcy - startx;
-        }else {
+        } else {
             odlegosc = startx - srodekProcy;
         }
 
-        szybkoscPoruszaniaY = ((y - (wielkosc/2)) - procay)/10;
-        szybkoscPoruszaniaX = odlegosc /10;
-
+        szybkoscPoruszaniaY = ((y - (wielkosc / 2)) - procay) / 10;
+        szybkoscPoruszaniaX = odlegosc / 10;
 
     }
 
@@ -301,17 +264,49 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        //System.out.println("MOVED!!"); //sprawdza czy działa event listener
+        // System.out.println("MOVED!!"); //sprawdza czy działa event listener
     }
 }
 
+class Ball {
+    int x;
+    int y;
+    int size;
+
+    public Ball(int size, int x, int y) {
+        this.x = x;
+        this.y = y;
+        this.size = size;
+    }
+
+    public void paint(Graphics2D g2d) {
+        g2d.setStroke(new BasicStroke(3));
+        g2d.setColor(Color.gray);
+        g2d.fillOval(x, y, size, size);
+    }
+
+    // sprawdz czy kulka o pozycji x,y i wielkosci size trafila kulke
+    public boolean trafienie(int size, int x, int y) {
+        // odl euklidesowa
+        int odleglosc = (int) Math.sqrt(
+                Math.pow(((x - (size / 2)) - this.x), 2) + Math.pow((y - (size / 2) - this.y), 2));
+        if (odleglosc < 35) {
+            this.x = -151150; // Jak trafiles to wyrzuc poza ekran
+            this.y = 151150;
+            return true;
+        }
+        return false;
+    }
+}
 
 class Myframe extends JFrame implements KeyListener {
 
-    Dzialo dzialo;  //Klasa Dzialo o nazwie dzialo
+    Dzialo dzialo; // Klasa Dzialo o nazwie dzialo
+
     public Myframe(Dzialo dzialo) {
-        this.dzialo = dzialo;       //konstruktor dla Myframe to dzialo (stworzone wyzej) przypisane do dzialo (z Jpanela)
-        addKeyListener(this);       // dodany do tego keyListener
+        this.dzialo = dzialo; // konstruktor dla Myframe to dzialo (stworzone wyzej) przypisane do dzialo (z
+                              // Jpanela)
+        addKeyListener(this); // dodany do tego keyListener
 
     }
 
@@ -324,11 +319,11 @@ class Myframe extends JFrame implements KeyListener {
     public void keyPressed(KeyEvent e) {
 
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            this.dzialo.setStrzal(true);  // po naciśnieciu na SPACJE
-            //bool "strzal = true" i wystrzeli klulkę
+            this.dzialo.setStrzal(true); // po naciśnieciu na SPACJE
+            // bool "strzal = true" i wystrzeli klulkę
 
-            //zbieranie współrzędnych pierwotnej piłki
-            for (int i = 0; i <2 ; i++) {
+            // zbieranie współrzędnych pierwotnej piłki
+            for (int i = 0; i < 2; i++) {
                 this.dzialo.xD[i] = (int) dzialo.x;
                 this.dzialo.yD[i] = dzialo.y;
             }
@@ -344,12 +339,12 @@ class Myframe extends JFrame implements KeyListener {
     }
 }
 
-
 public class DzialoUpgrade {
     public static void main(String[] args) throws InterruptedException {
 
+        int ilosCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
 
-        Dzialo dzialo = new Dzialo();
+        Dzialo dzialo = new Dzialo(ilosCeli);
         Myframe obwod = new Myframe(dzialo);
         obwod.getContentPane().add(dzialo);
 
