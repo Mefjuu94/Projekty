@@ -1,13 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.Random;
-import java.util.Scanner;
-
 
 class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
@@ -63,10 +60,6 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     int gracze;
     int ktoryGraczGra = 1;
     Player gracz[];
-    double wynik;
-    String NajlepszyGracz = "";
-    String NajlepszyWynik = "";
-    double NajlepszyWynikDouble;
     long a = System.currentTimeMillis();
     int czasWsek;
 
@@ -81,7 +74,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         addMouseMotionListener(this);
         this.stworzCele(ilosCeli);
         this.iloscCeli = ilosCeli;
-        this.scoreBoard = new ScoreBoard(this.gracz);
+        this.scoreBoard = new ScoreBoard();
     }
 
 
@@ -102,14 +95,10 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             gracz[i] = new Player(name);
             System.out.println(gracz[i].name);
         }
+
+        this.scoreBoard.setPlayers(gracz);
     }
     //Tworzenie graczy działa
-
-
-    //najlepszy gracz odczyt
-    Scanner score = new Scanner(new File("C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt"));
-    String linijka = "";
-    String[] split;
 
     int iloscCeli;
 
@@ -119,9 +108,8 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
 
     public void odPoczatku() throws FileNotFoundException {
-        score = new Scanner(new File("C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt"));
-        linijka = "";
-        //NajlepszyWynik();
+        this.scoreBoard.NajlepszyWynik();
+
         this.stworzCele(iloscCeli);
         a = System.currentTimeMillis();
         x = -800; // wywal piłkę zeby po wpisaniu nie leciala dalej
@@ -233,7 +221,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
 
             //jeśli wynik był najwiekszy zamień!! > działa
-            if (wynik > NajlepszyWynikDouble) {
+            if (gracz[ktoryGraczGra].score > this.scoreBoard.NajlepszyWynikDouble) {
                 PrintWriter zapis = new PrintWriter("C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt");
                 String graczS = String.valueOf(gracz[ktoryGraczGra].name);
 
@@ -286,6 +274,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
                 if (trafienie1 || trafienie2 || trafienie3) {
                     this.celeTrafione++;
+                    this.gracz[ktoryGraczGra].score = this.celeTrafione;
                 }
                 // System.out.println("cele trafione = " + celeTrafione + " / " +
                 // this.balls.length);
@@ -353,7 +342,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         public void Score () {
             //wynik to iloscPilek/czas*10
             for (int i = 1; i < gracze + 1; i++) {
-                wynik = ((double) this.balls.length / czasWsek) * 10; // *czas * 10;
+                double wynik = ((double) this.balls.length / czasWsek) * 10; // *czas * 10;
                 gracz[i].score = wynik;
                 System.out.println(wynik);
             }
