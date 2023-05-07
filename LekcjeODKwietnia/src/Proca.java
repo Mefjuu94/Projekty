@@ -221,7 +221,7 @@ public class Proca {
     public static void main(String[] args) throws InterruptedException {
 
         JFrame obwod = new JFrame("Proca");
-        Dzialo gierka = new Dzialo();
+        Dzialo gierka = new Dzialo(3);
 
 
         obwod.setVisible(true);
