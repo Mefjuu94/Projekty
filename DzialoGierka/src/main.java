@@ -9,7 +9,6 @@ import java.util.Random;
 import java.util.Scanner;
 
 
-
 class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
     int Width = 1200;
@@ -63,7 +62,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     //gracze,wynik czas
     int gracze;
     int ktoryGraczGra = 1;
-    Players gracz[];
+    Player gracz[];
     double wynik;
     String NajlepszyGracz = "";
     String NajlepszyWynik = "";
@@ -75,19 +74,32 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     int pilkiDlaNastGracza[];
 
 
+    ScoreBoard scoreBoard;
+
+    public Dzialo(int ilosCeli) throws FileNotFoundException {
+        addMouseListener(this);
+        addMouseMotionListener(this);
+        this.stworzCele(ilosCeli);
+        this.iloscCeli = ilosCeli;
+        this.scoreBoard = new ScoreBoard(this.gracz);
+    }
+
+
+
 
     public int IloscGraczy() {
         gracze = Integer.parseInt(JOptionPane.showInputDialog("Ilość GRACZY"));
         System.out.println(a);
+        ktoryGraczGra = 1;
         return gracze;
     }
 
 
     public void Players() {
-        gracz = new Players[gracze + 1]; // gracze liczeni od 1 !!!!!
+        gracz = new Player[gracze + 1]; // gracze liczeni od 1 !!!!!
         for (int i = 1; i < gracze + 1; i++) {
             String name = JOptionPane.showInputDialog("Imię Gracza " + i);
-            gracz[i] = new Players(name, wynik);
+            gracz[i] = new Player(name);
             System.out.println(gracz[i].name);
         }
     }
@@ -99,31 +111,26 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     String linijka = "";
     String[] split;
 
-    public void NajlepszyWynik() {
-        while (score.hasNextLine()) {
-            linijka = score.nextLine();
-            split = linijka.split(" ");
-            NajlepszyGracz = split[0];
-            NajlepszyWynik = split[1];
-            NajlepszyWynikDouble = Double.parseDouble(split[1]);
-        }
-    }
+    int iloscCeli;
+
 
     ///////////////////////////////////////////////////////////////////
 
-    /// kostruktor
-    public Dzialo(int ilosCeli) throws FileNotFoundException {
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        this.stworzCele(ilosCeli);
-    }
 
-    public void odPoczatku(int iloscCeli) throws FileNotFoundException {
+
+    public void odPoczatku() throws FileNotFoundException {
         score = new Scanner(new File("C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt"));
         linijka = "";
-        NajlepszyWynik();
+        //NajlepszyWynik();
         this.stworzCele(iloscCeli);
-
+        a = System.currentTimeMillis();
+        x = -800; // wywal piłkę zeby po wpisaniu nie leciala dalej
+        y = 50;
+        xD[0] = -500; // wyzeruj współrzędne piłek dodatkowych zeby nie leciały dalej
+        xD[1] = -500;
+        celeTrafione = 0; //wyzeruj cele trafione
+        szybkoscPoruszaniaX = 0;
+        szybkoscPoruszaniaY = 0;
     }
 
     private void stworzCele(int ilosCeli) {
@@ -199,21 +206,9 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         g2d.drawString("Liczba strzałów: " + iloscStrzalow, Width - 400, Height - 50); // zrobic
 
         //Wyświetlenie graczy!!
-        int y = Height - 180;
-        ;
-        for (int i = 1; i < gracze + 1; i++) {
-            g2d.setColor(Color.black);
-            if (gracze > 1) {
-                g2d.drawString("gracz: " + gracz[i].name + " wynik " + wynik, 50, y);
-                y += 20;
-            } else {
-                g2d.drawString("gracz: " + gracz[i].name + " wynik " + wynik, 50, y);
-            }
-        }
-        g2d.drawRect(45, Height - 200, Width / 2 - 300, 150);
 
-        //NAJLEPSZY WYNIK!!
-        g2d.drawString("Najlepszy gracz: " + NajlepszyGracz + "   Wynik: " + NajlepszyWynik, 50, Height - 10);
+        this.scoreBoard.paint(g2d);
+
 
     }
 
@@ -234,23 +229,17 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             ObliczCzas();
             System.out.println("czas w sek " + czasWsek);
             Score();
-            //koniec gracza 1, wczytanie gracza 2;
-            if(ktoryGraczGra == gracze){
-                // wczytaj jeszscze raz piłeczki!!
-                ktoryGraczGra+=1;
-            }
-
             //jaki wynik
 
 
             //jeśli wynik był najwiekszy zamień!! > działa
             if (wynik > NajlepszyWynikDouble) {
                 PrintWriter zapis = new PrintWriter("C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt");
-                String graczS = String.valueOf(gracz[1].name);
+                String graczS = String.valueOf(gracz[ktoryGraczGra].name);
 
                 final DecimalFormat df = new DecimalFormat("0.00");
                 df.format(gracz[1].score);
-                String wynikS = Double.toString(gracz[1].score);
+                String wynikS = Double.toString(gracz[ktoryGraczGra].score);
                 System.out.println("graczS" + graczS);
                 System.out.println("WynikS " + wynikS);
                 zapis.println(graczS + " " + wynikS);
@@ -258,266 +247,268 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
                 System.out.println("Twoj wynik to: " + wynikS);
             }
 
-            // pytanie czy chce zagrać jescze raz?
-            int dialogButton = JOptionPane.showConfirmDialog(null,
-                    "Czy chcesz zagrać jeszcze raz?", "WARNING", JOptionPane.YES_NO_OPTION);
-            // YES =0 NO = 1
-            if (dialogButton == 1) {
-                System.exit(0);
-            } else if (dialogButton == 0) {
-                // tu ma być wywołanie na nowo!!!!
-                int iloscCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
+            // wczytaj jeszscze raz piłeczki!!
 
-                this.odPoczatku(iloscCeli);
-                a = System.currentTimeMillis();
-                x = -800; // wywal piłkę zeby po wpisaniu nie leciala dalej
-                y = 50;
-                xD[0] = -500; // wyzeruj współrzędne piłek dodatkowych zeby nie leciały dalej
-                xD[1] = -500;
-                celeTrafione = 0; //wyzeruj cele trafione
+            if (ktoryGraczGra + 1 == gracze) {
+
+
+                // pytanie czy chce zagrać jescze raz?
+                int dialogButton = JOptionPane.showConfirmDialog(null,
+                        "Czy chcesz zagrać jeszcze raz?", "WARNING", JOptionPane.YES_NO_OPTION);
+                // YES =0 NO = 1
+                if (dialogButton == 1) {
+                    System.exit(0);
+                } else if (dialogButton == 0) {
+                    // tu ma być wywołanie na nowo!!!!
+
+                    this.odPoczatku();
+
+                }
+            } else {
+                int komunikat = JOptionPane.showConfirmDialog(this, "Następny Gracz");
+                odPoczatku();
+                ktoryGraczGra+=1;
+
+            }
+        }
+    }
+        //////////////////////////////////
+
+        public void Trafienie () throws FileNotFoundException {
+            for (int i = 0; i < this.balls.length; i++) {
+                boolean trafienie1 = this.balls[i].trafienie(wielkosc, (int) x, y);
+                boolean trafienie2 = false;
+                boolean trafienie3 = false;
+                if (this.upgrade) {
+                    trafienie2 = this.balls[i].trafienie(wielkosc, (int) xD[0], yD[0]);
+                    trafienie3 = this.balls[i].trafienie(wielkosc, (int) xD[1], yD[1]);
+                }
+
+                if (trafienie1 || trafienie2 || trafienie3) {
+                    this.celeTrafione++;
+                }
+                // System.out.println("cele trafione = " + celeTrafione + " / " +
+                // this.balls.length);
+            }
+
+            // jak Trafione zostanie 1/3 WSZYSTKICH celów to odblokowuje UPGRADE
+            if (celeTrafione >= (this.balls.length / 3)) {
+                upgrade = true;
+                if (count < 1) {
+                    System.out.println(" Możesz Wystrzelić UPGRADE");
+                    System.out.println("upgrade = " + upgrade);
+                    count = count + 1;
+                }
+            }
+            SprawdzCele();
+
+        }
+
+        public void strzal () throws FileNotFoundException {
+            addMouseListener(this);
+
+            y -= szybkoscPoruszaniaY;
+
+            // oblicz kąt ( z jaką predkoscia x bedzie sie przemieszcał
+
+            if (startx > Width / 2) {
+                x = x - szybkoscPoruszaniaX;
+            } else {
+                x = x + szybkoscPoruszaniaX;
+            }
+
+            // poruszanie się dodatkowych piłek
+
+            if (strzelaj && !afterShoot) {
+                xD[0] = (int) x;
+                xD[1] = (int) x;
+            }
+            if (afterShoot) {
+                xD[0] += 5;
+                xD[1] -= 5;
+            }
+
+            // sprawdz czy trafiłeś
+            Trafienie();
+
+            // jak wypadnie poza ekran pilka nie leci dalej, lokuje sie w "x", "y" -200
+            if (x < -150 && y < -150) {
+                x = -200;
+                y = -200;
                 szybkoscPoruszaniaX = 0;
                 szybkoscPoruszaniaY = 0;
             }
-        }
-    }
 
-    //////////////////////////////////
-
-    public void Trafienie() throws FileNotFoundException {
-        for (int i = 0; i < this.balls.length; i++) {
-            boolean trafienie1 = this.balls[i].trafienie(wielkosc, (int) x, y);
-            boolean trafienie2 = false;
-            boolean trafienie3 = false;
-            if (this.upgrade) {
-                trafienie2 = this.balls[i].trafienie(wielkosc, (int) xD[0], yD[0]);
-                trafienie3 = this.balls[i].trafienie(wielkosc, (int) xD[1], yD[1]);
-            }
-
-            if (trafienie1 || trafienie2 || trafienie3) {
-                this.celeTrafione++;
-            }
-            // System.out.println("cele trafione = " + celeTrafione + " / " +
-            // this.balls.length);
-        }
-
-        // jak Trafione zostanie 1/3 WSZYSTKICH celów to odblokowuje UPGRADE
-        if (celeTrafione >= (this.balls.length / 3)) {
-            upgrade = true;
-            if (count < 1) {
-                System.out.println(" Możesz Wystrzelić UPGRADE");
-                System.out.println("upgrade = " + upgrade);
-                count = count + 1;
-            }
-        }
-        SprawdzCele();
-
-    }
-
-    public void strzal() throws FileNotFoundException {
-        addMouseListener(this);
-
-        y -= szybkoscPoruszaniaY;
-
-        // oblicz kąt ( z jaką predkoscia x bedzie sie przemieszcał
-
-        if (startx > Width / 2) {
-            x = x - szybkoscPoruszaniaX;
-        } else {
-            x = x + szybkoscPoruszaniaX;
-        }
-
-        // poruszanie się dodatkowych piłek
-
-        if (strzelaj && !afterShoot) {
-            xD[0] = (int) x;
-            xD[1] = (int) x;
-        }
-        if (afterShoot) {
-            xD[0] += 5;
-            xD[1] -= 5;
-        }
-
-        // sprawdz czy trafiłeś
-        Trafienie();
-
-        // jak wypadnie poza ekran pilka nie leci dalej, lokuje sie w "x", "y" -200
-        if (x < -150 && y < -150) {
-            x = -200;
-            y = -200;
-            szybkoscPoruszaniaX = 0;
-            szybkoscPoruszaniaY = 0;
-        }
-
-        repaint();
-
-    }
-
-    public void ObliczCzas() {
-        long b = System.currentTimeMillis();
-        long c = (b - a) / 1000;
-        czasWsek = (int) c;
-
-    }
-
-    public void Score() {
-        //wynik to iloscPilek/czas*10
-        for (int i = 1; i < gracze + 1; i++) {
-            wynik = ((double) this.balls.length / czasWsek) * 10; // *czas * 10;
-            gracz[i].score = wynik;
-            System.out.println(wynik);
-        }
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-
-        return new Dimension(Width, Height);
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-        x = e.getX();
-        y = e.getY();
-        if (y > procay) {
-            rysKulke = true;
-            rysCieciwe = true;
-            dragging = true;
-            szybkoscPoruszaniaY = 0;
-            szybkoscPoruszaniaX = 0;
-            strzelaj = false;
-        } else {
-            rysKulke = false;
-            rysCieciwe = false;
-            dragging = false;
-        }
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-        x = e.getX();
-        y = e.getY();
-        if (y > procay) {
-            dragging = false;
-            strzelaj = false;
-            upgrade = false;
-
-            startx = e.getX();
-
-            if (x < srodekProcy) {
-                odlegosc = srodekProcy - startx;
-            } else {
-                odlegosc = startx - srodekProcy;
-            }
-
-            szybkoscPoruszaniaY = ((y - (wielkosc / 2)) - procay) / 10;
-            szybkoscPoruszaniaX = odlegosc / 10;
-        }
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-
-        x = e.getX();
-        y = e.getY();
-
-        if (y > procay) {
-            dragging = true;
             repaint();
-        } else {
-            dragging = false;
+
         }
 
-    }
+        public void ObliczCzas () {
+            long b = System.currentTimeMillis();
+            long c = (b - a) / 1000;
+            czasWsek = (int) c;
 
-    @Override
-    public void mouseMoved(MouseEvent e) {
-        // System.out.println("MOVED!!"); //sprawdza czy działa event listener
-    }
-}
+        }
 
-class Myframe extends JFrame implements KeyListener {
+        public void Score () {
+            //wynik to iloscPilek/czas*10
+            for (int i = 1; i < gracze + 1; i++) {
+                wynik = ((double) this.balls.length / czasWsek) * 10; // *czas * 10;
+                gracz[i].score = wynik;
+                System.out.println(wynik);
+            }
+        }
 
-    Dzialo dzialo; // Klasa Dzialo o nazwie dzialo
+        @Override
+        public Dimension getPreferredSize () {
 
-    public Myframe(Dzialo dzialo) {
-        this.dzialo = dzialo; // konstruktor dla Myframe to dzialo (stworzone wyzej) przypisane do dzialo (z
-        // Jpanela)
-        addKeyListener(this); // dodany do tego keyListener
+            return new Dimension(Width, Height);
+        }
 
-    }
+        @Override
+        public void mouseClicked (MouseEvent e){
 
-    @Override
-    public void keyTyped(KeyEvent e) {
+        }
 
-    }
+        @Override
+        public void mousePressed (MouseEvent e){
 
-    @Override
-    public void keyPressed(KeyEvent e) {
+            x = e.getX();
+            y = e.getY();
+            if (y > procay) {
+                rysKulke = true;
+                rysCieciwe = true;
+                dragging = true;
+                szybkoscPoruszaniaY = 0;
+                szybkoscPoruszaniaX = 0;
+                strzelaj = false;
+            } else {
+                rysKulke = false;
+                rysCieciwe = false;
+                dragging = false;
+            }
+        }
 
-        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            this.dzialo.setStrzal(true); // po naciśnieciu na SPACJE
-            // bool "strzal = true" i wystrzeli klulkę
+        @Override
+        public void mouseReleased (MouseEvent e){
 
-            // zbieranie współrzędnych pierwotnej piłki
-            for (int i = 0; i < 2; i++) {
-                this.dzialo.xD[i] = (int) dzialo.x;
-                this.dzialo.yD[i] = dzialo.y;
+            x = e.getX();
+            y = e.getY();
+            if (y > procay) {
+                dragging = false;
+                strzelaj = false;
+                upgrade = false;
+
+                startx = e.getX();
+
+                if (x < srodekProcy) {
+                    odlegosc = srodekProcy - startx;
+                } else {
+                    odlegosc = startx - srodekProcy;
+                }
+
+                szybkoscPoruszaniaY = ((y - (wielkosc / 2)) - procay) / 10;
+                szybkoscPoruszaniaX = odlegosc / 10;
             }
 
-            System.out.println(" SPACJA! ");
         }
 
-    }
+        @Override
+        public void mouseEntered (MouseEvent e){
 
-    @Override
-    public void keyReleased(KeyEvent e) {
+        }
 
-    }
-}
+        @Override
+        public void mouseExited (MouseEvent e){
 
+        }
 
-public class main {
-    public static void main(String[] args) throws InterruptedException, FileNotFoundException {
+        @Override
+        public void mouseDragged (MouseEvent e){
 
-        int iloscCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
+            x = e.getX();
+            y = e.getY();
 
-        Dzialo dzialo = new Dzialo(iloscCeli);
-        Myframe obwod = new Myframe(dzialo);
-        obwod.getContentPane().add(dzialo);
+            if (y > procay) {
+                dragging = true;
+                repaint();
+            } else {
+                dragging = false;
+            }
 
-        obwod.setVisible(true);
-        obwod.add(dzialo);
-        obwod.pack();
-        obwod.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        }
 
-        dzialo.IloscGraczy();
-        dzialo.Players();
-        dzialo.NajlepszyWynik();//wczytaj najlepszy wynik
-
-
-        while (true) {
-            dzialo.strzal();
-            Thread.sleep(50);
+        @Override
+        public void mouseMoved (MouseEvent e){
+            // System.out.println("MOVED!!"); //sprawdza czy działa event listener
         }
     }
 
-}
+    class Myframe extends JFrame implements KeyListener {
+
+        Dzialo dzialo; // Klasa Dzialo o nazwie dzialo
+
+        public Myframe(Dzialo dzialo) {
+            this.dzialo = dzialo; // konstruktor dla Myframe to dzialo (stworzone wyzej) przypisane do dzialo (z
+            // Jpanela)
+            addKeyListener(this); // dodany do tego keyListener
+
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+
+            if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                this.dzialo.setStrzal(true); // po naciśnieciu na SPACJE
+                // bool "strzal = true" i wystrzeli klulkę
+
+                // zbieranie współrzędnych pierwotnej piłki
+                for (int i = 0; i < 2; i++) {
+                    this.dzialo.xD[i] = (int) dzialo.x;
+                    this.dzialo.yD[i] = dzialo.y;
+                }
+
+                System.out.println(" SPACJA! ");
+            }
+
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+
+        }
+    }
+
+
+    public class main {
+        public static void main(String[] args) throws InterruptedException, FileNotFoundException {
+
+            int iloscCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
+
+            Dzialo dzialo = new Dzialo(iloscCeli);
+            Myframe obwod = new Myframe(dzialo);
+            obwod.getContentPane().add(dzialo);
+
+            obwod.setVisible(true);
+            obwod.add(dzialo);
+            obwod.pack();
+            obwod.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+            dzialo.IloscGraczy();
+            dzialo.Players();
+           // dzialo.NajlepszyWynik();//wczytaj najlepszy wynik
+
+
+            while (true) {
+                dzialo.strzal();
+                Thread.sleep(50);
+            }
+        }
+
+    }
 
