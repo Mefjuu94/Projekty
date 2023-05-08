@@ -2,8 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.util.Random;
 
 class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
@@ -60,7 +58,13 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     int gracze;
     int ktoryGraczGra = 1;
     Player gracz[];
-    long a = System.currentTimeMillis();
+
+    double wynik;
+    String NajlepszyGracz = "";
+    String NajlepszyWynik = "";
+    double NajlepszyWynikDouble;
+    long startTime = System.currentTimeMillis();
+
     int czasWsek;
 
     boolean WszyscyGracze = true;
@@ -82,7 +86,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
     public int IloscGraczy() {
         gracze = Integer.parseInt(JOptionPane.showInputDialog("Ilość GRACZY"));
-        System.out.println(a);
+        System.out.println(startTime);
         ktoryGraczGra = 1;
         return gracze;
     }
@@ -108,10 +112,11 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
 
     public void odPoczatku() throws FileNotFoundException {
-        this.scoreBoard.NajlepszyWynik();
+        this.scoreBoard.WczytajNajlepszyWynik();
+
 
         this.stworzCele(iloscCeli);
-        a = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
         x = -800; // wywal piłkę zeby po wpisaniu nie leciala dalej
         y = 50;
         xD[0] = -500; // wyzeruj współrzędne piłek dodatkowych zeby nie leciały dalej
@@ -127,9 +132,6 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         for (int i = 0; i < ilosCeli; i++) {
             int ballSize = 40;
             this.balls[i] = new Ball(ballSize, rand.nextInt(Width - ballSize), rand.nextInt(procay - ballSize));
-
-            //    boolean WszyscyGracze = true;
-            //    int pilkiDlaNastGracza[];
 
         }
     }
@@ -191,7 +193,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             g2d.drawString("UPGRADE AKTYWNY!! ", Width - 250, Height - 20);
         }
 
-        g2d.drawString("Liczba strzałów: " + iloscStrzalow, Width - 400, Height - 50); // zrobic
+        g2d.drawString("który gracz gra:: " + ktoryGraczGra, Width - 400, Height - 50); // zrobic
 
         //Wyświetlenie graczy!!
 
@@ -216,24 +218,8 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             System.out.println("Gratulacje, trafiłeś wszystkie Cele!");
             ObliczCzas();
             System.out.println("czas w sek " + czasWsek);
-            Score();
+            updateScore();
             //jaki wynik
-
-
-            //jeśli wynik był najwiekszy zamień!! > działa
-            if (gracz[ktoryGraczGra].score > this.scoreBoard.NajlepszyWynikDouble) {
-                PrintWriter zapis = new PrintWriter("C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt");
-                String graczS = String.valueOf(gracz[ktoryGraczGra].name);
-
-                final DecimalFormat df = new DecimalFormat("0.00");
-                df.format(gracz[1].score);
-                String wynikS = Double.toString(gracz[ktoryGraczGra].score);
-                System.out.println("graczS" + graczS);
-                System.out.println("WynikS " + wynikS);
-                zapis.println(graczS + " " + wynikS);
-                zapis.close();
-                System.out.println("Twoj wynik to: " + wynikS);
-            }
 
             // wczytaj jeszscze raz piłeczki!!
 
@@ -255,10 +241,13 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             } else {
                 int komunikat = JOptionPane.showConfirmDialog(this, "Następny Gracz");
                 odPoczatku();
-                ktoryGraczGra+=1;
+                ktoryGraczGra++;
 
             }
+            this.scoreBoard.setScoreIfNeeded(this.gracz[ktoryGraczGra]);
         }
+
+
     }
         //////////////////////////////////
 
@@ -334,18 +323,18 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
         public void ObliczCzas () {
             long b = System.currentTimeMillis();
-            long c = (b - a) / 1000;
+            long c = (b - startTime) / 1000;
             czasWsek = (int) c;
 
         }
 
-        public void Score () {
+        public void updateScore () {
             //wynik to iloscPilek/czas*10
-            for (int i = 1; i < gracze + 1; i++) {
+
                 double wynik = ((double) this.balls.length / czasWsek) * 10; // *czas * 10;
-                gracz[i].score = wynik;
+                gracz[ktoryGraczGra].score = wynik;
                 System.out.println(wynik);
-            }
+
         }
 
         @Override
@@ -433,11 +422,11 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         }
     }
 
-    class Myframe extends JFrame implements KeyListener {
+    class KeyListener extends JFrame implements java.awt.event.KeyListener {
 
         Dzialo dzialo; // Klasa Dzialo o nazwie dzialo
 
-        public Myframe(Dzialo dzialo) {
+        public KeyListener(Dzialo dzialo) {
             this.dzialo = dzialo; // konstruktor dla Myframe to dzialo (stworzone wyzej) przypisane do dzialo (z
             // Jpanela)
             addKeyListener(this); // dodany do tego keyListener
@@ -480,7 +469,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             int iloscCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
 
             Dzialo dzialo = new Dzialo(iloscCeli);
-            Myframe obwod = new Myframe(dzialo);
+            KeyListener obwod = new KeyListener(dzialo);
             obwod.getContentPane().add(dzialo);
 
             obwod.setVisible(true);
