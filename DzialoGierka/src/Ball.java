@@ -14,7 +14,7 @@ import java.awt.*;
         // przekazany paint component, żeby malowało w osobnej metodzie
         public void paint(Graphics2D g2d) {
             g2d.setStroke(new BasicStroke(3));
-            g2d.setColor(Color.gray);
+            g2d.setColor(Color.darkGray);
             g2d.fillOval(x, y, size, size);
         }
 

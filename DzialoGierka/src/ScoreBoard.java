@@ -2,19 +2,19 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.util.Scanner;
 
+import static java.lang.Math.round;
+
 public class ScoreBoard {
-    double wynik;
-    int Width = 1200;
-    int Height = 800;
+    int Width ;
+    int Height ;
     String NajlepszyGracz ;
     String NajlepszyWynik ;
     double NajlepszyWynikDouble ;
     Player gracz[];
+    int ktoryGraczGra ;
 
-    int ktoryGraczGra = 1;
     public ScoreBoard() throws FileNotFoundException {
         WczytajNajlepszyWynik();
 
@@ -45,9 +45,11 @@ public class ScoreBoard {
                 g2d.drawString("gracz: " + gracz[i].name + " wynik " + gracz[i].score, 50, y);
                 y += 20;
             }
+            g2d.drawString("który gracz gra: " + gracz[ktoryGraczGra].name, Width - 400, Height - 50); // zrobic
         }
         
         g2d.drawRect(45, Height - 200, Width / 2 - 300, 150);
+
 
         //NAJLEPSZY WYNIK!!
         g2d.drawString("Najlepszy gracz: " + NajlepszyGracz + "   Wynik: " + NajlepszyWynik, 50, Height - 10);
@@ -60,9 +62,10 @@ public class ScoreBoard {
         PrintWriter zapis = new PrintWriter("C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt");
         String graczS = String.valueOf(this.gracz[ktoryGraczGra].name);
 
-        final DecimalFormat df = new DecimalFormat("0.00");
-        df.format(gracz.score);
-        String wynikS = Double.toString(gracz.score);
+        double round = round(gracz.score);
+        System.out.println(round + "round");
+
+        String wynikS = Double.toString(round);
         System.out.println("graczS" + graczS);
         System.out.println("WynikS " + wynikS);
         zapis.println(graczS + " " + wynikS);
