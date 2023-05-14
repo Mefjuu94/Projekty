@@ -14,6 +14,9 @@ public class ScoreBoard {
     double NajlepszyWynikDouble ;
     Player gracz[];
     int ktoryGraczGra ;
+    final String bestScoreTxtPath = "C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt";
+    final String bestOfTenTxt = "C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\BestOfTen.txt";
+    int ileGraczy;
 
     public ScoreBoard() throws FileNotFoundException {
         WczytajNajlepszyWynik();
@@ -21,7 +24,7 @@ public class ScoreBoard {
     }
 
     public void WczytajNajlepszyWynik() throws FileNotFoundException {
-        Scanner score = new Scanner(new File("C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt"));
+        Scanner score = new Scanner(new File(bestScoreTxtPath));
         String linijka = "";
         while (score.hasNextLine()) {
             linijka = score.nextLine();
@@ -45,7 +48,7 @@ public class ScoreBoard {
                 g2d.drawString("gracz: " + gracz[i].name + " wynik " + gracz[i].score, 50, y);
                 y += 20;
             }
-            g2d.drawString("który gracz gra: " + gracz[ktoryGraczGra].name, Width - 400, Height - 50); // zrobic
+            g2d.drawString("Teraz Gra: " + gracz[ktoryGraczGra].name, Width - 400, Height - 50); // zrobic
         }
         
         g2d.drawRect(45, Height - 200, Width / 2 - 300, 150);
@@ -59,7 +62,7 @@ public class ScoreBoard {
         if (gracz.score < NajlepszyWynikDouble) {
             return;
         }
-        PrintWriter zapis = new PrintWriter("C:\\Users\\mateu\\OneDrive\\Pulpit\\PLIKI Z LEKCJI\\score.txt");
+        PrintWriter zapis = new PrintWriter(bestScoreTxtPath);
         String graczS = String.valueOf(this.gracz[ktoryGraczGra].name);
 
         double round = round(gracz.score);
@@ -72,4 +75,10 @@ public class ScoreBoard {
         zapis.close();
         System.out.println("Twoj wynik to: " + wynikS);
     }
+
+
+    //komunikat kto wygral
+
+
+
 }

@@ -4,10 +4,10 @@ import java.awt.event.*;
 import java.io.FileNotFoundException;
 import java.util.Random;
 
-class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
+class Dzialo extends JPanel implements MouseListener, MouseMotionListener, ActionListener {
 
     int Width = 1200;
-    int Height = 500;
+    int Height = 800;
 
     // proca
 
@@ -29,8 +29,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
     int ciecProcaLewa = lewa;
     int ciecProcaPrawa = prawa;
-    // int koniecCieciwyPr = (int) (x + wielkosc/2);
-    // int koniecCieciwyLw = (int) (x - wielkosc/2);
+
     int odlegosc;
     int srodekProcy = Width / 2;
     int koniecy = procay;
@@ -42,6 +41,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
 
     // nasze cele
     Ball balls[];
+    int iloscCeli;
 
     // TRAFIONE
     int celeTrafione;
@@ -57,18 +57,34 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
     Player gracz[];
 
     long startTime = System.currentTimeMillis();
-
     int czasWsek;
 
-    boolean WszyscyGracze = true;
-    int pilkiDlaNastGracza[];
+    boolean updateScore = true;
 
     ScoreBoard scoreBoard;
+    JButton przyciskOK;
+    JButton noweCele;
+    boolean IleNowychCeli = false;
+    boolean przycisk = false;
 
 
     public Dzialo(int ilosCeli) throws FileNotFoundException {
         addMouseListener(this);
         addMouseMotionListener(this);
+        setLayout(null);
+
+        przyciskOK = new JButton("Kliklnij aby\n zmienić gracza");
+        noweCele = new JButton("Ilość celi");
+        noweCele.addActionListener(this);
+        noweCele.setVisible(true);
+        noweCele.setBounds(Width-150,Height-100,100,50);
+        noweCele.setFocusable(false); // nie reguje na klawaiture
+        add(noweCele);
+        if (IleNowychCeli){
+            odPoczatku();
+            IleNowychCeli = false;
+        }
+
         this.stworzCele(ilosCeli);
         this.iloscCeli = ilosCeli;
         this.scoreBoard = new ScoreBoard();
@@ -81,9 +97,10 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         System.out.println(startTime);
         ktoryGraczGra = 1;
         this.scoreBoard.ktoryGraczGra = ktoryGraczGra;
+        this.scoreBoard.ileGraczy = gracze;
         return gracze;
     }
-
+    //Tworzenie graczy
     public void Players() {
         gracz = new Player[gracze + 1]; // gracze liczeni od 1 !!!!!
         for (int i = 1; i < gracze + 1; i++) {
@@ -93,9 +110,6 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         }
         this.scoreBoard.setPlayers(gracz);
     }
-    //Tworzenie graczy działa
-
-    int iloscCeli;
 
     ///////////////////////////////////////////////////////////////////
 
@@ -123,7 +137,6 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         }
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     protected void paintComponent(Graphics g) {
@@ -132,6 +145,10 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(3));
 
+        g2d.setColor(new Color(192,192,192));
+        g2d.fillRect(0,0,Width,Height);
+
+        g2d.setColor(Color.black);
         g2d.drawLine(Width / 2, Height - 10, Width / 2, Height - 120);
         g2d.drawLine(Width / 2, Height - 120, lewa, procay);
         g2d.drawLine(Width / 2, Height - 120, prawa, procay);
@@ -149,7 +166,6 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
                 g2d.drawLine(ciecProcaPrawa, procay, (int) (x + wielkosc / 2), y);
             }
         }
-
 
         for (int i = 0; i < this.balls.length; i++) {
             this.balls[i].paint(g2d);
@@ -177,8 +193,7 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             g2d.drawString("UPGRADE AKTYWNY!! ", Width - 250, Height - 20);
         }
 
-        //Wyświetlenie graczy!!
-
+        //Wyświetlenie graczy - klasa tablica!!
         this.scoreBoard.paint(g2d);
 
     }
@@ -199,7 +214,9 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             System.out.println("Gratulacje, trafiłeś wszystkie Cele!");
             ObliczCzas();
             System.out.println("czas w sek " + czasWsek);
-            updateScore();
+            if (updateScore) {
+                updateScore();
+            }
             //jaki wynik
 
             // wczytaj jeszscze raz piłeczki!!
@@ -216,19 +233,30 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
                     // tu ma być wywołanie na nowo!!!!
                     ktoryGraczGra = 1;
                     this.scoreBoard.ktoryGraczGra = ktoryGraczGra;
+                    this.iloscCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
                     this.odPoczatku();
                 }
             } else {
-                int komunikat = JOptionPane.showConfirmDialog(this, "Następny Gracz");
-                odPoczatku();
-                ktoryGraczGra++;
-                startTime = System.currentTimeMillis();
+                add(przyciskOK);
+                przyciskOK.setVisible(true);
+                przyciskOK.setBounds(Width/2-100,Height/2-25,200,50);
+                przyciskOK.addActionListener(this);
 
+
+                if (przycisk) {
+                    przyciskOK.setVisible(false);
+                    odPoczatku();
+                    ktoryGraczGra++;
+                    updateScore = true;
+                    startTime = System.currentTimeMillis();
+                }
             }
             this.scoreBoard.setScoreIfNeeded(this.gracz[ktoryGraczGra]);
             this.scoreBoard.ktoryGraczGra = ktoryGraczGra;
         }
+    }
 
+    public void KtoWygrał(){
 
     }
         //////////////////////////////////
@@ -314,10 +342,12 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             //wynik = iloscPilek/czas*10
 
             double wynikk = ((double) this.balls.length / czasWsek) * 10; // *czas * 10;
+            System.out.println("wynikk" + wynikk);
+            double wynik = Math.round(wynikk*100.0)/100.0; // obetnij wynik do 2 miejsc po przecinku!!
 
-            double wynik = Math.round(wynikk);
             gracz[ktoryGraczGra].score = wynik;
             System.out.println(wynik);
+            updateScore = false;
         }
 
         @Override
@@ -403,7 +433,24 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
         public void mouseMoved (MouseEvent e){
             // System.out.println("MOVED!!"); //sprawdza czy działa event listener
         }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        przycisk = true;
+        if(e.getSource() == noweCele){
+            try {
+                odPoczatku();
+                ktoryGraczGra = 1;
+                this.scoreBoard.ktoryGraczGra = ktoryGraczGra;
+                this.iloscCeli = Integer.parseInt(JOptionPane.showInputDialog("Ilość celi"));
+                this.odPoczatku();
+            } catch (FileNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
+
+}
 
     class KeyListener extends JFrame implements java.awt.event.KeyListener {
 
@@ -454,26 +501,24 @@ class Dzialo extends JPanel implements MouseListener, MouseMotionListener {
             Dzialo dzialo = new Dzialo(iloscCeli);
             KeyListener obwod = new KeyListener(dzialo);
 
-            //obwod.getContentPane().setBackground(Color.gray);
-            //tutaj zmiana koloru na mniej oczojebny
-            obwod.getContentPane().add(dzialo);
-
             obwod.setVisible(true);
             obwod.add(dzialo);
             obwod.pack();
             obwod.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-
             dzialo.IloscGraczy();
             dzialo.Players();
-           // dzialo.NajlepszyWynik();//wczytaj najlepszy wynik
-
 
             while (true) {
                 dzialo.strzal();
                 Thread.sleep(50);
             }
         }
+
+        //praca na komponentach
+        //przejscia pomiedzy komponentami
+        //jak oczytywac z checkboxow rozwijanych mani
+        //uleposzycz to i buttony
 
     }
 
