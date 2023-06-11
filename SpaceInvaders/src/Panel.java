@@ -2,95 +2,83 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import javax.swing.ImageIcon;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JPanel;
+import java.util.Iterator;
 
 public class Panel extends JPanel {
-    final int WIDTH = 500;
-    final int HEIGHT = 500;
-    public int x = 250;
-    public int y = 450;
+    final int WIDTH = 800;
+    final int HEIGHT = 800;
+
     Hero hero = new Hero();
-    ImageIcon heroImage;
-    Bullet[] bullets = new Bullet[999999];
-    boolean[] activeBullet = new boolean[999999];
-    int counter = 0;
+
+    int enemiesNumber = 40; //(max 16x na szerokość ekranu)
+    List<Enemy> enemies = new ArrayList<>();
+
 
     public Panel() {
+
+        for (int i = 0; i < enemiesNumber; i++) {
+            enemies.add(new Enemy(i % 16 * 50, (int) Math.floor((i / 16)) * 50));
+        }
+
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
         this.addKeyListener(this.hero);
         this.setFocusable(true);
-        this.heroImage = new ImageIcon("C:\\Users\\mateu\\OneDrive\\Pulpit\\Projekty\\SpaceInvaders\\src\\hero1.png");
+
     }
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D)g;
-        this.heroImage.paintIcon(this, g2d, this.x, this.y);
-        g2d.setColor(Color.WHITE);
-        if (this.activeBullet[this.hero.shootCounter]) {
-            g2d.fillOval(this.bullets[this.hero.shootCounter].xShoot, this.bullets[this.hero.shootCounter].yShoot, 5, 5);
-        }
+        Graphics2D g2d = (Graphics2D) g;
 
-        for(int i = 0; i < this.hero.shootCounter; ++i) {
-            if (this.activeBullet[i]) {
-                g2d.fillOval(this.bullets[i].xShoot, this.bullets[i].yShoot, 5, 5);
-            }
+        this.hero.paint(g2d, this);   // rysuje również  pocisk
+
+        // rysuj przeciwnika
+
+        for (Enemy i : enemies) {  //eneny to jest "i"
+            i.paint(g2d, this);
         }
 
     }
+
 
     public void move() {
-        this.updateMove();
-        this.strzal();
+
+        this.hero.updateMove();
+        this.kolizje();
         this.repaint();
-        this.sprawdzenie();
+
+        //this.sprawdzenie();
     }
 
-    public void updateMove() {
-        if (this.hero.right) {
-            this.x += 3;
-        } else if (this.hero.left) {
-            this.x -= 3;
-        }
 
-    }
+    public void kolizje() {
 
-    public void strzal() {
-        if (this.hero.shoot) {
-            Bullet bullet = new Bullet(this.x, this.y);
-            this.bullets[this.hero.shootCounter] = bullet;
-            System.out.println(this.hero.shootCounter + " pocisk stworzony");
-            this.activeBullet[this.hero.shootCounter] = true;
-        }
+        Iterator<Bullet> i = hero.bullets.iterator();
+        while (i.hasNext()) {
 
-        this.BulletCoordinates();
-    }
+            Bullet bullet = i.next(); // must be called before you can call i.remove()
 
-    public void BulletCoordinates() {
-        for(int i = 1; i <= this.hero.shootCounter; ++i) {
-            this.bullets[i].yShoot -= 5;
-            if (this.bullets[i].yShoot < -10) {
-                this.bullets[i].xShoot = -99999;
-                this.bullets[i].yShoot = -99999;
-                this.activeBullet[i] = false;
+            Iterator<Enemy> e = enemies.iterator();
+            while (e.hasNext()) {
+
+                Enemy enemy = e.next(); // must be called before you can call i.remove()
+                if (bullet.yShoot <= enemy.y + 48 && bullet.yShoot > enemy.y && bullet.xShoot <= enemy.x + 48 && bullet.xShoot > enemy.x) {
+                    e.remove();
+                    i.remove();
+                    System.out.println("pozostało pzzeciwników " + enemies.size());
+
+                }
             }
         }
 
     }
 
-    public void sprawdzenie() {
-        for(int i = 1; i <= this.hero.shootCounter; ++i) {
-            if (!this.activeBullet[i] && this.counter < i) {
-                System.out.println("" + i + " kulka jest poza ekrtanem");
-                ++this.counter;
-            }
-        }
-
-    }
 
     public Dimension getPreferredSize() {
-        return new Dimension(500, 500);
+        return new Dimension(800, 800);
     }
 }
