@@ -2,10 +2,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import javax.swing.JPanel;
-import java.util.Iterator;
 
 public class Panel extends JPanel {
     final int WIDTH = 800;
@@ -13,14 +11,22 @@ public class Panel extends JPanel {
 
     Hero hero = new Hero();
 
-    int enemiesNumber = 40; //(max 16x na szerokość ekranu)
+    int enemiesNumber = 11; //(max 16x na szerokość ekranu)
     List<Enemy> enemies = new ArrayList<>();
+    int health = 5;
+
+    InfoPanel info = new InfoPanel();
 
 
     public Panel() {
 
+        int[] randomArray = generateRandomArray(3,0,15);
         for (int i = 0; i < enemiesNumber; i++) {
-            enemies.add(new Enemy(i % 16 * 50, (int) Math.floor((i / 16)) * 50));
+            if (i % 3 == 0){
+                randomArray = generateRandomArray(3,0,15);
+            }
+            enemies.add(new Enemy(randomArray[i % 3] * 50, (int) Math.floor((i / 3)) * 50));
+
         }
 
         this.setBackground(Color.black);
@@ -42,6 +48,9 @@ public class Panel extends JPanel {
             i.paint(g2d, this);
         }
 
+        //infopanel
+        this.info.paintInfopanel(g2d,enemiesNumber,health,hero.bulletCounter);
+
     }
 
 
@@ -49,6 +58,10 @@ public class Panel extends JPanel {
 
         this.hero.updateMove();
         this.kolizje();
+        for (Enemy i : enemies) {  //eneny to jest "i"
+            i.update();
+        }
+        this.checkEnemyY();
         this.repaint();
 
         //this.sprawdzenie();
@@ -70,11 +83,50 @@ public class Panel extends JPanel {
                     e.remove();
                     i.remove();
                     System.out.println("pozostało pzzeciwników " + enemies.size());
-
+                    break;
                 }
             }
         }
 
+    }
+
+    public void checkEnemyY(){
+
+        for (Enemy e: enemies) {
+            if (e.y > 780){
+                e.y = -50; // wyjdzie jeszcze raz zza ekranu
+                health --;
+                System.out.println("przeciwniik ma punkt");
+            }
+        }
+
+        if (health <= 0){
+            //koniec gry
+
+        }
+
+    }
+
+    public static int[] generateRandomArray(int size, int min, int max) {
+        if (max - min + 1 < size) {
+            throw new IllegalArgumentException("Cannot generate unique array. Range is too small.");
+        }
+
+        int[] randomArray = new int[size];
+        Set<Integer> uniqueSet = new HashSet<>();
+        Random random = new Random();
+
+        while (uniqueSet.size() < size) {
+            int randomNum = random.nextInt(max - min + 1) + min;
+            uniqueSet.add(randomNum);
+        }
+
+        int index = 0;
+        for (int number : uniqueSet) {
+            randomArray[index++] = number;
+        }
+
+        return randomArray;
     }
 
 

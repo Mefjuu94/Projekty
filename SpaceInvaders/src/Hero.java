@@ -17,6 +17,7 @@ public class Hero implements KeyListener {
     public ImageIcon heroIcon = new ImageIcon("C:\\Users\\mateu\\OneDrive\\Pulpit\\Projekty\\SpaceInvaders\\src\\hero1.png");
 
     List<Bullet> bullets = new ArrayList<>();
+    int bulletCounter = 0;
 
 
     public Hero() {
@@ -94,6 +95,8 @@ public class Hero implements KeyListener {
     public void strzal() {
 
         bullets.add(new Bullet(x + 20, y)); // twórz pocisk)=
+
+        bulletCounter++;
 
     }
 

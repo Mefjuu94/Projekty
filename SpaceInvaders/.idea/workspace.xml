@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="94be1400-9c1e-4913-85c8-d62b425b6614" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Bullet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Hero.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Panel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/hero1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/SpaceInvaders/Main/Bullet.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/SpaceInvaders/Main/Hero.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/SpaceInvaders/Main/Main.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/SpaceInvaders/Main/Panel.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/SpaceInvaders/Main/Shoot.class" beforeDir="false" />
+    <list default="true" id="94be1400-9c1e-4913-85c8-d62b425b6614" name="Changes" comment="Poprawka">
+      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Dzialo.class" beforeDir="false" afterPath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Dzialo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/KeyListener.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Myframe.class" beforeDir="false" afterPath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Myframe.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Player.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/ScoreBoard.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Pilki/out/production/Pilki/Panel.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Pilki/out/production/Pilki/Panel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Pilki/out/production/Pilki/Pileczki.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Pilki/out/production/Pilki/Pileczki.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Pilki/src/Pileczki.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Pilki/src/Pileczki.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Enemy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Enemy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Hero.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Hero.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/InfoPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/InfoPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Panel.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,12 +43,13 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/mateu/OneDrive/Pulpit/Projekty/SpaceInvaders&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Main" />
@@ -69,6 +73,14 @@
       <option name="presentableId" value="Default" />
       <updated>1685193580890</updated>
     </task>
+    <task id="LOCAL-00001" summary="Poprawka">
+      <created>1686516327469</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1686516327469</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -81,5 +93,12 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Poprawka" />
+    <option name="LAST_COMMIT_MESSAGE" value="Poprawka" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/SpaceInvaders$Main.ic" NAME="Main Coverage Results" MODIFIED="1686518181347" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>

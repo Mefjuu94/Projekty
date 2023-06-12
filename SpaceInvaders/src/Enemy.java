@@ -25,4 +25,9 @@ public class Enemy {
 
     }
 
+    public void update(){
+        y = y + 5;
+
+    }
+
     }
