@@ -10,6 +10,8 @@ public class Main {
         ramka.setDefaultCloseOperation(3);
         ramka.pack();
 
+
+
         while(true) {
             panel.move();
             Thread.sleep(20L);

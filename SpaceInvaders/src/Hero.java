@@ -14,7 +14,7 @@ public class Hero implements KeyListener {
     public int x = 250;
     public int y = 750;
 
-    public ImageIcon heroIcon = new ImageIcon("C:\\Users\\mateu\\OneDrive\\Pulpit\\Projekty\\SpaceInvaders\\src\\hero1.png");
+    public ImageIcon heroIcon = new ImageIcon("src/ICONS/hero1.png"); // zrobić ścieżkę
 
     List<Bullet> bullets = new ArrayList<>();
     int bulletCounter = 0;

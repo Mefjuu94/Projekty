@@ -3,7 +3,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.*;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class Panel extends JPanel {
     final int WIDTH = 800;
@@ -16,6 +16,9 @@ public class Panel extends JPanel {
     int health = 5;
 
     InfoPanel info = new InfoPanel();
+    JButton start =new JButton(new ImageIcon("src/ICONS/StartGame.png"));
+    JButton exit =new JButton(new ImageIcon("src/ICONS/ExitGame.png"));
+    MENU menu = new MENU();
 
 
     public Panel() {
@@ -34,36 +37,60 @@ public class Panel extends JPanel {
         this.addKeyListener(this.hero);
         this.setFocusable(true);
 
+
+        this.add(start);
+        start.setVisible(false);
+        this.add(exit);
+        exit.setVisible(false);
+
     }
+
+
+    enum STATE{
+        MENU,
+        GAME
+
+    }
+
+    public static STATE State = STATE.MENU; /// zmienic na GAME zebyh grac
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        this.hero.paint(g2d, this);   // rysuje również  pocisk
+        if (State == STATE.MENU){
+            menu.Draw(g2d,this,start,exit);
+            repaint();
+        }else {
 
-        // rysuj przeciwnika
+            this.hero.paint(g2d, this);   // rysuje również  pocisk
 
-        for (Enemy i : enemies) {  //eneny to jest "i"
-            i.paint(g2d, this);
+            // rysuj przeciwnika
+
+            for (Enemy i : enemies) {  //eneny to jest "i"
+                i.paint(g2d, this);
+            }
+
+            //infopanel
+            this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter);
         }
-
-        //infopanel
-        this.info.paintInfopanel(g2d,enemiesNumber,health,hero.bulletCounter);
 
     }
 
 
     public void move() {
 
-        this.hero.updateMove();
-        this.kolizje();
-        for (Enemy i : enemies) {  //eneny to jest "i"
-            i.update();
-        }
-        this.checkEnemyY();
-        this.repaint();
+        if (State == STATE.GAME) {
 
+            this.hero.updateMove();
+            this.kolizje();
+            for (Enemy i : enemies) {  //eneny to jest "i"
+                i.update();
+            }
+            this.checkEnemyY();
+
+        }
+        this.repaint();
         //this.sprawdzenie();
     }
 
@@ -73,12 +100,12 @@ public class Panel extends JPanel {
         Iterator<Bullet> i = hero.bullets.iterator();
         while (i.hasNext()) {
 
-            Bullet bullet = i.next(); // must be called before you can call i.remove()
+            Bullet bullet = i.next();
 
             Iterator<Enemy> e = enemies.iterator();
             while (e.hasNext()) {
 
-                Enemy enemy = e.next(); // must be called before you can call i.remove()
+                Enemy enemy = e.next();
                 if (bullet.yShoot <= enemy.y + 48 && bullet.yShoot > enemy.y && bullet.xShoot <= enemy.x + 48 && bullet.xShoot > enemy.x) {
                     e.remove();
                     i.remove();

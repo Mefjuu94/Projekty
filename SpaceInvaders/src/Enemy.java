@@ -9,7 +9,7 @@ public class Enemy {
     int enemySize = 48; //px
     int enemyMiddle = 24;
 
-    ImageIcon enemyIcon = new ImageIcon("C:\\Users\\mateu\\OneDrive\\Pulpit\\Projekty\\SpaceInvaders\\src\\enemy.png");
+    ImageIcon enemyIcon = new ImageIcon("src/ICONS/enemy.png");
     int x, y;
 
     public Enemy(int x, int y) {
@@ -26,7 +26,7 @@ public class Enemy {
     }
 
     public void update(){
-        y = y + 5;
+        y = y + 2;
 
     }
 

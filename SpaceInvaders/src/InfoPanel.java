@@ -7,7 +7,7 @@ public class InfoPanel {
     public void paintInfopanel(Graphics2D g2d, int enemiesnumber, int health,int bulletcounter){
 
         g2d.setColor(Color.gray);
-        g2d.fillRect(0,0,800,100);
+        g2d.fillRect(0,0,800,70);
 
         g2d.setColor(Color.black);
 
