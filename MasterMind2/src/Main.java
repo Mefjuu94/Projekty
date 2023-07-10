@@ -12,6 +12,7 @@ public class Main {
         //frame.setSize(800,800);
         frame.pack();
         frame.setVisible(true);
+        frame.setResizable(false);
 
         panel.metoda();
 

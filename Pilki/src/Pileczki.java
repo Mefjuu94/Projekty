@@ -4,15 +4,17 @@ import java.util.Random;
 
 class Panel extends JPanel{
 
+    int width = 500;
+    int height = 500;
 
 
     Random los = new Random();
 
 
-    int[] pileczki = new int[2];
+    int[] pileczki = new int[4];
     int wielkosc = los.nextInt(150);
-    int x = los.nextInt(getWidth()) - wielkosc;
-    int y = los.nextInt(getHeight()) - wielkosc;
+    int x = los.nextInt(width) - wielkosc;
+    int y = los.nextInt(height) - wielkosc;
 
     int SzybX = los.nextInt(10);
     int SzybY = los.nextInt(10);
@@ -32,7 +34,7 @@ class Panel extends JPanel{
 
 
     public Dimension getPreferredSize(){
-        return new Dimension(500,500);
+        return new Dimension(width,height);
     }
 
 }

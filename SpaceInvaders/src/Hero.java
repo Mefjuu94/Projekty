@@ -107,7 +107,7 @@ public class Hero implements KeyListener {
         Iterator<Bullet> i = bullets.iterator();
         while (i.hasNext()) {
 
-            Bullet bullet = i.next(); // must be called before you can call i.remove()
+            Bullet bullet = i.next();
             if (bullet.yShoot < -5) {
                 i.remove();
                 System.out.println("usunieto " + bullets.size());

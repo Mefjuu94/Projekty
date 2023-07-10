@@ -9,13 +9,13 @@ public class MENU implements MouseListener {
 
     ImageIcon logo = new ImageIcon("src/ICONS/logo1.png");
 
-
     boolean play = false;
     int y = 800;
     boolean menu = false;
 
 
     public void Draw(Graphics2D g2d, JPanel panel, JButton start, JButton exit) {
+
 
             if (y > -240) {
                 y -= 1;
@@ -29,6 +29,9 @@ public class MENU implements MouseListener {
             }
 
     }
+
+
+
 
     public MENU(){
 

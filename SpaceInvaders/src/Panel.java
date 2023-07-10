@@ -11,7 +11,7 @@ public class Panel extends JPanel {
 
     Hero hero = new Hero();
 
-    int enemiesNumber = 11; //(max 16x na szerokość ekranu)
+    int enemiesNumber = 5; //(max 16x na szerokość ekranu)
     List<Enemy> enemies = new ArrayList<>();
     int health = 5;
 
@@ -23,14 +23,7 @@ public class Panel extends JPanel {
 
     public Panel() {
 
-        int[] randomArray = generateRandomArray(3,0,15);
-        for (int i = 0; i < enemiesNumber; i++) {
-            if (i % 3 == 0){
-                randomArray = generateRandomArray(3,0,15);
-            }
-            enemies.add(new Enemy(randomArray[i % 3] * 50, (int) Math.floor((i / 3)) * 50));
-
-        }
+        CreateEnemiesAgain();
 
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
@@ -52,6 +45,17 @@ public class Panel extends JPanel {
 
     }
 
+    public void CreateEnemiesAgain(){
+        int[] randomArray = generateRandomArray(3,0,15);
+        for (int i = 0; i < enemiesNumber; i++) {
+            if (i % 3 == 0){
+                randomArray = generateRandomArray(3,0,15);
+            }
+            enemies.add(new Enemy(randomArray[i % 3] * 50, (int) Math.floor((i / 3)) * 50));
+
+        }
+    }
+
     public static STATE State = STATE.MENU; /// zmienic na GAME zebyh grac
 
     protected void paintComponent(Graphics g) {
@@ -71,8 +75,13 @@ public class Panel extends JPanel {
                 i.paint(g2d, this);
             }
 
+            if (enemies.size() < 1){
+                hero.bullets.removeAll(hero.bullets);
+                CreateEnemiesAgain();
+            }
+
             //infopanel
-            this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter);
+            this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter,this);
         }
 
     }
@@ -97,12 +106,12 @@ public class Panel extends JPanel {
 
     public void kolizje() {
 
-        Iterator<Bullet> i = hero.bullets.iterator();
+        Iterator<Bullet> i = hero.bullets.iterator(); // wywołanie iteratora na klasie Hero (liczenie pocisków)
         while (i.hasNext()) {
 
             Bullet bullet = i.next();
 
-            Iterator<Enemy> e = enemies.iterator();
+            Iterator<Enemy> e = enemies.iterator(); // iterator nazwany "e" -> teraz kazdy enemies to "e"
             while (e.hasNext()) {
 
                 Enemy enemy = e.next();
@@ -113,6 +122,9 @@ public class Panel extends JPanel {
                     break;
                 }
             }
+        }
+        if (enemies.size() == 0){    // jak liczba przeciwników dojdzie do 0 to pojawi się MENU
+            State = STATE.MENU;   /// ale liczba przeciwniiów == 0 nadal więc gra nie odpali na nowo.
         }
 
     }
@@ -128,6 +140,9 @@ public class Panel extends JPanel {
         }
 
         if (health <= 0){
+            ImageIcon death = new ImageIcon("src/ICONS/skull.png");
+            JOptionPane.showMessageDialog(null,"Straciłeś wszystkie życia!","Koniec Gry",0,death);
+            State = STATE.MENU;
             //koniec gry
 
         }
