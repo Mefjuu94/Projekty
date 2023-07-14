@@ -18,6 +18,11 @@ public class Panel extends JPanel {
     InfoPanel info = new InfoPanel();
     JButton start =new JButton(new ImageIcon("src/ICONS/StartGame.png"));
     JButton exit =new JButton(new ImageIcon("src/ICONS/ExitGame.png"));
+    JButton load =new JButton(new ImageIcon("src/ICONS/LoadGame.png"));
+    JButton save =new JButton(new ImageIcon("src/ICONS/saveGame.png"));
+
+    ImageIcon background = new ImageIcon("src/Backgrounds/level1Recznie.jpg");
+    int movebackgroundY = -1600;
     MENU menu = new MENU();
 
 
@@ -35,13 +40,18 @@ public class Panel extends JPanel {
         start.setVisible(false);
         this.add(exit);
         exit.setVisible(false);
+        this.add(load);
+        load.setVisible(false);
+        this.add(save);
+        save.setVisible(false);
 
     }
 
 
     enum STATE{
         MENU,
-        GAME
+        GAME,
+        Pause,
 
     }
 
@@ -63,9 +73,15 @@ public class Panel extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
 
         if (State == STATE.MENU){
-            menu.Draw(g2d,this,start,exit);
+            menu.Draw(g2d,this,start,exit,load);
             repaint();
-        }else {
+        }else if (State == STATE.GAME){
+            load.setVisible(false);
+            save.setVisible(false);
+            exit.setVisible(false);
+
+            background.paintIcon(this,g2d,0,movebackgroundY);
+            movebackgroundY = movebackgroundY + 1;
 
             this.hero.paint(g2d, this);   // rysuje również  pocisk
 
@@ -82,7 +98,20 @@ public class Panel extends JPanel {
 
             //infopanel
             this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter,this);
+
+        } else if (State == STATE.Pause) {
+
+            this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter,this);
+            background.paintIcon(this,g2d,0,movebackgroundY);
+            this.hero.paint(g2d, this);   // rysuje również  pocisk
+            for (Enemy i : enemies) {  //eneny to jest "i"
+                i.paint(g2d, this);
+            }
+
+
+            menu.pause(g2d,this,exit,load,save);
         }
+
 
     }
 

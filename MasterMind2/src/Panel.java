@@ -159,7 +159,7 @@ public class Panel extends JPanel implements ActionListener, KeyListener {
             odczyt.setVisible(true);
 
             bestOf.setOpaque(false);
-            bestOf.setText("Galeria sław \n Wciśnij 'W");
+            bestOf.setText("Galeria sław -> 'W");
 
             losoweGenerowanie(g2d);
 
@@ -181,6 +181,11 @@ public class Panel extends JPanel implements ActionListener, KeyListener {
                     throw new RuntimeException(e);
                 }
                 load = false;
+                System.out.println(row+ " row");
+                System.out.println(col+ " col");
+                if (clickCounter == 0 ){
+                    col = clickCounter;
+                }
                 c = fullFill[row][col];
                 fillFullmethod(g2d, c);
                 StartTime = System.currentTimeMillis();

@@ -39,6 +39,13 @@ public class Hero implements KeyListener {
         if (code == 32) {
             strzal();
         }
+        if (code == 27) {
+            if (Panel.State == Panel.STATE.GAME){
+                Panel.State = Panel.STATE.Pause;
+        } else {
+                Panel.State = Panel.STATE.GAME;
+            }
+        }
 
     }
 
@@ -56,7 +63,10 @@ public class Hero implements KeyListener {
             this.shoot = false;
         }
 
+
     }
+
+
 
 
     ////rysowanie
@@ -114,5 +124,6 @@ public class Hero implements KeyListener {
             }
         }
     }
+
 
 }

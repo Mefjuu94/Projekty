@@ -1,9 +1,9 @@
-4
+3
+0
 1
-1
-src/neptun.png;src/neptun.png;src/neptun.png;src/mars.png;
-src/sun.png;src/earth.png;src/mars.png;src/mars.png;
-src/mars.png;null;null;null;
+src/Icons/mars.png;src/Icons/earth.png;src/Icons/earth.png;src/Icons/mars.png;
+src/Icons/sun.png;src/Icons/sun.png;src/Icons/sun.png;src/Icons/sun.png;
+null;null;null;null;
 null;null;null;null;
 null;null;null;null;
 null;null;null;null;

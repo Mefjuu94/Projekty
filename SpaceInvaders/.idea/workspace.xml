@@ -2,29 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="94be1400-9c1e-4913-85c8-d62b425b6614" name="Changes" comment="Poprawka">
-      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Dzialo.class" beforeDir="false" afterPath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Dzialo.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/KeyListener.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Myframe.class" beforeDir="false" afterPath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Myframe.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/Player.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/ScoreBoard.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/../DzialoGierka/out/production/DzialoGierka/main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/sa" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/MENU.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/src/Main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/TalentPoints.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasterMind2/Score.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/Score.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasterMind2/save" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/save" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../MasterMind2/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/src/Panel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/blue.png" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/src/blue.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/green.png" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/src/green.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/orange.png" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/src/orange.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/red.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/save.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/sniezka.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/tlo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Pilki/out/production/Pilki/Panel.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Pilki/out/production/Pilki/Panel.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Pilki/out/production/Pilki/Pileczki.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Pilki/out/production/Pilki/Pileczki.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Pilki/src/Pileczki.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Pilki/src/Pileczki.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Hero.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Hero.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/InfoPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/InfoPanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MENU.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MENU.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Panel.java" afterDir="false" />
     </list>
