@@ -1,10 +1,12 @@
 package Figury;
 
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class Figura implements KeyListener {
@@ -14,6 +16,9 @@ public class Figura implements KeyListener {
 
     int x = 230;
     int y = 180;
+
+    int doneX = 50;
+    int doneY= 150;
 
     Color c;
     int[] wspolrzedneX = new int[4];
@@ -40,10 +45,16 @@ public class Figura implements KeyListener {
     boolean left,right,down,turn;
 
     //Lista zapisanych figur które są na dnie
-
-    int[][] TablicaNaDnie = new int[20][15];
-    int wypelnienieKolorem; // wypełnia komorke kolorem
-    /// kolory nr 1 zoltyy 2 czerw....
+    int liczbaKoloru;
+    Color kolorLiczby;
+    int[][] FiguryNaDnieXY = new int[15][20];
+    {
+        for (int i = 0; i < FiguryNaDnieXY.length; i++) {
+            for (int j = 0; j < FiguryNaDnieXY[0].length; j++) {
+                FiguryNaDnieXY[i][j] = 0;
+            }
+        }
+    }
 
 
     boolean StartGame = true;
@@ -127,6 +138,7 @@ public class Figura implements KeyListener {
                 nextTyp = l1.typ;
                 if (StartGame) {
                     stworzFigue(l1.xL, l1.yL, l1.c, l1.width, l1.height, l1.typ);
+                    wylosowana = nextLOS;
                 }
                 break;
             case 1:
@@ -135,6 +147,7 @@ public class Figura implements KeyListener {
                 nextTyp = 0;
                 if (StartGame) {
                     stworzFigue(r1.xL, r1.yL, r1.c, r1.Width, r1.Height, 0);
+                    wylosowana = nextLOS;
                 }
                 break;
             case 2:
@@ -143,6 +156,7 @@ public class Figura implements KeyListener {
                 nextTyp = z1.typ;
                 if (StartGame) {
                     stworzFigue(z1.xL, z1.yL, z1.c, z1.Width, z1.Height, z1.typ);
+                    wylosowana = nextLOS;
                 }
                 break;
             case 3:
@@ -151,6 +165,7 @@ public class Figura implements KeyListener {
                 nextTyp = patyk.typ;
                 if (StartGame) {
                     stworzFigue(patyk.xL, patyk.yL, patyk.c, patyk.Width, patyk.Height, patyk.typ);
+                    wylosowana = nextLOS;
                 }
                 break;
             case 4:
@@ -159,6 +174,7 @@ public class Figura implements KeyListener {
                 nextTyp = t.typ;
                 if (StartGame) {
                     stworzFigue(t.xL, t.yL, t.c, t.Width, t.Height, t.typ);
+                    wylosowana = nextLOS;
                 }
                 break;
         }
@@ -225,14 +241,25 @@ public class Figura implements KeyListener {
         ///
         //rysowanie kloców na dnie
 
-        for (int i = 0; i < TablicaNaDnie.length ; i++) {
 
-            System.out.println(i + " i");
-            for (int j = 0; j < TablicaNaDnie[0].length; j++) {
-            g2d.fillRect(TablicaNaDnie[i][j],TablicaNaDnie[i][j],cellSize,cellSize);
-                System.out.println(j + " j");
+        doneX = 50;
+        doneY = 150;
+        for (int i = 0; i < FiguryNaDnieXY.length; i++) {
+            for (int j = 0; j < FiguryNaDnieXY[0].length ; j++) {
+                if (FiguryNaDnieXY[i][j] != 0) {
+
+                    reveseColorOfCell(FiguryNaDnieXY,i,j); // oczyt kolorów!! :)
+                    g2d.setColor(kolorLiczby);
+
+                    g2d.fillRect(doneX, doneY, cellSize, cellSize);
+                }
+                doneY += 30;
+
             }
+            doneY = 150;
+            doneX += 30;
         }
+
 
 
         //szykbosc przesuwania przy nasciniecu na klawisz
@@ -386,12 +413,26 @@ public class Figura implements KeyListener {
         if (naDnie){
 
 
-
-
             for (int i = 0; i < 4 ; i++) {
-                TablicaNaDnie[wspolrzedneX[i]][wspolrzedneY[i]] = 1;
+                int liczbaX = wspolrzedneX[i];
+                liczbaX = liczbaX - 50;
+                liczbaX = liczbaX / cellSize;
+
+                int liczbaY = wspolrzedneY[i];
+                liczbaY = liczbaY - 150;
+                liczbaY = liczbaY / cellSize;
+
+                colorOfCell();
+
+                FiguryNaDnieXY[liczbaX][liczbaY] = liczbaKoloru;
+//                System.out.println("index X " + liczbaX);
+//                System.out.println("index y " + liczbaY);
+//                System.out.println("wspolrzedna X= " + wspolrzedneX[i]);
+//                System.out.println("wspolrzedna Y = " + wspolrzedneY[i]);
+                System.out.println(liczbaKoloru);
 
             }
+
 
 
             GetNext();/// tutaj ma byc metoda ktora wezmie mi figure z NEXTA
@@ -402,25 +443,45 @@ public class Figura implements KeyListener {
 
     }
 
-    public void Color(Color c){
+    public int colorOfCell(){
 
-        if (c == Color.ORANGE){
-            wypelnienieKolorem = 0;
-        }
-        if (c == Color.pink){
-            wypelnienieKolorem = 1;
-        }
-        if (c == Color.blue){
-            wypelnienieKolorem = 2;
+        if (Objects.equals(c, new Color(178, 102, 255))){
+            liczbaKoloru = 1;
         }
         if (c == Color.magenta){
-            wypelnienieKolorem = 3;
+            liczbaKoloru = 2;
         }
-        if (c == Color.red){
-            wypelnienieKolorem = 4;
+        if (c == Color.ORANGE){
+            liczbaKoloru = 3;
         }
-
+        if (c == Color.blue){
+            liczbaKoloru = 4;
+        }
+        if (c == Color.pink){
+            liczbaKoloru = 5;
+        }
+        return liczbaKoloru;
     }
+    public Color reveseColorOfCell(int[][] Figurynadnie, int i,int j){
+
+        if (Figurynadnie[i][j] == 1){
+            kolorLiczby = new Color(178, 102, 255);
+        }
+        if (Figurynadnie[i][j] == 2){
+            kolorLiczby = Color.magenta;
+        }
+        if (Figurynadnie[i][j] == 3){
+            kolorLiczby = Color.orange;
+        }
+        if (Figurynadnie[i][j] == 4){
+            kolorLiczby = Color.blue;
+        }
+        if (Figurynadnie[i][j] == 5){
+            kolorLiczby = Color.pink;
+        }
+        return kolorLiczby;
+    }
+
 
 
     public void keyTyped(KeyEvent e) {
@@ -449,8 +510,8 @@ public class Figura implements KeyListener {
             System.out.println("obróc!");
         }
         if (code == 38){
-//            System.out.println("x "  + xTab[0]);
-//            System.out.println("y "  + yTab[0]);
+            System.out.println("x "  + wspolrzedneX[0]);
+
         }
     }
 

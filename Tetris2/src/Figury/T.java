@@ -14,7 +14,7 @@ public class T {
 
     int[] xL = new int[4];
     int[] yL= new int[4];
-    Color c = Color.magenta;
+    Color c = new Color(178,102,255);
 
     Random random = new Random();
     int iloscPozycji = 3;

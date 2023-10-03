@@ -12,7 +12,7 @@ public class Z {
 
     int xL[] = new int[4];
     int yL[] = new int[4];
-    Color c = Color.red;
+    Color c = Color.magenta;
 
     Z(){
 
