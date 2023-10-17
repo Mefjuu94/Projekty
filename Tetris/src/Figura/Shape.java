@@ -7,7 +7,7 @@ import java.util.Random;
 public abstract class Shape {
 
     int[][] tab = new int[4][4];
-    static Color[] colors = {Color.ORANGE,Color.BLUE,Color.magenta,Color.PINK};
+    static Color[] colors = {Color.BLACK,Color.ORANGE,Color.BLUE,Color.magenta,Color.PINK,Color.GREEN,Color.RED};
     int color;
 
     public static Shape CreateShape(){
@@ -15,7 +15,7 @@ public abstract class Shape {
         Shape randomShape = new Shape() {};
 
         int los = random.nextInt(6);
-        int randomColor = random.nextInt(colors.length);
+        int randomColor = random.nextInt(colors.length-1) + 1; // omiń index 0 żeby wyswietlał się kolor
         if (los ==0){
             randomShape = new LShape();
         }
@@ -42,6 +42,7 @@ public abstract class Shape {
 
     public void rotate(){
 
+        //przekształcenie tablicy ( obrot w prawo CW)
             final int M = tab.length;
             final int N = tab[0].length;
             int[][] ret = new int[N][M];
