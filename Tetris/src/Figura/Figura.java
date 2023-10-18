@@ -98,9 +98,7 @@ public class Figura implements KeyListener {
                         System.out.println();
                             if (figure.tab[i][j] > 0 && checkBoundariesX(i,j)) {
                                 board[i + moveX][j + moveY] = figure.color;
-                                repairPosition = true;
                             }else if (!checkBoundariesX(i,j)){
-                                repairPosition = false;
                                 repairPosition(i,g2d);
                                 goDown(g2d);
                             }
@@ -108,12 +106,10 @@ public class Figura implements KeyListener {
 
                     }
                 }
-                if (repairPosition) {
-                    moveY = 0;
-                    moveX = 6;
-                    //stworzyc niowa figure
-                    figure = Shape.CreateShape();
-                }
+                moveY = 0;
+                moveX = 6;
+                //stworzyc niowa figure
+                figure = Shape.CreateShape();
             }
             trzystaMs = System.currentTimeMillis();
             //System.out.println(moveY);
