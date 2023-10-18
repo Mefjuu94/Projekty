@@ -12,7 +12,7 @@ public class Figura implements KeyListener {
     Shape figure = Shape.CreateShape();
     int[][] board = new int[boardWidth][boardHeight];
 
-    boolean left, right, down, turn, repairPosition;
+    boolean left, right, down, turn, hardDrop;
     //czas / tick do zjezxdzania w dol
     long trzystaMs = System.currentTimeMillis();
 
@@ -20,6 +20,8 @@ public class Figura implements KeyListener {
 
     int moveX = 6;
     int moveY = 0;
+    int yShadow;
+
     static Color[] colors = {Color.BLACK, Color.ORANGE, Color.BLUE, Color.magenta, Color.PINK, Color.GREEN, Color.RED}; // index 0 jest omijany
     //żeby wyświetlił sie kolor na dole tablicy - gdyby został index 0 to by zytało jako puste pole
 
@@ -134,10 +136,7 @@ public class Figura implements KeyListener {
 
 
         for (int j = 0; j < figure.tab[0].length; j++) {
-
             if (moveX < 0 ) {
-
-                System.out.println("mało, bo" + 0 + " jest mniejsze od " + moveX );
                 if (figure.tab[0][j] > 0) {
                     System.out.println("za mało, poza ekranem gry!");
                     return false;
@@ -165,6 +164,7 @@ public class Figura implements KeyListener {
 
 
     }
+
 
     public boolean canMove(int x, int y) { // sprawia, ze "widziw figury pod soba
 
@@ -208,6 +208,10 @@ public class Figura implements KeyListener {
             down = false;
         }
 
+        if (hardDrop && canMove(0, 1)) {
+            moveY++;
+        }
+
     }
 
 
@@ -236,9 +240,9 @@ public class Figura implements KeyListener {
             this.turn = true;
             System.out.println("obróc!");
         }
-        if (code == 38) {
-            System.out.println(code);
 
+        if (code == 17) {
+            this.hardDrop = true;
         }
     }
 
@@ -246,6 +250,7 @@ public class Figura implements KeyListener {
     public void keyReleased(KeyEvent e) {
 
         int code = e.getKeyCode();
+        System.out.println(code);
 
         if (code == 37) {
             this.left = false;
@@ -261,6 +266,10 @@ public class Figura implements KeyListener {
 
         if (code == 32) {
             this.turn = false;
+        }
+
+        if (code == 17) {
+            this.hardDrop = false;
         }
     }
 }
