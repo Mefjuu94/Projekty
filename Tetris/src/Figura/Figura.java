@@ -12,22 +12,22 @@ public class Figura implements KeyListener {
     Shape figure = Shape.CreateShape();
     int[][] board = new int[boardWidth][boardHeight];
 
-    boolean left,right,down,turn;
+    boolean left, right, down, turn, repairPosition;
     //czas / tick do zjezxdzania w dol
-    long trzystaMs =  System.currentTimeMillis();
+    long trzystaMs = System.currentTimeMillis();
 
     int cellSize = 30;
 
     int moveX = 6;
     int moveY = 0;
-    static Color[] colors = {Color.BLACK,Color.ORANGE,Color.BLUE,Color.magenta,Color.PINK,Color.GREEN,Color.RED}; // index 0 jest omijany
+    static Color[] colors = {Color.BLACK, Color.ORANGE, Color.BLUE, Color.magenta, Color.PINK, Color.GREEN, Color.RED}; // index 0 jest omijany
     //żeby wyświetlił sie kolor na dole tablicy - gdyby został index 0 to by zytało jako puste pole
 
-    public Figura(){
+    public Figura() {
 
         {
             for (int i = 0; i < figure.tab.length; i++) {
-                for (int j = 0; j < figure.tab[0].length ; j++) {
+                for (int j = 0; j < figure.tab[0].length; j++) {
                     figure.tab[i][j] = 0;
                 }
             }
@@ -46,20 +46,20 @@ public class Figura implements KeyListener {
         drawBoard(g2d);
         //figura głowna
 
-        goDown();
+        goDown(g2d);
 
         updateMove();
     }
 
 
     // zrobic  porzadek z rysowaniem figury oraz aktualizacja ruchow (nie mogha byc sprzężone
-    public void drawMainFigure(Graphics2D g2d){
+    public void drawMainFigure(Graphics2D g2d) {
         for (int i = 0; i < figure.tab.length; i++) {
             for (int j = 0; j < figure.tab[0].length; j++) {
                 if (figure.tab[i][j] > 0) {
                     g2d.setColor(colors[figure.color]);
                     //ładuj kolor figury
-                    //rysuj figure która jest iloscią indexów + ilosc przeunięć * wielkosc kratki + przesuniecie tablicy
+                    //rysuj figure która jest:  index + ilosc przeunięć[movex] * wielkosc kratki[cellsize] + przesuniecie tablicy
                     // (0+6) * 30 + 50 = poczatkowa wspolrzedna na X 230
                     g2d.fillRect((i + moveX) * cellSize + 50, (j + moveY) * cellSize + 150, cellSize, cellSize);
                 }
@@ -73,37 +73,47 @@ public class Figura implements KeyListener {
             for (int j = 0; j < board[0].length; j++) {
                 if (board[i][j] > 0) {
                     g2d.setColor(colors[board[i][j]]);
-                    g2d.fillRect(i * cellSize + 50, j * cellSize + 150, cellSize, cellSize);
+                    g2d.fillRect(i * cellSize + 50, j * cellSize + 150, cellSize, cellSize); // tu metoda na redukcje oraz punkty
                 }
             }
         }
     }
 
 
-        public void goDown(){
+    public void goDown(Graphics2D g2d) {
 
         long curentms = System.currentTimeMillis();
 
 
+        //sprawdzenhie granic
 
-        if (curentms - trzystaMs > 300 ) {
-            if (canMove(0,1)) {
+
+
+        if (curentms - trzystaMs > 300) {
+            if (canMove(0, 1) ) {
                 moveY++;
-            }else {
+            } else {
                 for (int i = 0; i < figure.tab.length; i++) {
                     for (int j = 0; j < figure.tab[0].length; j++) {
+                        System.out.println();
+                            if (figure.tab[i][j] > 0 && checkBoundariesX(i,j)) {
+                                board[i + moveX][j + moveY] = figure.color;
+                                repairPosition = true;
+                            }else if (!checkBoundariesX(i,j)){
+                                repairPosition = false;
+                                repairPosition(i,g2d);
+                                goDown(g2d);
+                            }
 
-
-                        if (figure.tab[i][j] > 0 ) {
-                            board[i + moveX][j + moveY] = figure.color;
-                        }
 
                     }
                 }
-                moveY = 0;
-                moveX = 6;
-                //stworzyc niowa figure
-                figure = Shape.CreateShape();
+                if (repairPosition) {
+                    moveY = 0;
+                    moveX = 6;
+                    //stworzyc niowa figure
+                    figure = Shape.CreateShape();
+                }
             }
             trzystaMs = System.currentTimeMillis();
             //System.out.println(moveY);
@@ -111,14 +121,52 @@ public class Figura implements KeyListener {
 
 
     }
+
     // sprawdzenie granic-------------- --> zrobic
-    public boolean checkBoundariesX() {
+    public boolean checkBoundariesX(int i, int j) {
+
+        if (boardWidth < moveX + figure.tab.length) {
+
+            if (figure.tab[figure.tab.length-1][j] > 0) {
+                System.out.println(figure.tab[figure.tab.length-1][j]);
+                System.out.println("za dużo!! bo " + boardWidth + " < " + moveX + "+" +  figure.tab.length);
+                return false;
+            }
+        }
+
+//        if (0 < moveX + figure.tab.length) {
+//            System.out.println("mało");
+//            System.out.println(moveX + figure.tab.length);
+//            if (figure.tab[0][j] > 0) {
+//                System.out.println(figure.tab[figure.tab.length-1][j]);
+//                System.out.println("za MAŁO! bo " + 0 + " < " + i + " " + figure.tab.length+ "" + -1);
+//                return false;
+//            }
+//        }
+
 
 
         return true;
     }
 
-    public boolean canMove(int x, int y){ // sprawia, ze "widziw figury pod soba
+    public void repairPosition(int i,Graphics2D g2d){
+        System.out.println("naprawiam pozycje!");
+        System.out.println("move przed" + moveX);
+        if (i < i + moveX) {
+            moveX--;
+            System.out.println(moveX + " move po");
+            drawMainFigure(g2d);
+        }
+
+//        if (3 > i -3 ) {
+//            moveX++;
+//            System.out.println(moveX + " move po");
+//            drawMainFigure(g2d);
+//        }
+
+    }
+
+    public boolean canMove(int x, int y) { // sprawia, ze "widziw figury pod soba
 
 
         for (int i = 0; i < figure.tab.length; i++) {
@@ -126,7 +174,7 @@ public class Figura implements KeyListener {
                 //jak index jest wiekszy od 1
                 if (figure.tab[i][j] > 0) {
                     //sprawdz czy nie dotknęło granicy
-                    if( i + moveX + x < 0 || i + moveX + x >= boardWidth ||  (j + moveY + y >= boardHeight || board[i + moveX + x][j + moveY + y] > 0)  ){
+                    if (i + moveX + x < 0 || i + moveX + x >= boardWidth || (j + moveY + y >= boardHeight || board[i + moveX + x][j + moveY + y] > 0)) {
                         return false;
                     }
                 }
@@ -137,33 +185,30 @@ public class Figura implements KeyListener {
     }
 
 
-
     /// aktualizacja ruchow
 
     public void updateMove() {
-        if (right && canMove(1,0)) {
+        if (right && canMove(1, 0)) {
             moveX++;
             right = false;
         }
 
-        if (left && canMove(-1,0)) {
-            moveX --;
+        if (left && canMove(-1, 0)) {
+            moveX--;
             left = false;
         }
 
-        if (turn ){
+        if (turn) {
             figure.rotate();
             turn = false;
         }
 
-        if(down && canMove(0,1)){
+        if (down && canMove(0, 1)) {
             moveY++;
             down = false;
         }
 
     }
-
-
 
 
     public void keyTyped(KeyEvent e) {
@@ -175,23 +220,23 @@ public class Figura implements KeyListener {
         int code = e.getKeyCode();
         //System.out.println(code);
 
-        if (code == 37){
+        if (code == 37) {
             this.left = true;
         }
 
-        if (code == 39){
+        if (code == 39) {
             this.right = true;
         }
 
-        if (code == 40){
+        if (code == 40) {
             this.down = true;
         }
 
-        if (code == 32){
+        if (code == 32) {
             this.turn = true;
             System.out.println("obróc!");
         }
-        if (code == 38){
+        if (code == 38) {
             System.out.println(code);
 
         }
@@ -202,19 +247,19 @@ public class Figura implements KeyListener {
 
         int code = e.getKeyCode();
 
-        if (code == 37){
+        if (code == 37) {
             this.left = false;
         }
 
-        if (code == 39){
+        if (code == 39) {
             this.right = false;
         }
 
-        if (code == 40){
+        if (code == 40) {
             this.down = false;
         }
 
-        if (code == 32){
+        if (code == 32) {
             this.turn = false;
         }
     }
