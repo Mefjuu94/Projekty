@@ -37,7 +37,6 @@ public class Figura implements KeyListener {
 
     }
 
-
     /// Rysowanie-----------------------
 
     public void rysujFigure(Graphics2D g2d) throws InterruptedException {
@@ -87,25 +86,23 @@ public class Figura implements KeyListener {
 
         //sprawdzenhie granic
 
-
+        if (!checkBoundariesX()){
+            repairPosition(15,g2d);
+        }
 
         if (curentms - trzystaMs > 300) {
-            if (canMove(0, 1) ) {
+            if (canMove(0, 1)) {
                 moveY++;
             } else {
                 for (int i = 0; i < figure.tab.length; i++) {
                     for (int j = 0; j < figure.tab[0].length; j++) {
-                        System.out.println();
-                            if (figure.tab[i][j] > 0 && checkBoundariesX(i,j)) {
-                                board[i + moveX][j + moveY] = figure.color;
-                            }else if (!checkBoundariesX(i,j)){
-                                repairPosition(i,g2d);
-                                goDown(g2d);
-                            }
 
-
+                        if (figure.tab[i][j] > 0) {
+                            board[i + moveX][j + moveY] = figure.color;
+                        }
                     }
                 }
+
                 moveY = 0;
                 moveX = 6;
                 //stworzyc niowa figure
@@ -118,47 +115,54 @@ public class Figura implements KeyListener {
 
     }
 
-    // sprawdzenie granic-------------- --> zrobic
-    public boolean checkBoundariesX(int i, int j) {
+    // sprawdzenie granic-------------- --> zrobic DLA KOLIZI FIGUR PRZY OBRUCENIU!!!!
+    public boolean checkBoundariesX() {
 
-        if (boardWidth < moveX + figure.tab.length) {
 
-            if (figure.tab[figure.tab.length-1][j] > 0) {
-                System.out.println(figure.tab[figure.tab.length-1][j]);
-                System.out.println("za dużo!! bo " + boardWidth + " < " + moveX + "+" +  figure.tab.length);
-                return false;
+        // sprawdzenie prawej storiny dZiała
+        for (int j = 0; j < figure.tab[0].length; j++) {
+
+            if (boardWidth < moveX + figure.tab.length) {
+
+                if (figure.tab[figure.tab.length - 1][j] > 0) {
+                    System.out.println(figure.tab[figure.tab.length - 1][j]);
+                    System.out.println("za dużo!! bo " + boardWidth + " < " + moveX + "+" + figure.tab.length);
+                    return false;
+                }
             }
         }
 
-//        if (0 < moveX + figure.tab.length) {
-//            System.out.println("mało");
-//            System.out.println(moveX + figure.tab.length);
-//            if (figure.tab[0][j] > 0) {
-//                System.out.println(figure.tab[figure.tab.length-1][j]);
-//                System.out.println("za MAŁO! bo " + 0 + " < " + i + " " + figure.tab.length+ "" + -1);
-//                return false;
-//            }
-//        }
 
+        for (int j = 0; j < figure.tab[0].length; j++) {
 
+            if (moveX < 0 ) {
+
+                System.out.println("mało, bo" + 0 + " jest mniejsze od " + moveX );
+                if (figure.tab[0][j] > 0) {
+                    System.out.println("za mało, poza ekranem gry!");
+                    return false;
+                }
+            }
+        }
 
         return true;
     }
 
-    public void repairPosition(int i,Graphics2D g2d){
+    public void repairPosition(int i, Graphics2D g2d) {
         System.out.println("naprawiam pozycje!");
         System.out.println("move przed" + moveX);
         if (i < i + moveX) {
-            moveX--;
-            System.out.println(moveX + " move po");
-            drawMainFigure(g2d);
+            moveX -= 1;
+            System.out.println("move po" + moveX);
         }
 
-//        if (3 > i -3 ) {
-//            moveX++;
-//            System.out.println(moveX + " move po");
-//            drawMainFigure(g2d);
-//        }
+        if (moveX < 0 ) {
+            moveX+=1;
+            System.out.println(moveX + " move po");
+        }
+
+        drawMainFigure(g2d);
+
 
     }
 
