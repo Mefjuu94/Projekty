@@ -14,39 +14,16 @@ public class GameBoard {
     public final int cellSize = 30;
 
     int StartXBoard = 50;
-    int endBoardX = StartXBoard + boardWidth;
     int startBoardY = 150;
-    int getEndBoardY = startBoardY + boardHeight;
-
-    Figura figura = new Figura();
 
 
-    boolean[][] board = new boolean[20][30];
 
-    //f,f,  2/3 ratio
-    //f,f
-    //f,f
-
-    public boolean[][] sprawdzTabliceGry(){
-
-        for (int i = 0; i < boardHeight/30; i++) {
-
-            for (int j = 0; j <boardWidth/30; j++) {
-                /// tutaj koordynaty lub kratki?
-
-            }
-
-        }
-
-        return board;
-    }
-
-    public void draw(Graphics2D g2d){
+    public void draw(Graphics2D g2d) {
 
         g2d.setColor(Color.black);
         int x = StartXBoard;
         int y = startBoardY;
-        for (int i = 0; i < boardHeight/30 ; i++) {
+        for (int i = 0; i < boardHeight / 30; i++) {
 
             for (int j = 0; j < boardWidth / 30; j++) {
                 g2d.drawRect(x, y, cellSize, cellSize);
@@ -61,11 +38,11 @@ public class GameBoard {
 
         // mniejsza tablica next
 
-        Font font = new Font(Font.SERIF,Font.BOLD,30);
+        Font font = new Font(Font.SERIF, Font.BOLD, 30);
         g2d.setFont(font);
-        g2d.drawString("NEXT:",650,530);
+        g2d.drawString("NEXT:", 650, 530);
         g2d.setColor(Color.black);
-        for (int i = 0; i < 5  ; i++) {
+        for (int i = 0; i < 5; i++) {
 
             for (int j = 0; j < 5; j++) {
                 g2d.drawRect(nextx, nexty, cellSize, cellSize);
@@ -76,10 +53,10 @@ public class GameBoard {
         }
 
         g2d.setColor(Color.white);
-        g2d.drawRect(630,550,150,150);
+        g2d.drawRect(630, 550, 150, 150);
+
 
     }
-
 
 
 }

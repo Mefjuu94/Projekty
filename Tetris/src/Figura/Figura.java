@@ -10,7 +10,7 @@ public class Figura implements KeyListener {
     final int boardHeight = 20;
 
     Shape figure = Shape.CreateShape();
-    int[][] board = new int[boardWidth][boardHeight];
+    public int[][] board = new int[boardWidth][boardHeight];
 
     boolean left, right, down, turn, hardDrop;
     //czas / tick do zjezxdzania w dol
@@ -22,7 +22,7 @@ public class Figura implements KeyListener {
     int moveY = 0;
     int yShadow;
 
-    static Color[] colors = {Color.BLACK, Color.ORANGE, Color.BLUE, Color.magenta, Color.PINK, Color.GREEN, Color.RED}; // index 0 jest omijany
+    static Color[] colors = {Color.DARK_GRAY, Color.ORANGE, Color.BLUE, Color.magenta, Color.PINK, Color.GREEN, Color.RED}; // index 0 jest omijany
     //żeby wyświetlił sie kolor na dole tablicy - gdyby został index 0 to by zytało jako puste pole
 
     public Figura() {
@@ -43,17 +43,17 @@ public class Figura implements KeyListener {
 
     public void rysujFigure(Graphics2D g2d) throws InterruptedException {
 
-        drawMainFigure(g2d);
-        drawBoard(g2d);
         //figura głowna
-
+        drawMainFigure(g2d);
+        //tabica
+        drawBoard(g2d);
+        //idź w doł
         goDown(g2d);
-
+        //poruszanie
         updateMove();
     }
 
 
-    // zrobic  porzadek z rysowaniem figury oraz aktualizacja ruchow (nie mogha byc sprzężone
     public void drawMainFigure(Graphics2D g2d) {
         for (int i = 0; i < figure.tab.length; i++) {
             for (int j = 0; j < figure.tab[0].length; j++) {
@@ -74,7 +74,7 @@ public class Figura implements KeyListener {
             for (int j = 0; j < board[0].length; j++) {
                 if (board[i][j] > 0) {
                     g2d.setColor(colors[board[i][j]]);
-                    g2d.fillRect(i * cellSize + 50, j * cellSize + 150, cellSize, cellSize); // tu metoda na redukcje oraz punkty
+                    g2d.fillRect(i * cellSize + 50, j * cellSize + 150, cellSize, cellSize);
                 }
             }
         }
@@ -107,6 +107,7 @@ public class Figura implements KeyListener {
 
                 moveY = 0;
                 moveX = 6;
+                hardDrop = false;
                 //stworzyc niowa figure
                 figure = Shape.CreateShape();
             }
@@ -114,12 +115,12 @@ public class Figura implements KeyListener {
             //System.out.println(moveY);
         }
 
+        checkArrayGetPoints();
 
     }
 
     // sprawdzenie granic-------------- --> zrobic DLA KOLIZI FIGUR PRZY OBRUCENIU!!!!
     public boolean checkBoundariesX() {
-
 
         // sprawdzenie prawej storiny dZiała
         for (int j = 0; j < figure.tab[0].length; j++) {
@@ -148,26 +149,22 @@ public class Figura implements KeyListener {
     }
 
     public void repairPosition(int i, Graphics2D g2d) {
-        System.out.println("naprawiam pozycje!");
-        System.out.println("move przed" + moveX);
+        //System.out.println("naprawiam pozycje!");
+        //System.out.println("move przed" + moveX);
         if (i < i + moveX) {
             moveX -= 1;
-            System.out.println("move po" + moveX);
+            //System.out.println("move po" + moveX);
         }
-
         if (moveX < 0 ) {
             moveX+=1;
-            System.out.println(moveX + " move po");
+            //System.out.println(moveX + " move po");
         }
-
         drawMainFigure(g2d);
-
 
     }
 
 
     public boolean canMove(int x, int y) { // sprawia, ze "widziw figury pod soba
-
 
         for (int i = 0; i < figure.tab.length; i++) {
             for (int j = 0; j < figure.tab[0].length; j++) {
@@ -182,6 +179,44 @@ public class Figura implements KeyListener {
         }
 
         return true;
+    }
+
+    public void checkArrayGetPoints() {
+
+        int mainCounter = 0;
+        int indexOfPoint = 0;
+        for (int i = 0; i < board[0].length; i++) {
+            int oneLineCounter = 0;
+            indexOfPoint = i;
+            for (int j = 0; j < board.length; j++) {
+                if (board[j][i] > 0) {
+                    oneLineCounter++;
+
+                }
+            }
+
+            if (oneLineCounter >= 15) {
+                System.out.println("Linia Zapełniona! Punkt!!");
+                mainCounter++;
+                // metoda na redukcje
+                reduceBecauseOfPoint(indexOfPoint);
+            }else {
+                mainCounter = 0;
+            }
+        }
+
+    }
+
+    public void reduceBecauseOfPoint(int indexOFPoint) { /// naprawić
+
+
+        for (int i = 0; i < board.length; i++) {
+            board[i][indexOFPoint] = 0;
+            }
+        System.out.println("zmieniłem stan! linii " + indexOFPoint);
+
+        /// tutaj ma byc przesuniecie o linie
+
     }
 
 
@@ -250,7 +285,6 @@ public class Figura implements KeyListener {
     public void keyReleased(KeyEvent e) {
 
         int code = e.getKeyCode();
-        System.out.println(code);
 
         if (code == 37) {
             this.left = false;
