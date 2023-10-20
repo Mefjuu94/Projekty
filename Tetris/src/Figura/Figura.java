@@ -6,10 +6,17 @@ import java.awt.event.KeyListener;
 
 public class Figura implements KeyListener {
 
+    //skonczyć:
+//    - punktowanie w ogóle
+//    - kolizja przy opbrocie klocków żeby się nie nakładał,
+    // - menu'
+    //cień gdzie spasdnie
+
     final int boardWidth = 15;
     final int boardHeight = 20;
 
     Shape figure = Shape.CreateShape();
+    Shape nextFigure;
     public int[][] board = new int[boardWidth][boardHeight];
 
     boolean left, right, down, turn, hardDrop;
@@ -35,8 +42,7 @@ public class Figura implements KeyListener {
             }
         }
         figure = Shape.CreateShape();
-        //nextTab = Shape.CreateShape().tab;
-
+        nextFigure = Shape.CreateShape();
     }
 
     /// Rysowanie-----------------------
@@ -45,6 +51,8 @@ public class Figura implements KeyListener {
 
         //figura głowna
         drawMainFigure(g2d);
+        //figura następna
+        drawNextFigure(g2d);
         //tabica
         drawBoard(g2d);
         //idź w doł
@@ -109,11 +117,13 @@ public class Figura implements KeyListener {
                 moveX = 6;
                 hardDrop = false;
                 //stworzyc niowa figure
-                figure = Shape.CreateShape();
+
+                figure = nextFigure;
+                nextFigure = Shape.CreateShape();
             }
             trzystaMs = System.currentTimeMillis();
-            //System.out.println(moveY);
         }
+
 
         checkArrayGetPoints();
 
@@ -207,16 +217,40 @@ public class Figura implements KeyListener {
 
     }
 
-    public void reduceBecauseOfPoint(int indexOFPoint) { /// naprawić
+    public void reduceBecauseOfPoint(int indexOFPoint) { /// naprawić działą!! :)
 
 
         for (int i = 0; i < board.length; i++) {
             board[i][indexOFPoint] = 0;
             }
-        System.out.println("zmieniłem stan! linii " + indexOFPoint);
+        System.out.println("zmieniłem stan! linii na 0 " + indexOFPoint);
 
         /// tutaj ma byc przesuniecie o linie
+//////////////////////////////////////////////////////////////////////
+//        for (int j = 0; j < board.length; j++) {
+//            for (int i = indexOFPoint; i > 1 ; i--) {
+//                board[j][i] = board[j][i- 1];
+//            }
+//        }    ten działający fragment można zapisać jako [ patrz niżej]
+/////////////////////////////////////////////////////////////////////////
+        for (int[] ints : board) {
+            if (indexOFPoint - 1 >= 0) System.arraycopy(ints, 1, ints, 2, indexOFPoint - 1);
+        }
 
+    }
+
+    public void drawNextFigure(Graphics2D g2d){
+
+
+        for (int i = 0; i < nextFigure.tab.length; i++) {
+            for (int j = 0; j < nextFigure.tab[0].length; j++) {
+                if (nextFigure.tab[i][j] > 0) {
+                    g2d.setColor(colors[nextFigure.color]);
+                    g2d.fillRect(630 + (i * cellSize) ,550 + (j * cellSize), cellSize, cellSize);
+                }
+
+            }
+        }
     }
 
 
@@ -273,7 +307,6 @@ public class Figura implements KeyListener {
 
         if (code == 32) {
             this.turn = true;
-            System.out.println("obróc!");
         }
 
         if (code == 17) {

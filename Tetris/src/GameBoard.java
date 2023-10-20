@@ -42,9 +42,9 @@ public class GameBoard {
         g2d.setFont(font);
         g2d.drawString("NEXT:", 650, 530);
         g2d.setColor(Color.black);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 4; i++) {
 
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < 4; j++) {
                 g2d.drawRect(nextx, nexty, cellSize, cellSize);
                 nextx = nextx + cellSize;
             }
@@ -53,7 +53,7 @@ public class GameBoard {
         }
 
         g2d.setColor(Color.white);
-        g2d.drawRect(630, 550, 150, 150);
+        g2d.drawRect(630, 550, 120, 120);
 
 
     }

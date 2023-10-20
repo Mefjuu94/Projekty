@@ -7,6 +7,7 @@ import java.util.Random;
 public abstract class Shape {
 
     int[][] tab = new int[4][4];
+    int[][] nextTab = new int[4][4];
     static Color[] colors = {Color.BLACK,Color.ORANGE,Color.BLUE,Color.magenta,Color.PINK,Color.GREEN,Color.RED};
     int color;
 
