@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class MENU implements MouseListener {
 
@@ -14,7 +16,7 @@ public class MENU implements MouseListener {
     boolean menu = false;
 
 
-    public void Draw(Graphics2D g2d, JPanel panel, JButton start, JButton exit,JButton load) {
+    public void Draw(Graphics2D g2d, JPanel panel, JButton start, JButton exit,JButton load,JButton save) {
 
             if (y > -240) {
                 y -= 1;
@@ -24,7 +26,7 @@ public class MENU implements MouseListener {
             logo.paintIcon(panel, g2d, 0, y);
 
             if (y == -240) {
-                mainMenu(start,exit,load);
+                mainMenu(start,exit,load,save);
             }
 
     }
@@ -43,38 +45,22 @@ public class MENU implements MouseListener {
             load.setBounds(300, 250, 150, 50);
             load.setSize(200, 76);
             load.setVisible(true);
-            load.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-
-
-                }
-            });
+            load.addMouseListener(this);
 
             save.setBounds(300, 350, 150, 50);
             save.setSize(200, 76);
             save.setVisible(true);
-            save.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-
-
-                }
-            });
+            save.addMouseListener(this);
             
             exit.setBounds(300, 450, 150, 50);
             exit.setSize(200, 76);
             exit.setVisible(true);
-            exit.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    System.exit(0);
-                }
-            });
+            exit.addMouseListener(this);
         }
     }
 
-    public void mainMenu(JButton start, JButton exit,JButton load){
+    public void mainMenu(JButton start, JButton exit,JButton load, JButton save){
+
         start.setBounds(300,350,150,50);
         start.setSize(200,76);
         start.addActionListener(new ActionListener() {
@@ -86,6 +72,7 @@ public class MENU implements MouseListener {
                 start.setVisible(false);
                 exit.setVisible(false);
                 load.setVisible(false);
+                save.setVisible(false);
             }
         });
 
@@ -100,6 +87,36 @@ public class MENU implements MouseListener {
 
             }
         });
+
+
+
+
+        ////dokonczyc save button!!!!!!
+        save.setBounds(300, 550,150,50);
+        save.setSize(200,76);
+        save.setVisible(true);
+        save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                e.getSource();
+                String zapis = JOptionPane.showInputDialog("nazwij zapis");
+
+                if(e.getSource() == save){
+                    try {
+                        FileWriter writer = new FileWriter(zapis + ".txt");
+
+
+                        writer.close();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+
+
+
+            }
+        });
+
 
         start.setVisible(true);
 

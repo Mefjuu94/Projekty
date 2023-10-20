@@ -1,0 +1,122 @@
+Losowanie numer: 1
+taśma 1
+src/image/1.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/2.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+-------
+taśma 2
+src/image/1.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/2.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+-------
+taśma 3
+src/image/1.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/2.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+-------
+Wylosowane obrazy w okienkach:
+src/image/1.jpg || src/image/2.jpg || src/image/1.jpg
+src/image/3.jpg || src/image/3.jpg || src/image/1.jpg
+src/image/3.jpg || src/image/2.jpg || src/image/3.jpg
+obrazy które się zgadzały: :
+Nie było żadnej wygranej
+STAWKA Z PLUSEM (3xpodstawa) x mnożnik  =30 * 0
+Stan konta = 70
+--------------------------
+Losowanie numer: 2
+taśma 1
+src/image/1.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/2.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+-------
+taśma 2
+src/image/1.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/2.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+-------
+taśma 3
+src/image/1.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/2.jpg
+src/image/2.jpg
+src/image/3.jpg
+src/image/3.jpg
+src/image/1.jpg
+src/image/3.jpg
+src/image/3.jpg
+-------
+Wylosowane obrazy w okienkach:
+src/image/2.jpg || src/image/2.jpg || src/image/2.jpg
+src/image/3.jpg || src/image/3.jpg || src/image/3.jpg
+src/image/2.jpg || src/image/2.jpg || src/image/3.jpg
+obrazy które się zgadzały: :
+Wygania POZIOMIE  null
+STAWKA Z PLUSEM (3xpodstawa) x mnożnik  =30 * 1
+Stan konta = 100
+--------------------------

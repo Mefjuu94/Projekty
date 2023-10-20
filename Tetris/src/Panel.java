@@ -7,14 +7,15 @@ import java.awt.*;
 
 public class Panel extends JPanel {
 
-    final int WIDTH = 1000;
-    final int HEIGTH = 800;
+    public final int WIDTH = 1000;
+    public final int HEIGTH = 800;
 
     GameBoard gb;
     //Block block;
     Figura figura;
 
-    Panel(){
+
+    Panel() {
 
         this.setBackground(Color.darkGray);
         gb = new GameBoard();
@@ -27,7 +28,7 @@ public class Panel extends JPanel {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(WIDTH,HEIGTH);
+        return new Dimension(WIDTH, HEIGTH);
     }
 
     @Override
@@ -35,19 +36,17 @@ public class Panel extends JPanel {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        //g2d.fillRect(10,10,20,20);
+
         try {
-            figura.rysujFigure(g2d);
+            figura.rysujFigure(g2d, this);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-
         gb.draw(g2d);
+
 
         repaint();
     }
-
 
 
 }

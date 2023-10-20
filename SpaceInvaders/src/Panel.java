@@ -73,7 +73,7 @@ public class Panel extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
 
         if (State == STATE.MENU){
-            menu.Draw(g2d,this,start,exit,load);
+            menu.Draw(g2d,this,start,exit,load,save);
             repaint();
         }else if (State == STATE.GAME){
             load.setVisible(false);

@@ -2,14 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="94be1400-9c1e-4913-85c8-d62b425b6614" name="Changes" comment="Poprawka">
-      <change afterPath="$PROJECT_DIR$/src/TalentPoints.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../MasterMind2/Score.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/Score.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/save" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/save" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MasterMind2/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/../MasterMind2/src/Panel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Hero.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Hero.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MENU.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MENU.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Panel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Tetris/src/Figura/Figura.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Tetris/src/Figura/Figura.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Tetris/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Tetris/src/Panel.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

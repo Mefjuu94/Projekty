@@ -1,5 +1,6 @@
 package Figura;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -8,7 +9,6 @@ public class Figura implements KeyListener {
 
     //skonczyć:
 //    - punktowanie w ogóle
-//    - kolizja przy opbrocie klocków żeby się nie nakładał,
     // - menu'
     //cień gdzie spasdnie
 
@@ -18,6 +18,9 @@ public class Figura implements KeyListener {
     Shape figure = Shape.CreateShape();
     Shape nextFigure;
     public int[][] board = new int[boardWidth][boardHeight];
+
+    public boolean pause = false;
+    public ImageIcon pauseGame = new ImageIcon("src/Figura/img/PAUSE.png");
 
     boolean left, right, down, turn, hardDrop;
     //czas / tick do zjezxdzania w dol
@@ -47,18 +50,29 @@ public class Figura implements KeyListener {
 
     /// Rysowanie-----------------------
 
-    public void rysujFigure(Graphics2D g2d) throws InterruptedException {
+    public void rysujFigure(Graphics2D g2d, JPanel panel) throws InterruptedException {
 
-        //figura głowna
-        drawMainFigure(g2d);
-        //figura następna
-        drawNextFigure(g2d);
-        //tabica
-        drawBoard(g2d);
-        //idź w doł
-        goDown(g2d);
-        //poruszanie
-        updateMove();
+        if (pause) {
+            //figura głowna
+            drawMainFigure(g2d);
+            //figura następna
+            drawNextFigure(g2d);
+            //tabica
+            drawBoard(g2d);
+            pauseGame.paintIcon(panel, g2d, 250, 250);
+        } else {
+            //figura głowna
+            drawMainFigure(g2d);
+            //figura następna
+            drawNextFigure(g2d);
+            //tabica
+            drawBoard(g2d);
+            //idź w doł
+            goDown(g2d);
+            //poruszanie
+            updateMove();
+        }
+
     }
 
 
@@ -96,8 +110,8 @@ public class Figura implements KeyListener {
 
         //sprawdzenhie granic
 
-        if (!checkBoundariesX()){
-            repairPosition(15,g2d);
+        if (!checkBoundariesX()) {
+            repairPosition(15, g2d);
         }
 
         if (curentms - trzystaMs > 300) {
@@ -147,7 +161,7 @@ public class Figura implements KeyListener {
 
 
         for (int j = 0; j < figure.tab[0].length; j++) {
-            if (moveX < 0 ) {
+            if (moveX < 0) {
                 if (figure.tab[0][j] > 0) {
                     System.out.println("za mało, poza ekranem gry!");
                     return false;
@@ -165,8 +179,8 @@ public class Figura implements KeyListener {
             moveX -= 1;
             //System.out.println("move po" + moveX);
         }
-        if (moveX < 0 ) {
-            moveX+=1;
+        if (moveX < 0) {
+            moveX += 1;
             //System.out.println(moveX + " move po");
         }
         drawMainFigure(g2d);
@@ -210,7 +224,7 @@ public class Figura implements KeyListener {
                 mainCounter++;
                 // metoda na redukcje
                 reduceBecauseOfPoint(indexOfPoint);
-            }else {
+            } else {
                 mainCounter = 0;
             }
         }
@@ -222,7 +236,7 @@ public class Figura implements KeyListener {
 
         for (int i = 0; i < board.length; i++) {
             board[i][indexOFPoint] = 0;
-            }
+        }
         System.out.println("zmieniłem stan! linii na 0 " + indexOFPoint);
 
         /// tutaj ma byc przesuniecie o linie
@@ -239,14 +253,14 @@ public class Figura implements KeyListener {
 
     }
 
-    public void drawNextFigure(Graphics2D g2d){
+    public void drawNextFigure(Graphics2D g2d) {
 
 
         for (int i = 0; i < nextFigure.tab.length; i++) {
             for (int j = 0; j < nextFigure.tab[0].length; j++) {
                 if (nextFigure.tab[i][j] > 0) {
                     g2d.setColor(colors[nextFigure.color]);
-                    g2d.fillRect(630 + (i * cellSize) ,550 + (j * cellSize), cellSize, cellSize);
+                    g2d.fillRect(630 + (i * cellSize), 550 + (j * cellSize), cellSize, cellSize);
                 }
 
             }
@@ -267,7 +281,7 @@ public class Figura implements KeyListener {
             left = false;
         }
 
-        if (turn) {
+        if (turn && canMove(0, 1) && turn && canMove(-1, 1)) {
             figure.rotate();
             turn = false;
         }
@@ -311,6 +325,10 @@ public class Figura implements KeyListener {
 
         if (code == 17) {
             this.hardDrop = true;
+        }
+        if (code == 27) {
+            this.pause = !pause;
+            System.out.println(pause);
         }
     }
 
