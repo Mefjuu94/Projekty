@@ -1,5 +1,6 @@
 import Figura.Figura;
 
+import javax.swing.*;
 import java.awt.*;
 
 
@@ -8,17 +9,16 @@ public class GameBoard {
     final int boardWidth = 450;
     final int boardHeight = 600;  //30px -> W = 20 kratek na H = 30
 
-    int startNextX = 630;
-    int startNextY = 550;
+    int startNextX = 530;
+    int startNextY = 100;
 
     public final int cellSize = 30;
 
-    int StartXBoard = 50;
-    int startBoardY = 150;
+    public int StartXBoard = 50;
+    public int startBoardY = 50;
+    ImageIcon navi = new ImageIcon("src/arrowsPNG.png");
 
-
-
-    public void draw(Graphics2D g2d) {
+    public void draw(Graphics2D g2d, JPanel panel) {
 
         g2d.setColor(Color.black);
         int x = StartXBoard;
@@ -38,9 +38,10 @@ public class GameBoard {
 
         // mniejsza tablica next
 
+        g2d.setColor(Color.WHITE);
         Font font = new Font(Font.SERIF, Font.BOLD, 30);
         g2d.setFont(font);
-        g2d.drawString("NEXT:", 650, 530);
+        g2d.drawString("NEXT:", 550, 80);
         g2d.setColor(Color.black);
         for (int i = 0; i < 4; i++) {
 
@@ -53,8 +54,10 @@ public class GameBoard {
         }
 
         g2d.setColor(Color.white);
-        g2d.drawRect(630, 550, 120, 120);
+        g2d.drawRect(StartXBoard, startBoardY, 30*15, 30*20);
 
+        g2d.setColor(Color.white);
+        g2d.drawRect(530, 100, 120, 120);
 
     }
 

@@ -8,9 +8,6 @@ import java.awt.event.KeyListener;
 public class Figura implements KeyListener {
 
     //skonczyć:
-//    - punktowanie w ogóle
-    // - menu'
-    //cień gdzie spasdnie
 
     final int boardWidth = 15;
     final int boardHeight = 20;
@@ -24,12 +21,23 @@ public class Figura implements KeyListener {
 
     boolean left, right, down, turn, hardDrop;
     //czas / tick do zjezxdzania w dol
+    int dropSpeed = 500; // default 500
+    int tickSpeed = 25; // co ile będzie się zmniejszać czas
     long trzystaMs = System.currentTimeMillis();
 
     int cellSize = 30;
-
     int moveX = 6;
     int moveY = 0;
+
+    public long result = 0;
+    public int scoreLineCounter = 0; // default 0
+    int lineScoreToLevelUp = 3; // co ileś linie zwiększa szybkość 0 25ms ( tickSpeed )
+    public int level = 1; // default 1
+    int scoreX = 550;
+    public int scoreY = 40;
+
+    public boolean gameOver = false;
+
     int yShadow;
 
     static Color[] colors = {Color.DARK_GRAY, Color.ORANGE, Color.BLUE, Color.magenta, Color.PINK, Color.GREEN, Color.RED}; // index 0 jest omijany
@@ -52,25 +60,41 @@ public class Figura implements KeyListener {
 
     public void rysujFigure(Graphics2D g2d, JPanel panel) throws InterruptedException {
 
-        if (pause) {
-            //figura głowna
-            drawMainFigure(g2d);
-            //figura następna
-            drawNextFigure(g2d);
-            //tabica
+        if (!gameOver) {
+            if (pause) {
+                //figura głowna
+                drawMainFigure(g2d);
+                //figura następna
+                drawNextFigure(g2d);
+                //tabica
+                drawBoard(g2d);
+                pauseGame.paintIcon(panel, g2d, 80, 150);
+            } else {
+                //figura głowna
+                drawMainFigure(g2d);
+                //figura następna
+                drawNextFigure(g2d);
+                //tabica
+                drawBoard(g2d);
+                //idź w doł
+                goDown(g2d);
+                //poruszanie
+                updateMove();
+                gameOver();
+            }
+
+
+            Font font = new Font(Font.SERIF, Font.BOLD, 30);
+            g2d.setFont(font);
+
+            g2d.setColor(Color.white);
+            g2d.drawString("Score: " + result, scoreX, 350);
+            g2d.drawString("Lines: " + scoreLineCounter, scoreX, 350 + scoreY);
+            g2d.drawString("Level: " + level, scoreX, 350 + (scoreY * 2));
+            g2d.drawString("Speed: " + dropSpeed, scoreX, 350 + (scoreY * 3));
+
+        } else{                         // game over
             drawBoard(g2d);
-            pauseGame.paintIcon(panel, g2d, 250, 250);
-        } else {
-            //figura głowna
-            drawMainFigure(g2d);
-            //figura następna
-            drawNextFigure(g2d);
-            //tabica
-            drawBoard(g2d);
-            //idź w doł
-            goDown(g2d);
-            //poruszanie
-            updateMove();
         }
 
     }
@@ -84,7 +108,7 @@ public class Figura implements KeyListener {
                     //ładuj kolor figury
                     //rysuj figure która jest:  index + ilosc przeunięć[movex] * wielkosc kratki[cellsize] + przesuniecie tablicy
                     // (0+6) * 30 + 50 = poczatkowa wspolrzedna na X 230
-                    g2d.fillRect((i + moveX) * cellSize + 50, (j + moveY) * cellSize + 150, cellSize, cellSize);
+                    g2d.fillRect((i + moveX) * cellSize + 50, (j + moveY) * cellSize + 50, cellSize, cellSize);
                 }
             }
         }
@@ -96,7 +120,10 @@ public class Figura implements KeyListener {
             for (int j = 0; j < board[0].length; j++) {
                 if (board[i][j] > 0) {
                     g2d.setColor(colors[board[i][j]]);
-                    g2d.fillRect(i * cellSize + 50, j * cellSize + 150, cellSize, cellSize);
+                    g2d.fillRect(i * cellSize + 50, j * cellSize + 50, cellSize, cellSize);
+
+                    g2d.setColor(Color.WHITE);
+                    g2d.drawRect(i * cellSize + 50, j * cellSize + 50, cellSize, cellSize);
                 }
             }
         }
@@ -114,7 +141,7 @@ public class Figura implements KeyListener {
             repairPosition(15, g2d);
         }
 
-        if (curentms - trzystaMs > 300) {
+        if (curentms - trzystaMs > dropSpeed) {
             if (canMove(0, 1)) {
                 moveY++;
             } else {
@@ -130,14 +157,12 @@ public class Figura implements KeyListener {
                 moveY = 0;
                 moveX = 6;
                 hardDrop = false;
-                //stworzyc niowa figure
 
-                figure = nextFigure;
-                nextFigure = Shape.CreateShape();
+                figure = nextFigure; // następna figura z next
+                nextFigure = Shape.CreateShape(); // losowanie next figury
             }
             trzystaMs = System.currentTimeMillis();
         }
-
 
         checkArrayGetPoints();
 
@@ -152,18 +177,14 @@ public class Figura implements KeyListener {
             if (boardWidth < moveX + figure.tab.length) {
 
                 if (figure.tab[figure.tab.length - 1][j] > 0) {
-                    System.out.println(figure.tab[figure.tab.length - 1][j]);
-                    System.out.println("za dużo!! bo " + boardWidth + " < " + moveX + "+" + figure.tab.length);
                     return false;
                 }
             }
         }
 
-
         for (int j = 0; j < figure.tab[0].length; j++) {
             if (moveX < 0) {
                 if (figure.tab[0][j] > 0) {
-                    System.out.println("za mało, poza ekranem gry!");
                     return false;
                 }
             }
@@ -173,15 +194,14 @@ public class Figura implements KeyListener {
     }
 
     public void repairPosition(int i, Graphics2D g2d) {
-        //System.out.println("naprawiam pozycje!");
-        //System.out.println("move przed" + moveX);
+
+        //naprawa pozycji
+
         if (i < i + moveX) {
             moveX -= 1;
-            //System.out.println("move po" + moveX);
         }
         if (moveX < 0) {
             moveX += 1;
-            //System.out.println(moveX + " move po");
         }
         drawMainFigure(g2d);
 
@@ -208,36 +228,46 @@ public class Figura implements KeyListener {
     public void checkArrayGetPoints() {
 
         int mainCounter = 0;
-        int indexOfPoint = 0;
+        int indexOfPoint;
         for (int i = 0; i < board[0].length; i++) {
             int oneLineCounter = 0;
             indexOfPoint = i;
             for (int j = 0; j < board.length; j++) {
                 if (board[j][i] > 0) {
                     oneLineCounter++;
-
                 }
             }
 
             if (oneLineCounter >= 15) {
-                System.out.println("Linia Zapełniona! Punkt!!");
                 mainCounter++;
                 // metoda na redukcje
+                System.out.println("ilość lini na raz = " + mainCounter + " * 15");
                 reduceBecauseOfPoint(indexOfPoint);
-            } else {
-                mainCounter = 0;
             }
         }
 
+        //liczenie unktów + szybkość spadadnia i level
+        nextLevelSpeed(mainCounter);
+    }
+
+    public void nextLevelSpeed(int mainCounter) {
+
+        if (mainCounter > 0) {
+            result += 15L * mainCounter;
+        }
     }
 
     public void reduceBecauseOfPoint(int indexOFPoint) { /// naprawić działą!! :)
+
+        scoreLineCounter++;
+        lineScoreToLevelUp--;
+        System.out.println(lineScoreToLevelUp);
 
 
         for (int i = 0; i < board.length; i++) {
             board[i][indexOFPoint] = 0;
         }
-        System.out.println("zmieniłem stan! linii na 0 " + indexOFPoint);
+        System.out.println("zredukowałem linię " + indexOFPoint);
 
         /// tutaj ma byc przesuniecie o linie
 //////////////////////////////////////////////////////////////////////
@@ -251,6 +281,14 @@ public class Figura implements KeyListener {
             if (indexOFPoint - 1 >= 0) System.arraycopy(ints, 1, ints, 2, indexOFPoint - 1);
         }
 
+        if (lineScoreToLevelUp == 0) {
+            System.out.println("level UP!");
+            level++;
+            dropSpeed -= tickSpeed;
+            System.out.println("szybkość tiku = " + dropSpeed + " ms");
+            lineScoreToLevelUp = 3;
+        }
+
     }
 
     public void drawNextFigure(Graphics2D g2d) {
@@ -260,7 +298,7 @@ public class Figura implements KeyListener {
             for (int j = 0; j < nextFigure.tab[0].length; j++) {
                 if (nextFigure.tab[i][j] > 0) {
                     g2d.setColor(colors[nextFigure.color]);
-                    g2d.fillRect(630 + (i * cellSize), 550 + (j * cellSize), cellSize, cellSize);
+                    g2d.fillRect(530 + (i * cellSize), 100 + (j * cellSize), cellSize, cellSize);
                 }
 
             }
@@ -271,6 +309,7 @@ public class Figura implements KeyListener {
     /// aktualizacja ruchow
 
     public void updateMove() {
+
         if (right && canMove(1, 0)) {
             moveX++;
             right = false;
@@ -295,6 +334,16 @@ public class Figura implements KeyListener {
             moveY++;
         }
 
+    }
+
+    public void gameOver() {
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][1] > 0) {
+                    gameOver = true;
+                }
+            }
+        }
     }
 
 
