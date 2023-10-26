@@ -52,6 +52,12 @@ public class Figura implements KeyListener {
     boolean load = true;
     Scanner scanner;
     String[][] podium = new String[3][3];
+    ImageIcon goldTrophy = new ImageIcon("src/Figura/img/gold.png");
+    ImageIcon silverTrophy = new ImageIcon("src/Figura/img/silver.png");
+    ImageIcon bronzeTrophy = new ImageIcon("src/Figura/img/bronze.png");
+
+
+
     {
         for (int i = 0; i < podium.length; i++) {
             for (int j = 0; j < podium[0].length; j++) {
@@ -117,6 +123,9 @@ public class Figura implements KeyListener {
         }else {
             saveScore(panel);
             drawBestScores(g2d);
+            goldTrophy.paintIcon(panel,g2d,360,160);
+            silverTrophy.paintIcon(panel,g2d,360,260);
+            bronzeTrophy.paintIcon(panel,g2d,360,350);
         }
 
     }
@@ -405,6 +414,12 @@ public class Figura implements KeyListener {
 
                 if (liczba > liczbaScore){
 
+                    if (i + 2 < podium.length){
+                        podium[i+2][0] = podium[i+1][0]; // jak index + 1 jest mniejszy od dl. tablicy podium
+                        podium[i+2][1] = podium[i+1][1]; // to przesuń wiersz o jeden do góry
+                        podium[i+2][2] = podium[i+1][2];
+                    }
+
                     if (i + 1 < podium.length){
                         podium[i+1][0] = podium[i][0]; // jak index + 1 jest mniejszy od dl. tablicy podium
                         podium[i+1][1] = podium[i][1]; // to przesuń wiersz o jeden do góry
@@ -444,10 +459,10 @@ public class Figura implements KeyListener {
             g2d.drawString(i+1 +  ". ",80,yScore);
             for (int j = 0; j < podium.length -1; j++) {
                 g2d.drawString("  " + podium[i][j] + "    ",xScore,yScore);
-                xScore += 100;
+                xScore += 150;
             }
             xScore = 100;
-            yScore += 70;
+            yScore += 100;
         }
     }
 
