@@ -2,6 +2,7 @@ import Figura.Figura;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 
 public class GameBoard {
@@ -16,21 +17,28 @@ public class GameBoard {
 
     public int StartXBoard = 50;
     public int startBoardY = 50;
-    ImageIcon navi = new ImageIcon("src/arrowsPNG.png");
+
+    Figura figura = new Figura();
+
+    public GameBoard() throws IOException {
+    }
 
     public void draw(Graphics2D g2d, JPanel panel) {
 
         g2d.setColor(Color.black);
         int x = StartXBoard;
         int y = startBoardY;
-        for (int i = 0; i < boardHeight / 30; i++) {
 
-            for (int j = 0; j < boardWidth / 30; j++) {
-                g2d.drawRect(x, y, cellSize, cellSize);
-                x = x + cellSize;
+        if (!figura.gameOver) {
+            for (int i = 0; i < boardHeight / 30; i++) {
+
+                for (int j = 0; j < boardWidth / 30; j++) {
+                    g2d.drawRect(x, y, cellSize, cellSize);
+                    x = x + cellSize;
+                }
+                y = y + cellSize;
+                x = StartXBoard;
             }
-            y = y + cellSize;
-            x = StartXBoard;
         }
 
         int nextx = startNextX;
@@ -58,8 +66,9 @@ public class GameBoard {
 
         g2d.setColor(Color.white);
         g2d.drawRect(530, 100, 120, 120);
-
     }
+
+
 
 
 }

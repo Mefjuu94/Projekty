@@ -4,6 +4,7 @@ import Figura.Figura;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class Panel extends JPanel {
 
@@ -13,11 +14,12 @@ public class Panel extends JPanel {
     GameBoard gb;
     Figura figura;
 
-    Panel() {
+    Panel() throws IOException {
 
         this.setBackground(Color.DARK_GRAY);
         gb = new GameBoard();
         figura = new Figura();
+
 
         this.addKeyListener(this.figura);
         this.setFocusable(true);
@@ -35,27 +37,19 @@ public class Panel extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
 
         //naniesienie czarnego kwadratu jako tło tablicy
-        g2d.setColor(Color.black);
-        g2d.fillRect(gb.StartXBoard, gb.startBoardY, gb.boardWidth, gb.boardHeight);
+            g2d.setColor(Color.black);
+            g2d.fillRect(gb.StartXBoard, gb.startBoardY, gb.boardWidth, gb.boardHeight);
 
-        if (!figura.gameOver) {
             try {
                 figura.rysujFigure(g2d, this);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | IOException e) {
                 throw new RuntimeException(e);
             }
             gb.draw(g2d, this);
-        } else {
-            g2d.setColor(Color.white);
-            Font font = new Font(Font.SERIF, Font.BOLD, 50);
-            g2d.setFont(font);
-            g2d.drawString("Score: " + figura.result, 100, 150);
-            g2d.drawString("Lines: " + figura.scoreLineCounter, 100, 250 + figura.scoreY);
-            g2d.drawString("Level: " + figura.level, 100, 350 + (figura.scoreY * 2));
-        }
 
 
         repaint();
+
     }
 
 

@@ -4,6 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
 
 public class Figura implements KeyListener {
 
@@ -38,12 +43,28 @@ public class Figura implements KeyListener {
 
     public boolean gameOver = false;
 
-    int yShadow;
+    //save
+    boolean save = true;
+    FileWriter writer = new FileWriter("Save.txt", true);
+    public boolean inputDialog = true;
+    String nickname = "";
+    // load
+    boolean load = true;
+    Scanner scanner;
+    String[][] podium = new String[3][3];
+    {
+        for (int i = 0; i < podium.length; i++) {
+            for (int j = 0; j < podium[0].length; j++) {
+                podium[i][j] = "0";
+            }
+        }
+    }
+
 
     static Color[] colors = {Color.DARK_GRAY, Color.ORANGE, Color.BLUE, Color.magenta, Color.PINK, Color.GREEN, Color.RED}; // index 0 jest omijany
     //żeby wyświetlił sie kolor na dole tablicy - gdyby został index 0 to by zytało jako puste pole
 
-    public Figura() {
+    public Figura() throws IOException {
 
         {
             for (int i = 0; i < figure.tab.length; i++) {
@@ -58,7 +79,7 @@ public class Figura implements KeyListener {
 
     /// Rysowanie-----------------------
 
-    public void rysujFigure(Graphics2D g2d, JPanel panel) throws InterruptedException {
+    public void rysujFigure(Graphics2D g2d, JPanel panel) throws InterruptedException, IOException {
 
         if (!gameOver) {
             if (pause) {
@@ -93,8 +114,9 @@ public class Figura implements KeyListener {
             g2d.drawString("Level: " + level, scoreX, 350 + (scoreY * 2));
             g2d.drawString("Speed: " + dropSpeed, scoreX, 350 + (scoreY * 3));
 
-        } else{                         // game over
-            drawBoard(g2d);
+        }else {
+            saveScore(panel);
+            drawBestScores(g2d);
         }
 
     }
@@ -345,6 +367,90 @@ public class Figura implements KeyListener {
             }
         }
     }
+
+    public void saveScore( JPanel panel) throws IOException {
+
+        if (result > 0 && save) {
+
+            nickname = JOptionPane.showInputDialog(null, "your nickname", "Game Over", 1);
+            writer.write("\n" + nickname + " " + result + " points: " + scoreLineCounter + " lines");
+
+            writer.close();
+            save = false;
+        }
+
+        if (load) {
+            loadScores();
+            load = false;
+        }
+    }
+
+    public void loadScores() throws FileNotFoundException {
+
+        scanner = new Scanner(new File("Save.txt"));
+
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+
+            String[] split = line.split(" ");
+
+            int liczba = Integer.parseInt(split[1]);
+            System.out.println(liczba + " liczba" + " nazwa " + split[0]);
+
+
+            for (int i = 0; i < podium.length ; i++) {
+                int liczbaScore = Integer.parseInt(podium[i][1]);
+                //System.out.println(liczbaScore + " liczbaScore");
+
+                if (liczba > liczbaScore){
+
+                    if (i + 1 < podium.length){
+                        podium[i+1][0] = podium[i][0]; // jak index + 1 jest mniejszy od dl. tablicy podium
+                        podium[i+1][1] = podium[i][1]; // to przesuń wiersz o jeden do góry
+                        podium[i+1][2] = podium[i][2];
+                    }
+                    podium[i][0] = split[0];
+                    podium[i][1] = split[1];
+                    podium[i][2] = split[3];
+                    break;   //  w razie ifa sprzerwij iterację pętli
+                }
+            }
+
+        }
+
+        scanner.close();
+
+        System.out.println("----------------wypełniona tablica----------");
+
+        for (int i = 0; i < podium.length; i++) {
+
+            for (int j = 0; j < podium[0].length; j++) {
+                System.out.print(podium[i][j] + ' ');
+            }
+            System.out.println();
+        }
+    }
+
+    public void drawBestScores(Graphics2D g2d){
+
+        Font font = new Font(Font.SERIF, Font.BOLD, 30);
+        g2d.setFont(font);
+        g2d.setColor(Color.WHITE);
+
+        int xScore = 100;
+        int yScore = 200;
+        for (int i = 0; i < podium.length; i++) {
+            g2d.drawString(i+1 +  ". ",80,yScore);
+            for (int j = 0; j < podium.length -1; j++) {
+                g2d.drawString("  " + podium[i][j] + "    ",xScore,yScore);
+                xScore += 100;
+            }
+            xScore = 100;
+            yScore += 70;
+        }
+    }
+
 
 
     public void keyTyped(KeyEvent e) {
