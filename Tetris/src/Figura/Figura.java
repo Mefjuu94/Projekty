@@ -416,8 +416,8 @@ public class Figura implements KeyListener {
         if (result > 0 && save) {
 
             nickname = JOptionPane.showInputDialog(panel, "Game Over", 0);
-            System.out.println("jOptionPane");
-
+            System.out.println(nickname);
+            writer.write("\n" + nickname + " " + result + " points: " + scoreLineCounter + " lines");
             writer.close();
             save = false;
         }
@@ -427,12 +427,12 @@ public class Figura implements KeyListener {
             loadScores();
             load = false;
         }
+
     }
 
     public void loadScores() throws FileNotFoundException {
 
         scanner = new Scanner(new File("Save.txt"));
-
 
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
