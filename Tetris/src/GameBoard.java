@@ -18,7 +18,7 @@ public class GameBoard {
     public int StartXBoard = 50;
     public int startBoardY = 50;
 
-    Figura figura = new Figura();
+
 
     public GameBoard() throws IOException {
     }
@@ -29,17 +29,16 @@ public class GameBoard {
         int x = StartXBoard;
         int y = startBoardY;
 
-        if (!figura.gameOver) {
-            for (int i = 0; i < boardHeight / 30; i++) {
+        for (int i = 0; i < boardHeight / 30; i++) {
 
-                for (int j = 0; j < boardWidth / 30; j++) {
-                    g2d.drawRect(x, y, cellSize, cellSize);
-                    x = x + cellSize;
-                }
-                y = y + cellSize;
-                x = StartXBoard;
+            for (int j = 0; j < boardWidth / 30; j++) {
+                g2d.drawRect(x, y, cellSize, cellSize);
+                x = x + cellSize;
             }
+            y = y + cellSize;
+            x = StartXBoard;
         }
+
 
         int nextx = startNextX;
         int nexty = startNextY;
@@ -62,13 +61,11 @@ public class GameBoard {
         }
 
         g2d.setColor(Color.white);
-        g2d.drawRect(StartXBoard, startBoardY, 30*15, 30*20);
+        g2d.drawRect(StartXBoard, startBoardY, 30 * 15, 30 * 20);
 
         g2d.setColor(Color.white);
         g2d.drawRect(530, 100, 120, 120);
     }
-
-
 
 
 }

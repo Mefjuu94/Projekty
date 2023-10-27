@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -34,7 +36,7 @@ public class Figura implements KeyListener {
     int moveX = 6;
     int moveY = 0;
 
-    public long result = 0;
+    public long result = 2;
     public int scoreLineCounter = 0; // default 0
     int lineScoreToLevelUp = 3; // co ileś linie zwiększa szybkość 0 25ms ( tickSpeed )
     public int level = 1; // default 1
@@ -44,10 +46,10 @@ public class Figura implements KeyListener {
     public boolean gameOver = false;
 
     //save
-    boolean save = true;
+
+    public boolean save = true;
     FileWriter writer = new FileWriter("Save.txt", true);
-    public boolean inputDialog = true;
-    String nickname = "";
+    public String nickname = "";
     // load
     boolean load = true;
     Scanner scanner;
@@ -56,7 +58,8 @@ public class Figura implements KeyListener {
     ImageIcon silverTrophy = new ImageIcon("src/Figura/img/silver.png");
     ImageIcon bronzeTrophy = new ImageIcon("src/Figura/img/bronze.png");
 
-
+    //nowa gra
+    public boolean restartGame = false;
 
     {
         for (int i = 0; i < podium.length; i++) {
@@ -120,14 +123,49 @@ public class Figura implements KeyListener {
             g2d.drawString("Level: " + level, scoreX, 350 + (scoreY * 2));
             g2d.drawString("Speed: " + dropSpeed, scoreX, 350 + (scoreY * 3));
 
-        }else {
-            saveScore(panel);
+        } else {
+
             drawBestScores(g2d);
-            goldTrophy.paintIcon(panel,g2d,360,160);
-            silverTrophy.paintIcon(panel,g2d,360,260);
-            bronzeTrophy.paintIcon(panel,g2d,360,350);
+            goldTrophy.paintIcon(panel, g2d, 360, 160);
+            silverTrophy.paintIcon(panel, g2d, 360, 260);
+            bronzeTrophy.paintIcon(panel, g2d, 360, 350);
         }
 
+        restartGame();
+
+    }
+
+    public void restartGame() {
+
+        if (restartGame) {
+            gameOver = false;
+
+            for (int i = 0; i < figure.tab.length; i++) {
+                for (int j = 0; j < figure.tab[0].length; j++) {
+                    figure.tab[i][j] = 0;
+                }
+            }
+
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[0].length; j++) {
+                    board[i][j] = 0;
+                }
+            }
+
+            figure = Shape.CreateShape();
+            nextFigure = Shape.CreateShape();
+
+            restartGame = false;
+            gameOver = false;
+            save = true;
+
+
+            //reset Stats
+            scoreLineCounter = 0;
+            result = 0;
+            dropSpeed = 500;
+            level = 1;
+        }
     }
 
 
@@ -161,13 +199,11 @@ public class Figura implements KeyListener {
     }
 
 
-    public void goDown(Graphics2D g2d) {
+    public void goDown(Graphics2D g2d) { // spadanie klocków i  sprawdzanie kolizjii
 
         long curentms = System.currentTimeMillis();
 
-
         //sprawdzenhie granic
-
         if (!checkBoundariesX()) {
             repairPosition(15, g2d);
         }
@@ -224,10 +260,9 @@ public class Figura implements KeyListener {
         return true;
     }
 
-    public void repairPosition(int i, Graphics2D g2d) {
+    public void repairPosition(int i, Graphics2D g2d) { // reperuje pozycje żeby nie był poza granicą
 
         //naprawa pozycji
-
         if (i < i + moveX) {
             moveX -= 1;
         }
@@ -235,7 +270,6 @@ public class Figura implements KeyListener {
             moveX += 1;
         }
         drawMainFigure(g2d);
-
     }
 
 
@@ -377,16 +411,17 @@ public class Figura implements KeyListener {
         }
     }
 
-    public void saveScore( JPanel panel) throws IOException {
+    public void saveScore(JPanel panel) throws IOException {
 
         if (result > 0 && save) {
 
-            nickname = JOptionPane.showInputDialog(null, "your nickname", "Game Over", 1);
-            writer.write("\n" + nickname + " " + result + " points: " + scoreLineCounter + " lines");
+            nickname = JOptionPane.showInputDialog(panel, "Game Over", 0);
+            System.out.println("jOptionPane");
 
             writer.close();
             save = false;
         }
+
 
         if (load) {
             loadScores();
@@ -408,22 +443,22 @@ public class Figura implements KeyListener {
             System.out.println(liczba + " liczba" + " nazwa " + split[0]);
 
 
-            for (int i = 0; i < podium.length ; i++) {
+            for (int i = 0; i < podium.length; i++) {
                 int liczbaScore = Integer.parseInt(podium[i][1]);
                 //System.out.println(liczbaScore + " liczbaScore");
 
-                if (liczba > liczbaScore){
+                if (liczba > liczbaScore) {
 
-                    if (i + 2 < podium.length){
-                        podium[i+2][0] = podium[i+1][0]; // jak index + 1 jest mniejszy od dl. tablicy podium
-                        podium[i+2][1] = podium[i+1][1]; // to przesuń wiersz o jeden do góry
-                        podium[i+2][2] = podium[i+1][2];
+                    if (i + 2 < podium.length) {
+                        podium[i + 2][0] = podium[i + 1][0]; // jak index + 1 jest mniejszy od dl. tablicy podium
+                        podium[i + 2][1] = podium[i + 1][1]; // to przesuń wiersz o jeden do góry
+                        podium[i + 2][2] = podium[i + 1][2];
                     }
 
-                    if (i + 1 < podium.length){
-                        podium[i+1][0] = podium[i][0]; // jak index + 1 jest mniejszy od dl. tablicy podium
-                        podium[i+1][1] = podium[i][1]; // to przesuń wiersz o jeden do góry
-                        podium[i+1][2] = podium[i][2];
+                    if (i + 1 < podium.length) {
+                        podium[i + 1][0] = podium[i][0]; // jak index + 1 jest mniejszy od dl. tablicy podium
+                        podium[i + 1][1] = podium[i][1]; // to przesuń wiersz o jeden do góry
+                        podium[i + 1][2] = podium[i][2];
                     }
                     podium[i][0] = split[0];
                     podium[i][1] = split[1];
@@ -447,7 +482,7 @@ public class Figura implements KeyListener {
         }
     }
 
-    public void drawBestScores(Graphics2D g2d){
+    public void drawBestScores(Graphics2D g2d) {
 
         Font font = new Font(Font.SERIF, Font.BOLD, 30);
         g2d.setFont(font);
@@ -456,16 +491,15 @@ public class Figura implements KeyListener {
         int xScore = 100;
         int yScore = 200;
         for (int i = 0; i < podium.length; i++) {
-            g2d.drawString(i+1 +  ". ",80,yScore);
-            for (int j = 0; j < podium.length -1; j++) {
-                g2d.drawString("  " + podium[i][j] + "    ",xScore,yScore);
+            g2d.drawString(i + 1 + ". ", 80, yScore);
+            for (int j = 0; j < podium.length - 1; j++) {
+                g2d.drawString("  " + podium[i][j] + "    ", xScore, yScore);
                 xScore += 150;
             }
             xScore = 100;
             yScore += 100;
         }
     }
-
 
 
     public void keyTyped(KeyEvent e) {
