@@ -36,7 +36,7 @@ public class Figura implements KeyListener {
     int moveX = 6;
     int moveY = 0;
 
-    public long result = 2;
+    public long result = 0;
     public int scoreLineCounter = 0; // default 0
     int lineScoreToLevelUp = 3; // co ileś linie zwiększa szybkość 0 25ms ( tickSpeed )
     public int level = 1; // default 1
