@@ -16,6 +16,7 @@ public class Panel extends JPanel implements MouseListener {
     GameBoard gb;
     Figura figura;
     JButton restart = new JButton("New Game");
+    JButton endGame = new JButton("Exit");
 
     Panel() throws IOException {
 
@@ -26,6 +27,10 @@ public class Panel extends JPanel implements MouseListener {
         this.add(restart);
         restart.setVisible(false);
         restart.addMouseListener(this);
+
+        this.add(endGame);
+        endGame.setVisible(false);
+        endGame.addMouseListener(this);
 
 
         this.addKeyListener(this.figura);
@@ -42,6 +47,7 @@ public class Panel extends JPanel implements MouseListener {
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
+
 
         //naniesienie czarnego kwadratu jako tło tablicy
             g2d.setColor(Color.black);
@@ -65,6 +71,11 @@ public class Panel extends JPanel implements MouseListener {
                 restart.setBounds(530,500,150,40);
                 restart.setVisible(true);
                 restart.setFocusable(true);
+
+                endGame.setBounds(530,560,150,40);
+                endGame.setVisible(true);
+                endGame.setFocusable(true);
+
                 try {
                     figura.rysujFigure(g2d, this);
                 } catch (InterruptedException | IOException e) {
@@ -72,6 +83,8 @@ public class Panel extends JPanel implements MouseListener {
                 }
 
             }
+
+
 
 
 
@@ -89,6 +102,12 @@ public class Panel extends JPanel implements MouseListener {
             figura.gameOver = false;
             figura.restartGame = true;
             System.out.println(figura.gameOver);
+            endGame.setVisible(false);
+        }
+
+        if (e.getSource() == endGame){
+            System.out.println("klik! na endgame");
+            System.exit(0);
         }
     }
 

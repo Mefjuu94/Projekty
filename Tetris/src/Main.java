@@ -14,8 +14,6 @@ public class Main {
         frame.setResizable(false);
         frame.pack();
 
-        while (true) {
 
-        }
     }
 }
