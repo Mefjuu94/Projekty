@@ -17,6 +17,7 @@ public class Panel extends JPanel implements MouseListener {
     Figura figura;
     JButton restart = new JButton("New Game");
     JButton endGame = new JButton("Exit");
+    boolean saved = false;
 
     Panel() throws IOException {
 
@@ -35,7 +36,6 @@ public class Panel extends JPanel implements MouseListener {
 
         this.addKeyListener(this.figura);
         this.setFocusable(true);
-
     }
 
     @Override
@@ -63,7 +63,11 @@ public class Panel extends JPanel implements MouseListener {
                 }
             }else {
                 try {
-                    figura.saveScore(this);
+                    if (!saved) {
+                        figura.saveScore(this);
+                        saved = true;
+                    }
+                    
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -103,6 +107,7 @@ public class Panel extends JPanel implements MouseListener {
             figura.restartGame = true;
             System.out.println(figura.gameOver);
             endGame.setVisible(false);
+            saved = false;
         }
 
         if (e.getSource() == endGame){

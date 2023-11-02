@@ -4,15 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Scanner;
 
 public class Figura implements KeyListener {
+    Scoreboard scoreboard;
+    Result resultBox;
 
     //skonczyć:
 
@@ -40,48 +36,25 @@ public class Figura implements KeyListener {
     public int scoreLineCounter = 0; // default 0
     int lineScoreToLevelUp = 3; // co ileś linie zwiększa szybkość 0 25ms ( tickSpeed )
     public int level = 1; // default 1
-    int scoreX = 550;
-    public int scoreY = 40;
+    
 
     public boolean gameOver = false;
 
-    //save
-
-    public boolean save = true;
-    FileWriter writer = new FileWriter("Save.txt", true);
-    public String nickname = "";
-    // load
-    boolean load = true;
-    Scanner scanner;
-    String[][] podium = new String[3][3];
-    ImageIcon goldTrophy = new ImageIcon("src/Figura/img/gold.png");
-    ImageIcon silverTrophy = new ImageIcon("src/Figura/img/silver.png");
-    ImageIcon bronzeTrophy = new ImageIcon("src/Figura/img/bronze.png");
-
     //nowa gra
     public boolean restartGame = false;
-
-    {
-        for (int i = 0; i < podium.length; i++) {
-            for (int j = 0; j < podium[0].length; j++) {
-                podium[i][j] = "0";
-            }
-        }
-    }
-
 
     static Color[] colors = {Color.DARK_GRAY, Color.ORANGE, Color.BLUE, Color.magenta, Color.PINK, Color.GREEN, Color.RED}; // index 0 jest omijany
     //żeby wyświetlił sie kolor na dole tablicy - gdyby został index 0 to by zytało jako puste pole
 
     public Figura() throws IOException {
 
-        {
-            for (int i = 0; i < figure.tab.length; i++) {
-                for (int j = 0; j < figure.tab[0].length; j++) {
-                    figure.tab[i][j] = 0;
-                }
+        for (int i = 0; i < figure.tab.length; i++) {
+            for (int j = 0; j < figure.tab[0].length; j++) {
+                figure.tab[i][j] = 0;
             }
         }
+        scoreboard = new Scoreboard();
+        resultBox = new Result();
         figure = Shape.CreateShape();
         nextFigure = Shape.CreateShape();
     }
@@ -91,21 +64,12 @@ public class Figura implements KeyListener {
     public void rysujFigure(Graphics2D g2d, JPanel panel) throws InterruptedException, IOException {
 
         if (!gameOver) {
+            drawMainFigure(g2d);
+            drawNextFigure(g2d);
+            drawBoard(g2d);
             if (pause) {
-                //figura głowna
-                drawMainFigure(g2d);
-                //figura następna
-                drawNextFigure(g2d);
-                //tabica
-                drawBoard(g2d);
                 pauseGame.paintIcon(panel, g2d, 80, 150);
             } else {
-                //figura głowna
-                drawMainFigure(g2d);
-                //figura następna
-                drawNextFigure(g2d);
-                //tabica
-                drawBoard(g2d);
                 //idź w doł
                 goDown(g2d);
                 //poruszanie
@@ -113,22 +77,9 @@ public class Figura implements KeyListener {
                 gameOver();
             }
 
-
-            Font font = new Font(Font.SERIF, Font.BOLD, 30);
-            g2d.setFont(font);
-
-            g2d.setColor(Color.white);
-            g2d.drawString("Score: " + result, scoreX, 350);
-            g2d.drawString("Lines: " + scoreLineCounter, scoreX, 350 + scoreY);
-            g2d.drawString("Level: " + level, scoreX, 350 + (scoreY * 2));
-            g2d.drawString("Speed: " + dropSpeed, scoreX, 350 + (scoreY * 3));
-
+            resultBox.draw(g2d, result, scoreLineCounter, level, dropSpeed);
         } else {
-
-            drawBestScores(g2d);
-            goldTrophy.paintIcon(panel, g2d, 360, 160);
-            silverTrophy.paintIcon(panel, g2d, 360, 260);
-            bronzeTrophy.paintIcon(panel, g2d, 360, 350);
+            scoreboard.draw(g2d, panel);
         }
 
         restartGame();
@@ -157,8 +108,6 @@ public class Figura implements KeyListener {
 
             restartGame = false;
             gameOver = false;
-            save = true;
-
 
             //reset Stats
             scoreLineCounter = 0;
@@ -412,95 +361,8 @@ public class Figura implements KeyListener {
     }
 
     public void saveScore(JPanel panel) throws IOException {
-
-        if (result > 0 && save) {
-
-            nickname = JOptionPane.showInputDialog(panel, "Game Over", 0);
-            System.out.println(nickname);
-            writer.write("\n" + nickname + " " + result + " points: " + scoreLineCounter + " lines");
-            writer.close();
-            save = false;
-        }
-
-
-        if (load) {
-            loadScores();
-            load = false;
-        }
-
+        this.scoreboard.saveScore(panel, result, scoreLineCounter);
     }
-
-    public void loadScores() throws FileNotFoundException {
-
-        scanner = new Scanner(new File("Save.txt"));
-
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-
-            String[] split = line.split(" ");
-
-            int liczba = Integer.parseInt(split[1]);
-            System.out.println(liczba + " liczba" + " nazwa " + split[0]);
-
-
-            for (int i = 0; i < podium.length; i++) {
-                int liczbaScore = Integer.parseInt(podium[i][1]);
-                //System.out.println(liczbaScore + " liczbaScore");
-
-                if (liczba > liczbaScore) {
-
-                    if (i + 2 < podium.length) {
-                        podium[i + 2][0] = podium[i + 1][0]; // jak index + 1 jest mniejszy od dl. tablicy podium
-                        podium[i + 2][1] = podium[i + 1][1]; // to przesuń wiersz o jeden do góry
-                        podium[i + 2][2] = podium[i + 1][2];
-                    }
-
-                    if (i + 1 < podium.length) {
-                        podium[i + 1][0] = podium[i][0]; // jak index + 1 jest mniejszy od dl. tablicy podium
-                        podium[i + 1][1] = podium[i][1]; // to przesuń wiersz o jeden do góry
-                        podium[i + 1][2] = podium[i][2];
-                    }
-                    podium[i][0] = split[0];
-                    podium[i][1] = split[1];
-                    podium[i][2] = split[3];
-                    break;   //  w razie ifa sprzerwij iterację pętli
-                }
-            }
-
-        }
-
-        scanner.close();
-
-        System.out.println("----------------wypełniona tablica----------");
-
-        for (int i = 0; i < podium.length; i++) {
-
-            for (int j = 0; j < podium[0].length; j++) {
-                System.out.print(podium[i][j] + ' ');
-            }
-            System.out.println();
-        }
-    }
-
-    public void drawBestScores(Graphics2D g2d) {
-
-        Font font = new Font(Font.SERIF, Font.BOLD, 30);
-        g2d.setFont(font);
-        g2d.setColor(Color.WHITE);
-
-        int xScore = 100;
-        int yScore = 200;
-        for (int i = 0; i < podium.length; i++) {
-            g2d.drawString(i + 1 + ". ", 80, yScore);
-            for (int j = 0; j < podium.length - 1; j++) {
-                g2d.drawString("  " + podium[i][j] + "    ", xScore, yScore);
-                xScore += 150;
-            }
-            xScore = 100;
-            yScore += 100;
-        }
-    }
-
 
     public void keyTyped(KeyEvent e) {
 
