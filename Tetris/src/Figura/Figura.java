@@ -10,7 +10,6 @@ public class Figura implements KeyListener {
     Scoreboard scoreboard;
     Result resultBox;
 
-    //skonczyć:
 
     final int boardWidth = 15;
     final int boardHeight = 20;
@@ -360,7 +359,7 @@ public class Figura implements KeyListener {
         }
     }
 
-    public void saveScore(JPanel panel) throws IOException {
+    public void saveScore(JPanel panel) throws Exception {
         this.scoreboard.saveScore(panel, result, scoreLineCounter);
     }
 

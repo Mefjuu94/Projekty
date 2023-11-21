@@ -1,14 +1,20 @@
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.*;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 import javax.swing.*;
 
 import com.sun.mail.pop3.POP3Store;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 public class ReceiveMail {
 
+    String result = "";
 
     public void incoming(String pop3Host, String storeType, String user, String password, JTextArea label) {
         try {
@@ -34,30 +40,39 @@ public class ReceiveMail {
 
                 System.out.println("--------------------------------------------------");
 
+
                 System.out.println("Email Number " + (i + 1));
                 label.append("\n" +"Email Number " + (i + 1));
-                System.out.println("Subject: " + message.getSubject());
-                label.append("\n" +"Subject: " + message.getSubject());
 
-                //wycięcie nieportrzebnych znaków
+                //wycięcie nieportrzebnych znaków  /////////////////////////////////////////
                 String emailFrom = Arrays.toString(message.getFrom());
-//                int index = emailFrom.indexOf('<');
-//                int lastindex = emailFrom.indexOf('>');
-//                emailFrom = emailFrom.substring(index + 1,lastindex);
+                String s = emailFrom;
+                Matcher m = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(s);
+                while (m.find()) {
+                    System.out.println(m.group());
+                    emailFrom = m.group();
+                }
+                /////////////////////////////////////////////////////////////////////////////////
 
                 //dodanie do labela i wyświetlenie w konsoli
                 label.append("\n" +"From: " + emailFrom);
                 System.out.println("From: " + emailFrom);
 
 
+                System.out.println("Subject: " + message.getSubject());
+                label.append("\n" +"Subject: " + message.getSubject());
+
                 String contentType = message.getContentType();
                 String messageContent = "";
+
+
                 if (contentType.contains("multipart")) {
                     Multipart multiPart = (Multipart) message.getContent();
                     int numberOfParts = multiPart.getCount();
                     for (int partCount = 0; partCount < numberOfParts; partCount++) {
                         MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
                         messageContent = part.getContent().toString();
+
                     }
                 }
                 else if (contentType.contains("text/plain")
@@ -68,19 +83,20 @@ public class ReceiveMail {
                     }
                 }
 
+                /////////////////////////
+                Document doc1 = Jsoup.parse(messageContent);
+                String text = doc1.body().text();
+                System.out.println(text);
+                ////////////////////////
 
-                String emailtext = messageContent;
-//                int indexText = emailtext.indexOf("0");
-//                int lastindexText = emailtext.indexOf(emailtext.length());
-//                emailtext = emailtext.substring(indexText + 1,lastindexText-1);
+                String emailtext = text;
+
 
                 System.out.println("Text: " + emailtext);
-                label.append("\n" +"Text: " + emailtext);
-                label.append("-----------------------------------------------------------------------------------------------");
+                label.append("\n" +"Text: " + "\n" + emailtext);
+                label.append("\n" + "-----------------------------------------------------------------------------------------------" + "\n");
 
             }
-
-
 
             //5) close the store and folder objects
             emailFolder.close(false);
@@ -90,6 +106,5 @@ public class ReceiveMail {
             e.printStackTrace();
         }
     }
-
 
 }

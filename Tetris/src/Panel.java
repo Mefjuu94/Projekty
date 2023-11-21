@@ -68,7 +68,7 @@ public class Panel extends JPanel implements MouseListener {
                         saved = true;
                     }
                     
-                } catch (IOException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 gb.draw(g2d, this);

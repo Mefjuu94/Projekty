@@ -8,3 +8,9 @@ Szakalaka 150 points: 10 lines
 helo 45 points: 3 lines
 lol 15 points: 1 lines
 handsome 15 points: 1 lines
+Over 15 points: 1 lines
+null 15 points: 1 lines
+loki 15 points: 1 lines
+0 15 points: 1 lines
+null 15 points: 1 lines
+renia 15 points: 1 lines

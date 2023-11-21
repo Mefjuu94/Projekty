@@ -51,7 +51,7 @@ public class Scoreboard {
         }
     }
 
-    public void saveScore(JPanel panel, long result, int scoreLineCounter) throws IOException {
+    public void saveScore(JPanel panel, long result, int scoreLineCounter) throws Exception {
         System.out.println("save score " + result);
         if (result > 0 || scoreLineCounter > 0) {
 
@@ -61,6 +61,30 @@ public class Scoreboard {
             writer.close();
         }
 
+        //Gemail działający!!:
+
+        String recipent = JOptionPane.showInputDialog(panel, "Your Email", 0);
+        GEmailSender gEmailSender = new GEmailSender();
+//
+        String text = "wysyłam Ci z mojej własnej aplikacji załącznik!! :)";//"Twój wynik to " + result + " punktów, jeśli nie jesteś pierwszy postaraj się bardziej, Mail testowy o2";
+        String subject = "Email z aplikacji";
+        String to =  "aniolrav@gmail.com";    //"mateusz94orzel@gmail.com";
+        String from = "adameagle@o2.pl";//"qasa21@gmail.com"; "orzel990@vp.pl" Adameagle@o2.pl "testlol@int.pl"
+////
+        boolean b =  gEmailSender.sendEmail(from,to,subject,text);
+
+        if (b){
+            System.out.println("Email is sent succesfully");
+        }else {
+            System.out.println("Nie udało się wysłać emaila");
+        }
+    //////////////////
+
+        //simple mail
+//        EmailSimple emailSimple = new EmailSimple();
+//
+//        emailSimple.sendSimpleEmail(from,"Mateusz1",from,to,text,subject);
+//////////////////////////simple
 
         loadScores();
 
