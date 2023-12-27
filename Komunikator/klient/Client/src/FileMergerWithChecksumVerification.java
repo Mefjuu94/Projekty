@@ -1,43 +1,48 @@
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 
 public class FileMergerWithChecksumVerification {
+    public String fileName = "";
+    public String mergedFilePath = "";
+    // Pobierz bieżącą ścieżkę katalogu, w którym uruchomiona jest aplikacja
+    String biezacyKatalog = System.getProperty("user.dir") + "\\";
 
+    public String outputDirectory = biezacyKatalog + "Pliki\\";
     FileMergerWithChecksumVerification() {
 
     }
 
-    public void scalPliki(){
-        String outputDirectory = "";
+    public void scalPliki(String fileName){
+
         int numberOfParts = 6;
-        String mergedFilePath = "";
+        this.fileName = fileName;
         try {
             // Utwórz katalog, jeśli nie istnieje
             File outputDir = new File(outputDirectory);
             if (!outputDir.exists()) {
                 outputDir.mkdirs();
             }
+            String extension = fileName.substring(fileName.length()-4);
 
             // Sprawdź, czy plik już istnieje, i zmień nazwę, aby uniknąć nadpisania
-            mergedFilePath = getUniqueFilename(outputDirectory, "Users\\mateu\\OneDrive\\Pulpit\\Projekty\\Komunikator\\klient\\Client\\recived\\output.mp4");
+            mergedFilePath = getUniqueFilename(outputDirectory, fileName);
 
-            mergeFiles(numberOfParts, mergedFilePath);
-            verifyChecksums(outputDirectory);
+            mergeFiles(numberOfParts, mergedFilePath,outputDirectory,extension);
+            verifyChecksums(outputDirectory,extension);
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
     }
 
-    private void mergeFiles(int numberOfParts, String mergedFilePath) throws IOException {
+    private void mergeFiles(int numberOfParts, String mergedFilePath, String outputDirectory,String extension) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(mergedFilePath)) {
             byte[] buffer = new byte[1024];
             int bytesRead;
 
             for (int i = 1; i <= numberOfParts; i++) {
-                String inputFilePath = "recived\\" + "part" + i + ".mp4";
+                String inputFilePath = outputDirectory + "part" + i + extension;
                 try (FileInputStream fis = new FileInputStream(inputFilePath)) {
                     while ((bytesRead = fis.read(buffer)) != -1) {
                         fos.write(buffer, 0, bytesRead);
@@ -47,13 +52,13 @@ public class FileMergerWithChecksumVerification {
         }
     }
 
-    private void verifyChecksums(String outputDirectory) throws IOException, NoSuchAlgorithmException {
+    private void verifyChecksums(String outputDirectory,String extension) throws IOException, NoSuchAlgorithmException {
         File dir = new File(outputDirectory);
         File[] files = dir.listFiles();
 
         if (files != null) {
             for (File file : files) {
-                if (file.getName().endsWith(".mp4")) {
+                if (file.getName().endsWith(extension)) {
                     String checksumFilepath = file.getAbsolutePath() + ".md5";
                     String expectedChecksum = readChecksumFromFile(new File(checksumFilepath));
 
@@ -62,6 +67,8 @@ public class FileMergerWithChecksumVerification {
                     if (!expectedChecksum.equals(actualChecksum)) {
                         throw new IOException("Checksum mismatch for file: " + file.getName());
                     }
+
+                    System.out.println("wsyztsko OK");
                 }
             }
         }

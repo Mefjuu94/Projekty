@@ -4,27 +4,30 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 public class FileSplitterWithChecksum {
-    private String lol = "C:\\Users\\mateu\\Videos\\4K Video Downloader+\\Java Full Course for free ☕.mp4";
-    private String inputVideoPath;// = lol;//"C:\\Users\\mateu\\Videos\\4K Video Downloader+\\Java Swing event handling.mp4";
-    private String outputDirectory;// = "C:\\Users\\mateu\\OneDrive\\Pulpit\\Projekty\\Komunikator\\klient\\Client\\Pliki\\";
+    private String inputVideoPath;
+    private String outputDirectory;
     private int numberOfParts = 6;
     public ArrayList<String> partFilesName = new ArrayList<>();
 
+    // Pobierz bieżącą ścieżkę katalogu, w którym uruchomiona jest aplikacja
+    String biezacyKatalog = System.getProperty("user.dir") + "\\";
+
     FileSplitterWithChecksum(String inputVideoPath) {
         this.inputVideoPath = inputVideoPath;
-        outputDirectory = "C:\\Users\\mateu\\OneDrive\\Pulpit\\Projekty\\Komunikator\\klient\\Client\\Pliki\\";
+        outputDirectory = biezacyKatalog + "Pliki\\";
     }
 
     public void SplitFile(){
+        String extension = inputVideoPath.substring(inputVideoPath.length()-4);
         try {
-            splitVideo(inputVideoPath, outputDirectory, numberOfParts);
+            splitVideo(inputVideoPath, outputDirectory, numberOfParts,extension);
             calculateAndPrintChecksums(outputDirectory);
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
 
-    private void splitVideo(String inputVideoPath, String outputDirectory, int parts) throws IOException, NoSuchAlgorithmException {
+    private void splitVideo(String inputVideoPath, String outputDirectory, int parts,String extension) throws IOException, NoSuchAlgorithmException {
         try (FileInputStream fis = new FileInputStream(inputVideoPath)) {
             File outputDir = new File(outputDirectory);
             if (!outputDir.exists()) {
@@ -38,8 +41,10 @@ public class FileSplitterWithChecksum {
             int bytesRead;
 
             for (int i = 1; i <= parts; i++) {
-                String outputFilePath = outputDirectory + "part" + i + ".mp4";
+                String outputFilePath = outputDirectory + "part" + i + extension;
                 try (FileOutputStream fos = new FileOutputStream(outputFilePath)) {
+                    partFilesName.add("part" + i + extension);
+                    partFilesName.add("part" + i + extension + ".md5");
                     long bytesWritten = 0;
 
                     while (bytesWritten < partSize && (bytesRead = fis.read(buffer)) != -1) {
@@ -51,8 +56,11 @@ public class FileSplitterWithChecksum {
                     String checksum = calculateChecksum(new File(outputFilePath));
                     writeChecksumToFile(outputFilePath, checksum);
                 }
-                System.out.println("część " + i + " gotowa");
+
+                //System.out.println("część " + i + " gotowa");
             }
+
+
         }
     }
 
@@ -90,13 +98,11 @@ public class FileSplitterWithChecksum {
 
         if (files != null) {
             for (File file : files) {
-                partFilesName.add(file.getName());
                 if (file.getName().endsWith(".mp4")) {
                     String checksum = calculateChecksum(file);
                     System.out.println(file.getName() + ": " + checksum);
                 }
             }
         }
-        System.out.println(partFilesName);
     }
 }

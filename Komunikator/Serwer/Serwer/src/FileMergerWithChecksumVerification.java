@@ -12,7 +12,7 @@ public class FileMergerWithChecksumVerification {
 
     }
 
-    public void scalPliki() {
+    public void scalPliki(String filename) {
 
         try {
             // Utwórz katalog, jeśli nie istnieje
@@ -22,7 +22,7 @@ public class FileMergerWithChecksumVerification {
             }
 
             // Sprawdź, czy plik już istnieje, i zmień nazwę, aby uniknąć nadpisania
-            mergedFilePath = getUniqueFilename(outputDirectory, "Users\\mateu\\OneDrive\\Pulpit\\Projekty\\Komunikator\\Serwer\\Serwer\\output.mp4");
+            mergedFilePath = getUniqueFilename(outputDirectory, "Users\\mateu\\OneDrive\\Pulpit\\Projekty\\Komunikator\\Serwer\\Serwer\\" + filename);
 
             mergeFiles(numberOfParts, mergedFilePath);
             verifyChecksums(outputDirectory);

@@ -1,16 +1,24 @@
-import javax.print.attribute.standard.MediaSize;
-import javax.xml.crypto.Data;
+import javax.swing.*;
 import java.io.*;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class ChatServer {
     static List<ClientHandler> clients = new ArrayList<>();
 
     public static void main(String[] args) {
+
+        JFrame frame = new JFrame("serwer");
+        JPanel panel = new JPanel();
+
+        frame.add(panel);
+        frame.setBounds(300, 300, 300, 300);
+        frame.setResizable(false);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+
         try {
             ServerSocket serverSocket = new ServerSocket(9999);
             System.out.println("Serwer nasłuchuje na porcie 9999...");
@@ -44,9 +52,10 @@ public class ChatServer {
     static void broadcastVideo(String VideoBase64) {
         for (ClientHandler client : clients) {
             client.sendVideo(VideoBase64);
-            System.out.println("wysłano video");
+            System.out.println("wysłano video do " + client.username);
         }
     }
+
 }
 
 class ClientHandler extends Thread {
@@ -54,37 +63,28 @@ class ClientHandler extends Thread {
     private BufferedReader reader;
     private PrintWriter writer;
     private InputStream in;
-    private  OutputStream out;
+    private OutputStream out;
     FileOutputStream fileOutputStream;
-    String name;
 
     ClientHandler(Socket socket) {
         this.clientSocket = socket;
-        try{
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            writer = new PrintWriter(socket.getOutputStream(), true);
+        try {
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream(),StandardCharsets.UTF_8));
+            writer = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
             in = new DataInputStream(socket.getInputStream());
+            out = clientSocket.getOutputStream();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    enum STATE{
-        VIDEO,
-        NORMAL
-    }
-
-    STATE state = STATE.NORMAL;
     String username;
-
 
     @Override
     public void run() {
         try {
             username = reader.readLine();
             System.out.println(username + " dołączył do czatu.");
-            int count = 0;
-            int fileCounter = 0;
 
             while (true) {
                 String message = reader.readLine();
@@ -95,7 +95,7 @@ class ClientHandler extends Thread {
                     break;
                 }
 
-                if (message.startsWith("[IMAGE]") ) {
+                if (message.startsWith("[IMAGE]")) {
                     ChatServer.broadcastMessage(username + ": ");
                     // Przesłano obrazek
                     ChatServer.broadcastImage(message.substring(7));
@@ -104,27 +104,44 @@ class ClientHandler extends Thread {
                 }
 
                 if (message.startsWith("[VID]")) {
-
+                    String filename = "";
                     System.out.println("odbieram wideo..");
+
                     ChatServer.broadcastVideo("[VID]");
 
-                    out = clientSocket.getOutputStream();
-                    boolean EndOfVideo = false;
-                    int counter  = 0;
+                    String user = reader.readLine();
+                    System.out.println("kto wysyła: " + user);
+                    ChatServer.broadcastVideo(user);
 
-                    while (!EndOfVideo){
+
+                    filename = reader.readLine();
+                    System.out.println("odbieram i przekazuje n azwę pliku: " + filename);
+                    ChatServer.broadcastVideo(filename);
+
+
+                    int counter = 0;
+
+                    ArrayList<String> pliki = new ArrayList<>();
+
+
+                    while (true) {
                         String nameOfFile = reader.readLine();
                         System.out.println(nameOfFile);
+                        pliki.add(nameOfFile);
                         //do wysyłki
-                        out.write(nameOfFile.getBytes());
-                        out.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                        out.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                        for (ClientHandler client : ChatServer.clients) {
+                            client.out.write(nameOfFile.getBytes());
+                            client.out.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                            client.out.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                        }
 
                         String length = reader.readLine();
                         int lenghtOfFile = Integer.parseInt(length);
-                        out.write(length.getBytes());
-                        out.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                        out.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                        for (ClientHandler client : ChatServer.clients) {
+                            client.out.write(length.getBytes());
+                            client.out.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                            client.out.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                        }
 
                         String daneS = reader.readLine();
                         byte[] dane = Base64.getDecoder().decode(daneS);
@@ -133,34 +150,45 @@ class ClientHandler extends Thread {
                         byte[] data = encodedData.getBytes();
 
                         // Wysyłanie zakodowanych danych do serwera
-                        out.write(data);
-                        out.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                        out.flush(); // wysyła w "pakiecie" wwszystko po kolei
-                        
+                        for (ClientHandler client : ChatServer.clients) {
+                            client.out.write(data);
+                            client.out.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                            client.out.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                        }
+
                         byte[] b = dane;
                         //System.out.println(reader.readLine());
                         // Odczytaj i zapisz plik na dysku
 
                         fileOutputStream = new FileOutputStream(nameOfFile);
-                        fileOutputStream.write(b,0,lenghtOfFile);
+                        fileOutputStream.write(b, 0, lenghtOfFile);
                         fileOutputStream.close();
 
                         System.out.println("zapisałem na dysku plik o nazwie: " + nameOfFile +
-                        " o długości: " + lenghtOfFile);
+                                " o długości: " + lenghtOfFile);
 
-                        counter+=1;
-                        if (counter == 12){
+                        counter += 1;
+                        if (counter == 12) {
                             //tutaj ponownie trzeba wysłać pliki do klientów
                             FileMergerWithChecksumVerification fm = new FileMergerWithChecksumVerification();
-                            fm.scalPliki();
+                            fm.scalPliki(filename);
                             System.out.println("scaliłem pliki");
+
+
+                            /// usunięcie plików cząstkowych ze scalenia
+                            DeleteFiles deleteFiles = new DeleteFiles();
+                            for (String s : pliki) {
+
+                                String pathFromFilesName = s.toString();
+                                System.out.println(pathFromFilesName);
+                                deleteFiles.DeleteFile(pathFromFilesName);
+                            }
+                            //usunięcie głownego pliku scalonego
+                            deleteFiles.DeleteFile(fm.mergedFilePath);
+
                             break;
                         }
-
-
                     }
-
-
 
                 } else {
                     // Przesłano tekst
@@ -173,9 +201,13 @@ class ClientHandler extends Thread {
             }
 
             // Po rozłączeniu usuwamy klienta z listy
-            ChatServer.clients.remove(this);
-            System.out.println(username + " opuścił czat.");
-            clientSocket.close();
+            for (ClientHandler client : ChatServer.clients) {
+                if (!client.isAlive()){
+                    ChatServer.clients.remove(this);
+                    System.out.println(username + " opuścił czat.");
+                    clientSocket.close();
+                }
+            }
         } catch (IOException e) {
             System.out.println(username + " has left the Chat");
         }
