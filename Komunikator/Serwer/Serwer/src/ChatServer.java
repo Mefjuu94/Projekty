@@ -8,6 +8,7 @@ import java.util.*;
 public class ChatServer {
     static List<ClientHandler> clients = new ArrayList<>();
 
+
     public static void main(String[] args) {
 
         JFrame frame = new JFrame("serwer");
@@ -52,7 +53,7 @@ public class ChatServer {
     static void broadcastVideo(String VideoBase64) {
         for (ClientHandler client : clients) {
             client.sendVideo(VideoBase64);
-            System.out.println("wysłano video do " + client.username);
+            //System.out.println("wysłano video do " + client.username);
         }
     }
 
@@ -65,6 +66,11 @@ class ClientHandler extends Thread {
     private InputStream in;
     private OutputStream out;
     FileOutputStream fileOutputStream;
+    int plikiOdebrane = 0;
+
+    boolean zatrzymajPliki = false;
+    boolean zatrzymajimg = false;
+    boolean zatrzymajwiadomosc = false;
 
     ClientHandler(Socket socket) {
         this.clientSocket = socket;
@@ -86,13 +92,13 @@ class ClientHandler extends Thread {
             username = reader.readLine();
             System.out.println(username + " dołączył do czatu.");
 
-            while (true) {
+            while (!zatrzymajwiadomosc) {
                 String message = reader.readLine();
                 if (message == null) {
-                    break;
+                    zatrzymajwiadomosc = true;
                 }
                 if (message.equals("disconnect")) {
-                    break;
+                    clientSocket.close();
                 }
 
                 if (message.startsWith("[IMAGE]")) {
@@ -104,18 +110,20 @@ class ClientHandler extends Thread {
                 }
 
                 if (message.startsWith("[VID]")) {
+                    zatrzymajPliki = false;
                     String filename = "";
                     System.out.println("odbieram wideo..");
 
                     ChatServer.broadcastVideo("[VID]");
+                    System.out.println("WYSŁĄŁEM ZNACZNIK VIDEO");
 
                     String user = reader.readLine();
                     System.out.println("kto wysyła: " + user);
                     ChatServer.broadcastVideo(user);
 
-
                     filename = reader.readLine();
-                    System.out.println("odbieram i przekazuje n azwę pliku: " + filename);
+
+                    System.out.println("odbieram i przekazuje nazwę pliku: " + filename);
                     ChatServer.broadcastVideo(filename);
 
 
@@ -123,8 +131,7 @@ class ClientHandler extends Thread {
 
                     ArrayList<String> pliki = new ArrayList<>();
 
-
-                    while (true) {
+                    while (!zatrzymajPliki) {
                         String nameOfFile = reader.readLine();
                         System.out.println(nameOfFile);
                         pliki.add(nameOfFile);
@@ -174,7 +181,6 @@ class ClientHandler extends Thread {
                             fm.scalPliki(filename);
                             System.out.println("scaliłem pliki");
 
-
                             /// usunięcie plików cząstkowych ze scalenia
                             DeleteFiles deleteFiles = new DeleteFiles();
                             for (String s : pliki) {
@@ -186,7 +192,7 @@ class ClientHandler extends Thread {
                             //usunięcie głownego pliku scalonego
                             deleteFiles.DeleteFile(fm.mergedFilePath);
 
-                            break;
+                            zatrzymajPliki = true;
                         }
                     }
 
@@ -210,6 +216,15 @@ class ClientHandler extends Thread {
             }
         } catch (IOException e) {
             System.out.println(username + " has left the Chat");
+            ChatServer.clients.remove(this);
+            System.out.println(username + " opuścił czat.");
+            System.out.println("pozostało: " + ChatServer.clients.size() + " klientów");
+            try {
+                clientSocket.close();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
         }
     }
 

@@ -1,49 +1,90 @@
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameRecorder;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.text.*;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 
-public class Panel extends JPanel implements KeyListener {
 
-    private JEditorPane chatTextPane;
-    private JTextField messageField;
-    private Socket socket;
-    private String username;
+public class Panel extends JPanel implements KeyListener{
+
+    getMessage getMessage;
+    JEditorPane chatTextPane;
+    JTextField messageField;
+    Socket socket;
+    String username;
     FileSplitterWithChecksum fs;
     String client = "";
-    public String biezacyKatalog = System.getProperty("user.dir") + "\\";
+    String biezacyKatalog = System.getProperty("user.dir") + "\\";
+    boolean gif = false;
 
-    Panel(Socket socket) {
+    boolean zatrzymajwiadomosc = false;
+
+    HTMLEditorKit editorKit = new HTMLEditorKit();
+
+    int WIDTH = 400;
+    int HEIGHT = 300;
+    JFrame frame = new JFrame("Chat Client");
+
+    ArrayList <JLabel> labelsImages = new ArrayList<>();
+    ArrayList <String> baseImages = new ArrayList<>();
+    HTMLDocument htmlDocument;
+
+    LocalDateTime ld = LocalDateTime.now();
+
+    private String STYLESHEET ;
+
+    boolean videoCapture = false;
+
+    Panel(Socket socket) throws IOException {
         this.socket = socket;
         this.createAndShowGUI();
     }
 
-    private void createAndShowGUI() {
+    private void createAndShowGUI() throws IOException {
 
-        JFrame frame = new JFrame("Chat Client");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 300);
-
-        //TODO
-        // - zrbić na górze przycisk do zmiany nasłuchu portu lub wysyłania ip :)
+        frame.setSize(WIDTH, HEIGHT);
 
         chatTextPane = new JEditorPane();
+        chatTextPane.setLayout(new BoxLayout(chatTextPane,BoxLayout.PAGE_AXIS));
         chatTextPane.setEditable(false);
         chatTextPane.setContentType("text/html");
-        chatTextPane.setEditorKit(new HTMLEditorKit());
+        chatTextPane.setEditorKit(editorKit);
+
+        JScrollPane scrollPane = new JScrollPane(chatTextPane);
+
+        messageField = new JTextField();
+        JButton sendMessageButton = new JButton("Wyślij Wiadomość");
+        JButton sendFileButton = new JButton("Wyślij Załącznik");
+        JButton snapshot = new JButton("Take a Screenshot!");
+        JButton recordConversation = new JButton("Record Conversation!");
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new BorderLayout());
+        inputPanel.add(messageField, BorderLayout.CENTER);
+        messageField.addKeyListener(this);
+        inputPanel.add(sendMessageButton, BorderLayout.EAST);
+        inputPanel.add(sendFileButton, BorderLayout.WEST);
+
+        JPanel optionsPanel = new JPanel();
+        optionsPanel.add(snapshot,BorderLayout.NORTH);
+        optionsPanel.add(recordConversation,BorderLayout.CENTER);
+
 
         // Dodaj listenera do obsługi kliknięcia hiperłącza
         chatTextPane.addHyperlinkListener(e -> {
@@ -53,35 +94,117 @@ public class Panel extends JPanel implements KeyListener {
         });
 
 
-        JScrollPane scrollPane = new JScrollPane(chatTextPane);
-
-        messageField = new JTextField();
-        JButton sendMessageButton = new JButton("Wyślij Wiadomość");
-        JButton sendFileButton = new JButton("Wyślij Załącznik");
-
-        JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new BorderLayout());
-        inputPanel.add(messageField, BorderLayout.CENTER);
-        messageField.addKeyListener(this);
-        inputPanel.add(sendMessageButton, BorderLayout.EAST);
-        inputPanel.add(sendFileButton, BorderLayout.WEST);
 
         sendMessageButton.addActionListener(e -> sendMessage(messageField.getText()));
         sendFileButton.addActionListener(e -> sendFile());
+        snapshot.addActionListener(e -> {
+            try {
+                takeSnapshot();
+            } catch (IOException | AWTException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        recordConversation.addActionListener( new ImageRecordingHandler(frame,recordConversation));
 
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
         frame.getContentPane().add(inputPanel, BorderLayout.SOUTH);
+        frame.getContentPane().add(optionsPanel,BorderLayout.NORTH);
 
         this.username = JOptionPane.showInputDialog("Podaj swoją nazwę użytkownika:");
         frame.setTitle("Chat Client - " + username);
 
         System.out.println(biezacyKatalog);
-        this.listen();
 
         frame.setVisible(true);
+        frame.addComponentListener(new ComponentAdapter() {
+                                       @Override
+                                       public void componentResized(ComponentEvent e) {
+                                           super.componentResized(e);
+
+                                           int size = (frame.getWidth() + frame.getHeight()) / 50;
+
+                                           if (size < 15) {
+                                               size = 15;
+                                           }
+                                           String fontSize = String.valueOf(size);
+
+                                           htmlDocument = (HTMLDocument) chatTextPane.getDocument();
+                                           Font font = new Font("Serif", Font.BOLD, size);
+                                           int imagesize = (frame.getWidth()+frame.getHeight())/7;
+
+                                           STYLESHEET = "body { margin-top: 0; margin-bottom: 0; margin-left: 0; margin-right: 0;"
+                                                   + " font-family: %s; font-size: %dpt;  }"
+                                                   + "a, p, li { margin-top: 0; margin-bottom: 0; margin-left: 0;"
+                                                   + " margin-right: 0; font-family: %s; font-size: %dpt;  }"
+                                                   + "img {max-width: 100%%; height: auto; max-height: %dpt; }";
+
+                                           // Dodaj dane obrazów base64 do listy
+                                           // Ustawianie preferowanego rozmiaru JLabel (rozmiar obrazka)
+                                           for (int i = 0; i < labelsImages.size(); i++) {
+
+                                               // Dekodowanie Base64 do obrazka
+                                               ImageIcon imageIcon = new ImageIcon(Base64.getDecoder().decode(baseImages.get(i)));
+
+                                               // Dostosowanie obrazka do żądanych rozmiarów
+                                               Image scaledImage = imageIcon.getImage().getScaledInstance(imagesize, imagesize,Image.SCALE_FAST);
+                                               ImageIcon scaledImageIcon = new ImageIcon(scaledImage);
+
+                                               labelsImages.get(i).setPreferredSize(new Dimension(imagesize, imagesize));
+                                               labelsImages.get(i).setIcon(scaledImageIcon);
+                                           }
+                                           // większ rozmiar czcionki i obrazów
+                                           setHtmlFont(htmlDocument, font,imagesize);
+                                           chatTextPane.setCaretPosition(htmlDocument.getLength());
+                                       }
+                                   }
+        );
+
+        getMessage = new getMessage(socket,this);
     }
 
+
+    private void takeSnapshot() throws IOException, AWTException {
+        String DataTime = ld.toString().substring(0,16);
+        String formatedDataTime =DataTime.replace(":","_");
+        System.out.println(formatedDataTime);
+
+        try {
+            Robot robot = new Robot();
+            Container panel = frame.getContentPane();
+            Point pos = panel.getLocationOnScreen();
+            Rectangle bounds = panel.getBounds();
+            bounds.x = pos.x;
+            bounds.y = pos.y;
+            bounds.x -= 1;
+            bounds.y -= 1;
+            bounds.width += 2;
+            bounds.height += 2;
+            BufferedImage snapShot = robot.createScreenCapture(bounds);
+            ImageIO.write(snapShot, "png", new File("Screenshots\\Snap" + formatedDataTime + ".png"));
+            System.out.println("Screenshot Captured!");
+        } catch (Exception ex) {
+            System.out.println("capture screenshot failed");
+            ex.printStackTrace();
+        }
+
+    }
+
+    ///zmiania czcionki
+    private void setHtmlFont(HTMLDocument doc, Font font, int imageMaxHeight) {
+        String stylesheet = String.format(STYLESHEET, font.getName(), font.getSize(), font.getName(), font.getSize(), imageMaxHeight);
+
+        try {
+            doc.getStyleSheet().loadRules(new StringReader(stylesheet), null);
+        } catch (IOException e) {
+            // Obsługa błędu
+            throw new IllegalStateException(e);
+        }
+    }
+
+
+    //stworzenie linku
     private void openLink(String url) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
@@ -95,141 +218,12 @@ public class Panel extends JPanel implements KeyListener {
         }
     }
 
-    private void listen() {
-        try {
-            PrintWriter writer = new PrintWriter(socket.getOutputStream(),true,StandardCharsets.UTF_8);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(),StandardCharsets.UTF_8));
 
-            writer.println(username);
-
-            new Thread(() -> {
-                try {
-
-                    ArrayList<String> namesOfFilesToMerge = new ArrayList<>();
-                    while (true) {
-                        String message = reader.readLine();
-
-                        boolean ifVideo = false;
-                        if (message == null) {
-                            break;
-                        }
-
-                        if (message.startsWith("[VID]")) {
-                            ifVideo = true; /// żeby nie dodawało za końcu po przesłaniu pliku linijki z "[vid]"
-
-                            FileMergerWithChecksumVerification fm = new FileMergerWithChecksumVerification();
-                            client = message.substring(5,message.length());
-
-                            String user = reader.readLine();
-                            System.out.println("od kogo plik? -> " + user);
-
-                            String File = reader.readLine();
-                            String FileName = File.replace(" ","_");
-                            System.out.println("odbieram plik " + FileName);
-
-                            int numberOfFiles = 0;
-
-                            while (true) {
-                                String nameOfFile = reader.readLine();
-                                System.out.println(nameOfFile);
-                                //do wysyłki
-
-                                String length = reader.readLine();
-                                int lenghtOfFile = Integer.parseInt(length);
-
-                                String daneS = reader.readLine();
-                                byte[] dane = Base64.getDecoder().decode(daneS);
-
-                                byte[] b = dane;
-                                //System.out.println(reader.readLine());
-                                // Odczytaj i zapisz plik na dysku
-
-
-                                FileOutputStream fileOutputStream = new FileOutputStream(biezacyKatalog + "Pliki\\" + nameOfFile);
-                                fileOutputStream.write(b, 0, lenghtOfFile);
-                                fileOutputStream.close();
-
-                                System.out.println(" odebrałem i zapisałem na dysku plik o nazwie: " + nameOfFile +
-                                        " o długości: " + lenghtOfFile + " bajtów");
-                                numberOfFiles += 1;
-                                namesOfFilesToMerge.add(nameOfFile);
-                                if (numberOfFiles == 12) {
-
-                                    fm.scalPliki(FileName);
-                                    System.out.println("scaliłem pliki");
-                                    break;
-                                }
-
-                            }
-                            File file = new File(fm.mergedFilePath);
-                            //wypisz na ekran
-                            appendToChatTextPane(user + " sent File:");
-                            //dodaj do hyperlink
-                            appendVideoLink(file,fm.fileName);
-
-                            // usuń zbędne party po scaleniu!
-                            System.out.println(">>>>>>>>>>>>>CHCE USUNAC CZESCI PRZYJETE<<<<<<<<<<<<<<<<<");
-                            DeleteFiles deleteFiles = new DeleteFiles();
-                            for (String pathFromFilesName : namesOfFilesToMerge) {
-                                deleteFiles.DeleteFile(biezacyKatalog + "Pliki\\" + pathFromFilesName);
-                                System.out.println("ODEBRANA CZESC PLIKU " + pathFromFilesName + " USUNIETA");
-                            }
-                            System.out.println(">>>>>>>>>>>>>USUNĄŁEM CZESCI PRZYJETE<<<<<<<<<<<<<<<<<");
-
-                        }
-
-                        if (message.startsWith("[IMAGE]")) {
-                            System.out.println("img");
-                            appendToChatTextPane("sent image: ");
-                            appendToChatTextPane("");
-                            displayImage(message.substring(7));
-                            String blankMessage = reader.readLine(); // żeby nie wyświetlało w formie tekstowej obrazka
-                        } else {
-                            if (!ifVideo ) {
-                                System.out.println("wiadomosc tekstowa..");
-                                System.out.println(message);
-                                appendToChatTextPane(message.toString());
-                            }
-                            ifVideo = false;
-
-                        }
-                    }
-                } catch (IOException ex) {
-                    System.out.println("stracono połączenie!");
-                    ex.printStackTrace();
-                } catch (BadLocationException e) {
-                    throw new RuntimeException(e);
-                }
-            }).start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void appendToChatTextPane(String message) {
-        HTMLDocument doc = (HTMLDocument) chatTextPane.getDocument();
-        try {
-            // Sprawdź, czy treść istnieje w dokumencie
-            if (doc.getLength() > 0) {
-                // Dodaj nową linię przed nową wiadomością
-                doc.insertAfterEnd(doc.getCharacterElement(doc.getLength() - 1), "<br>");
-            }
-
-            // Dodaj wiadomość do dokumentu HTML
-            doc.insertAfterEnd(doc.getCharacterElement(doc.getLength()), message);
-        } catch (BadLocationException | IOException e) {
-            e.printStackTrace();
-        }
-
-        // Scrolluj do dołu
-        chatTextPane.setCaretPosition(doc.getLength());
-
-    }
-
+    //wyslij tekstową wiadomosc
     private void sendMessage(String message) {
         PrintWriter writer;
         try {
-            writer = new PrintWriter(socket.getOutputStream(), true,StandardCharsets.UTF_8);
+            writer = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
             writer.println(message);
             messageField.setText("");
         } catch (IOException e) {
@@ -237,6 +231,7 @@ public class Panel extends JPanel implements KeyListener {
         }
     }
 
+    //wyślij plik
     private void sendFile() {
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showOpenDialog(null);
@@ -339,9 +334,9 @@ public class Panel extends JPanel implements KeyListener {
         }
     }
 
-    private void usunCzesci(boolean wyslano){
+    private void usunCzesci(boolean wyslano) {
 
-        if (wyslano){
+        if (wyslano) {
             DeleteFiles deleteFiles = new DeleteFiles();
             for (int i = 0; i < fs.partFilesName.size(); i++) {
                 deleteFiles.DeleteFile(fs.partFilesName.get(i));
@@ -352,46 +347,6 @@ public class Panel extends JPanel implements KeyListener {
 
     }
 
-    private void displayImage(String base64Image) {
-
-        ImageIcon imageIcon = new ImageIcon(Base64.getDecoder().decode(base64Image));
-
-        // Tworzymy obrazek jako ikonę
-        Icon icon = new ImageIcon(imageIcon.getImage());
-
-        // Pobieramy dokument
-        StyledDocument doc = (StyledDocument) chatTextPane.getDocument();
-
-        // Tworzymy ikonę wstawianą jako komponent
-        SimpleAttributeSet attrs = new SimpleAttributeSet();
-        StyleConstants.setComponent(attrs, new JLabel(icon));
-
-        // Dodajemy ikonę do dokumentu
-        try {
-            doc.insertString(doc.getLength(), " ", attrs); // Wstawiamy spację jako tekst z atrybutami
-            doc.insertString(doc.getLength(), "\n", null);
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void appendVideoLink(File filePath, String videoFileName) throws BadLocationException {
-
-        HTMLDocument doc = (HTMLDocument) chatTextPane.getDocument();
-        try {
-            // Sprawdź, czy treść istnieje w dokumencie
-            if (doc.getLength() > 0) {
-                // Dodaj nową linię przed nową wiadomością
-                doc.insertAfterEnd(doc.getCharacterElement(doc.getLength() - 1), "<br><a href='" + "file://"
-                        + filePath.getAbsolutePath() + "'>OTWÓRZ PLIK</a>" + " o nazwie " + videoFileName ); //
-            }
-
-            // Dodaj wiadomość do dokumentu HTML
-            doc.insertAfterEnd(doc.getCharacterElement(doc.getLength()),"");
-        } catch (BadLocationException | IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void PartFiles(String selectedfile) {
 
@@ -399,6 +354,79 @@ public class Panel extends JPanel implements KeyListener {
         fs.SplitFile();
     }
 
+    private void sendGIF(byte[] source) throws IOException {
+        String base64Image = Base64.getEncoder().encodeToString(source); //base 64 koduje plik obrazu jpg,png,gif do stringa
+        //przekształca tablicwe bajtów w stringa
+
+        OutputStream outputStream = socket.getOutputStream();
+        outputStream.write("[IMAGE]".getBytes()); //wysłanie sygnału, że przesyła obraz
+        outputStream.write(base64Image.getBytes()); // wysłanie zakodowanego obrazu w stringu
+        outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+        outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
+    }
+
+    private void checkIfmessagehaveEmoji(String message) {
+
+        ///zaskoczenie szok
+        if (message.contains(":o") || message.contains(":O")) {
+            Path src = Path.of("gifs/yoyo and cici monkey-emojigg-pack/8191-yoyomonkey-scared.gif");
+            gif = true;
+            byte[] imgSource = new byte[0];
+            try {
+                imgSource = Files.readAllBytes(src);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                sendGIF(imgSource);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            messageField.setText("");
+        } else {
+            gif = false;
+        }
+
+        // kisss
+        if (message.contains(":*") || message.contains(";*")) {
+            Path src = Path.of("gifs/yoyo and cici monkey-emojigg-pack/4470-yoyomonkey-kiss.gif");
+            gif = true;
+            byte[] imgSource = new byte[0];
+            try {
+                imgSource = Files.readAllBytes(src);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                sendGIF(imgSource);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            messageField.setText("");
+        } else {
+            gif = false;
+        }
+
+        //smile
+        if (message.contains(":d") || message.contains(";D") || message.contains(":D") || message.contains(";d")) {
+            Path src = Path.of("gifs/yoyo and cici monkey-emojigg-pack/9369-yoyomonkey-thumbsup.gif");
+            gif = true;
+            byte[] imgSource = new byte[0];
+            try {
+                imgSource = Files.readAllBytes(src);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                sendGIF(imgSource);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            messageField.setText("");
+        } else {
+            gif = false;
+        }
+    }
 
 
     @Override
@@ -413,16 +441,21 @@ public class Panel extends JPanel implements KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
             if (messageField.getText().length() > 0) {
-                sendMessage(messageField.getText());
-            }else {
-                System.out.println("write something to send message!");
+                String message = messageField.getText();
+
+                checkIfmessagehaveEmoji(message);
+                if (!gif) {
+                    sendMessage(messageField.getText());
+                } else {
+                    System.out.println("write something to send message!");
+                }
             }
-        }
 
-        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-           // System.out.println("testKEY");
+            if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                // System.out.println("testKEY");
 
 
+            }
         }
     }
 
@@ -430,4 +463,6 @@ public class Panel extends JPanel implements KeyListener {
     public void keyReleased(KeyEvent e) {
 
     }
+
+
 }
