@@ -52,7 +52,7 @@ public class ImageRecordingHandler {
 
         recordingThread = new Thread(() -> {
             while (isRecording) {
-                recordFrame(frame);
+                recordFrame();
             }
         });
 
@@ -87,10 +87,10 @@ public class ImageRecordingHandler {
     }
 
 
-    private void recordFrame(JFrame Myframe) {
-        JFrame frame = Myframe;
+    private void recordFrame() {
         BufferedImage image = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
         frame.paint(image.getGraphics());
+        frame.repaint();
 
         try {
             Thread.sleep(50); // 10 = Nagrywanie co 100 milisekund (10 klatek na sekundę) - 50 = 20kl/s ->1000/20 = 50
@@ -98,7 +98,7 @@ public class ImageRecordingHandler {
             ImageIO.write(image, "jpeg", outputFile);
             frameNumber++;
             imageFiles.add(outputFile.getName());
-            frame.repaint();
+            frame.repaint(); //-> powodowało artefakty podczas nagrywania
 
         } catch (IOException e) {
             e.printStackTrace();

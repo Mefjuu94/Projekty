@@ -1,6 +1,3 @@
-
-import com.sun.media.ui.ToolTip;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -20,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 
 
-public class Panel extends JPanel implements KeyListener, ActionListener{
+public class Panel extends JPanel implements KeyListener, ActionListener {
 
     getMessage getMessage;
     JEditorPane chatTextPane;
@@ -46,10 +43,9 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
 
     LocalDateTime ld = LocalDateTime.now();
 
-
     boolean defaultVideoname = true;
     String prevideoName = "video";
-    String videoname  = prevideoName;
+    String videoname = prevideoName;
     String pathVideoName = "";
     String pathImeges = "capture\\";
 
@@ -61,23 +57,22 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
     int HEIGHT = 300;
     JFrame frame = new JFrame("Chat Client");
 
-    ImageRecordingHandler imageRecordingHandler = new ImageRecordingHandler(frame,this,videoname,pathImeges);
+    ImageRecordingHandler imageRecordingHandler = new ImageRecordingHandler(frame, this, videoname, pathImeges);
 
-    ArrayList <JLabel> labelsImages = new ArrayList<>();
-    ArrayList <String> baseImages = new ArrayList<>();
+    ArrayList<JLabel> labelsImages = new ArrayList<>();
+    ArrayList<String> baseImages = new ArrayList<>();
     HTMLDocument htmlDocument;
 
-    private String STYLESHEET ;
+    private String STYLESHEET;
 
     Panel(Socket socket) throws IOException {
         this.socket = socket;
-        this.createAndShowGUI(videoname);
+        this.createAndShowGUI();
 
         listenThread.start();
-
     }
 
-    private void createAndShowGUI(String videoname) throws IOException {
+    private void createAndShowGUI() throws IOException {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(WIDTH, HEIGHT);
@@ -187,19 +182,21 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
     }
 
 
-
-    private void setSizeOfComponents(){
+    private void setSizeOfComponents() {
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
 
                 int size = (frame.getWidth() + frame.getHeight()) / 50;
+                //// zabespieczenie przed błędem "IllegalArgumentException: Component 1 height should be a multiple of 2 for colorspace: YUV420J"
+                int newHeight = (frame.getHeight() / 2) * 2;
+                HEIGHT = newHeight;
+                System.out.println(HEIGHT);
 
                 if (size < 15) {
                     size = 15;
                 }
-                String fontSize = String.valueOf(size);
 
                 htmlDocument = (HTMLDocument) chatTextPane.getDocument();
                 Font font = new Font("Serif", Font.BOLD, size);
@@ -235,8 +232,8 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
 
 
     private void takeSnapshot() throws IOException, AWTException {
-        String DataTime = ld.toString().substring(0,16);
-        String formatedDataTime =DataTime.replace(":","_");
+        String DataTime = ld.toString().substring(0, 16);
+        String formatedDataTime = DataTime.replace(":", "_");
         System.out.println(formatedDataTime);
 
         try {
@@ -303,7 +300,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
     //wyślij plik
     private void sendFile() {
 
-        Runnable sendMeaasgeRun = ()-> {
+        Runnable sendMeaasgeRun = () -> {
             JFileChooser fileChooser = new JFileChooser();
             int result = fileChooser.showOpenDialog(frame);
 
@@ -541,7 +538,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        if (e.getSource() == showScreenFolder){
+        if (e.getSource() == showScreenFolder) {
             String userDir = biezacyKatalog + "Screenshots\\";
             try {
                 Desktop.getDesktop().open(new File(userDir));
@@ -551,7 +548,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
             }
         }
 
-        if (e.getSource() == showvideoFolder){
+        if (e.getSource() == showvideoFolder) {
             String userDir = pathVideoName;
             if (pathVideoName.length() < 2) {
                 userDir = biezacyKatalog;
@@ -565,7 +562,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
         }
 
 
-        if (e.getSource() == changeSaveFolder){
+        if (e.getSource() == changeSaveFolder) {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int result = fileChooser.showOpenDialog(frame);
@@ -580,24 +577,26 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
         }
 
 
-        if (e.getSource() == recordConversation){
+        if (e.getSource() == recordConversation) {
             isRecording = !isRecording;
 
             if (isRecording) {
                 System.out.println("record! videoname: " + videoname);
 
                 recordConversation.setText("Stop Recording!");
-                imageRecordingHandler = new ImageRecordingHandler(frame,this,videoname,pathImeges);
+                frame.setResizable(false);
+                imageRecordingHandler = new ImageRecordingHandler(frame, this, videoname, pathImeges);
                 imageRecordingHandler.record(isRecording);
-            }else {
+            } else {
                 System.out.println("nie nagrywam!");
                 recordConversation.setText("Start Recording!");
                 imageRecordingHandler.record(isRecording);
+                frame.setResizable(true);
             }
 
         }
 
-        if (e.getSource() == changeNameOfVideo){
+        if (e.getSource() == changeNameOfVideo) {
             String t = ld.toString();
             String ldt = t.substring(0, 16).replace(":", "_");
 
@@ -611,9 +610,9 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
             defaultVideoname = !defaultVideoname;
         }
 
-        if (e.getSource() == helpStore){
+        if (e.getSource() == helpStore) {
             System.out.println("help");
-            JOptionPane.showMessageDialog(frame,"pytaj na www.google.pl");
+            JOptionPane.showMessageDialog(frame, "pytaj na www.google.pl");
         }
 
     }
