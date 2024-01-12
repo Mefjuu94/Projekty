@@ -1,14 +1,12 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImageRecordingHandler implements ActionListener {
+public class ImageRecordingHandler {
 
     private boolean isRecording = false;
     private Thread recordingThread;
@@ -16,25 +14,33 @@ public class ImageRecordingHandler implements ActionListener {
     JFrame frame;
     List<String> imageFiles = new ArrayList<>();
     public Thread BuildingVideoThread;
-    JButton buttonStartStop;
+    Panel panel;
 
-    public ImageRecordingHandler(JFrame frame, JButton buttonStartStop) {
+    String videoname ;
+    String pathImeges ;
+
+    public ImageRecordingHandler(JFrame frame, Panel panel,String videoname,String pathImages) {
         this.frame = frame;
-        this.buttonStartStop = buttonStartStop;
+        this.videoname = videoname;
+        this.panel = panel;
+        this.pathImeges = pathImages;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    public void record(boolean isRecording) {
         try {
-            toggleRecording(buttonStartStop);
+            toggleRecording(isRecording);
         } catch (InterruptedException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    public void toggleRecording(JButton buttonStartStop) throws InterruptedException {
+
+
+    public void toggleRecording(boolean buttonStartStop) throws InterruptedException {
         if (isRecording) {
             stopRecording();
+            BuildingVideoThread.join();
+            deleteImages(imageFiles);
         } else {
             startRecording();
         }
@@ -45,7 +51,6 @@ public class ImageRecordingHandler implements ActionListener {
         System.out.println("Rozpoczęto nagrywanie.");
 
         recordingThread = new Thread(() -> {
-            buttonStartStop.setText("Stop recording!");
             while (isRecording) {
                 recordFrame(frame);
             }
@@ -54,23 +59,33 @@ public class ImageRecordingHandler implements ActionListener {
         recordingThread.start();
     }
 
-    private void stopRecording() throws InterruptedException {
-        BuildingVideoThread = new Thread(() -> {
-            VideoBuilder videoBuilder = new VideoBuilder(frame.getWidth(),frame.getHeight(),imageFiles,frame);
-        });
+    private void stopRecording() {
 
-        isRecording = false;
-        buttonStartStop.setText("Start Recording!");
-        try {
-            recordingThread.join(); // Poczekaj na zakończenie wątku nagrywania
-            BuildingVideoThread.start();
-        } catch (
-                InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Zakończono nagrywanie.");
+        Runnable buildVideoThreadRun = () -> {
+
+            isRecording = false;
+            try {
+                recordingThread.join(); // Poczekaj na zakończenie wątku nagrywania
+            } catch (
+                    InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Zakończono nagrywanie.");
+
+            try {
+                System.out.println(videoname + " przed kodeikiem");
+                JCodecPNGtoMP4 codecPNGtoMP4 = new JCodecPNGtoMP4(videoname, pathImeges);
+                codecPNGtoMP4.makeVideo();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        };
+        BuildingVideoThread = new Thread(buildVideoThreadRun);
+        BuildingVideoThread.start();
 
     }
+
 
     private void recordFrame(JFrame Myframe) {
         JFrame frame = Myframe;
@@ -78,7 +93,7 @@ public class ImageRecordingHandler implements ActionListener {
         frame.paint(image.getGraphics());
 
         try {
-            Thread.sleep(100); // 10 = Nagrywanie co 100 milisekund (10 klatek na sekundę)
+            Thread.sleep(50); // 10 = Nagrywanie co 100 milisekund (10 klatek na sekundę) - 50 = 20kl/s ->1000/20 = 50
             File outputFile = new File("capture\\frame_" + frameNumber + ".jpg");
             ImageIO.write(image, "jpeg", outputFile);
             frameNumber++;
@@ -93,5 +108,18 @@ public class ImageRecordingHandler implements ActionListener {
     }
 
 
+    private void deleteImages(List<String> imageFiles) {
+        System.out.println("Usuwanie zdjęć po zakończeniu nagrywania.");
+        for (String imageName : imageFiles) {
+            File imageFile = new File("capture", imageName);
+            if (imageFile.exists()) {
+                if (!imageFile.delete()) {
+                    System.out.println("Nie można usunąć: " + imageName);
+                }
+            }
+        }
+        System.out.println("zakończono proces usuwania klatek");
+        JOptionPane.showMessageDialog(frame, "Wideo zostało zapisane.");
+    }
 
 }

@@ -2,24 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="17805235-990b-4b91-9d27-7d031d406f76" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/bytedeco_javacv.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/openimaj_xuggle_video.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ImageRecordingHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/VideoBuilder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/getMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../Transfer/Reciver/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../Transfer/Reciver/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../Transfer/Reciver/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../Transfer/Reciver/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../Transfer/Reciver/untitled/untitled.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Serwer/Serwer/out/production/Serwer/ChatServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../Serwer/Serwer/out/production/Serwer/ChatServer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Serwer/Serwer/out/production/Serwer/ClientHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../Serwer/Serwer/out/production/Serwer/ClientHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Serwer/Serwer/src/ChatServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Serwer/Serwer/src/ChatServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/boofcv_jcodec.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/javax_media_jmf.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/JCodecPNGtoMP4.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/bytedeco_javacv.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Client.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Client.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pliki/1.mp3" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Client/Panel.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Client/Panel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ImageRecordingHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ImageRecordingHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Panel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/VideoBuilder.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

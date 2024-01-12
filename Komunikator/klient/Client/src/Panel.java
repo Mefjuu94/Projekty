@@ -1,5 +1,5 @@
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameRecorder;
+
+import com.sun.media.ui.ToolTip;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 
 
-public class Panel extends JPanel implements KeyListener{
+public class Panel extends JPanel implements KeyListener, ActionListener{
 
     getMessage getMessage;
     JEditorPane chatTextPane;
@@ -31,6 +31,27 @@ public class Panel extends JPanel implements KeyListener{
     String client = "";
     String biezacyKatalog = System.getProperty("user.dir") + "\\";
     boolean gif = false;
+    Thread listenThread = new Thread();
+    Thread fileSendingThread = new Thread();
+
+    JMenuBar menuBar;
+    public JMenuItem changeSaveFolder;
+    public JMenuItem changeNameOfVideo;
+    JMenuItem showScreenFolder = new JMenuItem("Pokaż uchwycone screeny");
+    JMenuItem showvideoFolder = new JMenuItem("Pokaż nagrane video");
+
+    public JButton recordConversation = new JButton("Record Conversation!");
+    JMenuItem helpStore = new JMenuItem("co robić");
+    boolean isRecording = false;
+
+    LocalDateTime ld = LocalDateTime.now();
+
+
+    boolean defaultVideoname = true;
+    String prevideoName = "video";
+    String videoname  = prevideoName;
+    String pathVideoName = "";
+    String pathImeges = "capture\\";
 
     boolean zatrzymajwiadomosc = false;
 
@@ -40,28 +61,59 @@ public class Panel extends JPanel implements KeyListener{
     int HEIGHT = 300;
     JFrame frame = new JFrame("Chat Client");
 
+    ImageRecordingHandler imageRecordingHandler = new ImageRecordingHandler(frame,this,videoname,pathImeges);
+
     ArrayList <JLabel> labelsImages = new ArrayList<>();
     ArrayList <String> baseImages = new ArrayList<>();
     HTMLDocument htmlDocument;
 
-    LocalDateTime ld = LocalDateTime.now();
-
     private String STYLESHEET ;
-
-    boolean videoCapture = false;
 
     Panel(Socket socket) throws IOException {
         this.socket = socket;
-        this.createAndShowGUI();
+        this.createAndShowGUI(videoname);
+
+        listenThread.start();
+
     }
 
-    private void createAndShowGUI() throws IOException {
+    private void createAndShowGUI(String videoname) throws IOException {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(WIDTH, HEIGHT);
 
+        ////////MENU////////
+        menuBar = new JMenuBar();
+
+        JMenu fileMenu = new JMenu("Plik");
+        fileMenu.add(showScreenFolder);
+        showScreenFolder.addActionListener(this);
+        fileMenu.add(showvideoFolder);
+        showvideoFolder.addActionListener(this);
+
+
+        JMenu edit = new JMenu("Edycja");
+        changeSaveFolder = new JMenuItem("zmień folder zapisu");
+        changeSaveFolder.addActionListener(this);
+        changeNameOfVideo = new JMenuItem("zmień nazwę video");
+        changeNameOfVideo.addActionListener(this);
+        edit.add(changeSaveFolder);
+        edit.add(changeNameOfVideo);
+
+        JMenu help = new JMenu("Pomoc");
+        help.add(helpStore);
+        helpStore.addActionListener(this);
+
+        menuBar.add(fileMenu);
+        menuBar.add(edit);
+        menuBar.add(help);
+
+        frame.setJMenuBar(menuBar);
+        ///////////////////koniec menu
+
+        ////////////////chat text
         chatTextPane = new JEditorPane();
-        chatTextPane.setLayout(new BoxLayout(chatTextPane,BoxLayout.PAGE_AXIS));
+        chatTextPane.setLayout(new BoxLayout(chatTextPane, BoxLayout.PAGE_AXIS));
         chatTextPane.setEditable(false);
         chatTextPane.setContentType("text/html");
         chatTextPane.setEditorKit(editorKit);
@@ -72,7 +124,7 @@ public class Panel extends JPanel implements KeyListener{
         JButton sendMessageButton = new JButton("Wyślij Wiadomość");
         JButton sendFileButton = new JButton("Wyślij Załącznik");
         JButton snapshot = new JButton("Take a Screenshot!");
-        JButton recordConversation = new JButton("Record Conversation!");
+
 
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new BorderLayout());
@@ -82,8 +134,8 @@ public class Panel extends JPanel implements KeyListener{
         inputPanel.add(sendFileButton, BorderLayout.WEST);
 
         JPanel optionsPanel = new JPanel();
-        optionsPanel.add(snapshot,BorderLayout.NORTH);
-        optionsPanel.add(recordConversation,BorderLayout.CENTER);
+        optionsPanel.add(snapshot, BorderLayout.NORTH);
+        optionsPanel.add(recordConversation, BorderLayout.CENTER);
 
 
         // Dodaj listenera do obsługi kliknięcia hiperłącza
@@ -92,8 +144,6 @@ public class Panel extends JPanel implements KeyListener{
                 openLink(e.getURL().toString());
             }
         });
-
-
 
         sendMessageButton.addActionListener(e -> sendMessage(messageField.getText()));
         sendFileButton.addActionListener(e -> sendFile());
@@ -104,64 +154,83 @@ public class Panel extends JPanel implements KeyListener{
                 throw new RuntimeException(ex);
             }
         });
+        recordConversation.addActionListener(this);
 
-        recordConversation.addActionListener( new ImageRecordingHandler(frame,recordConversation));
+        //recordConversation.addActionListener(new ImageRecordingHandler(frame, recordConversation,this,videoname,pathImeges));
 
+        // ustawienie kontentu
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
         frame.getContentPane().add(inputPanel, BorderLayout.SOUTH);
-        frame.getContentPane().add(optionsPanel,BorderLayout.NORTH);
+        frame.getContentPane().add(optionsPanel, BorderLayout.NORTH);
+        ///////////////////////////////////////////////////////
 
         this.username = JOptionPane.showInputDialog("Podaj swoją nazwę użytkownika:");
         frame.setTitle("Chat Client - " + username);
 
-        System.out.println(biezacyKatalog);
-
         frame.setVisible(true);
+
+
+        setSizeOfComponents(); // zmiana wielkosci komponentow
+
+        // wątek nasłuchu wadomosci
+        Runnable listenMessages = () -> {
+
+            try {
+                getMessage = new getMessage(socket, this);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+        listenThread = new Thread(listenMessages);
+
+    }
+
+
+
+    private void setSizeOfComponents(){
         frame.addComponentListener(new ComponentAdapter() {
-                                       @Override
-                                       public void componentResized(ComponentEvent e) {
-                                           super.componentResized(e);
+            @Override
+            public void componentResized(ComponentEvent e) {
+                super.componentResized(e);
 
-                                           int size = (frame.getWidth() + frame.getHeight()) / 50;
+                int size = (frame.getWidth() + frame.getHeight()) / 50;
 
-                                           if (size < 15) {
-                                               size = 15;
-                                           }
-                                           String fontSize = String.valueOf(size);
+                if (size < 15) {
+                    size = 15;
+                }
+                String fontSize = String.valueOf(size);
 
-                                           htmlDocument = (HTMLDocument) chatTextPane.getDocument();
-                                           Font font = new Font("Serif", Font.BOLD, size);
-                                           int imagesize = (frame.getWidth()+frame.getHeight())/7;
+                htmlDocument = (HTMLDocument) chatTextPane.getDocument();
+                Font font = new Font("Serif", Font.BOLD, size);
+                int imagesize = (frame.getWidth() + frame.getHeight()) / 7;
 
-                                           STYLESHEET = "body { margin-top: 0; margin-bottom: 0; margin-left: 0; margin-right: 0;"
-                                                   + " font-family: %s; font-size: %dpt;  }"
-                                                   + "a, p, li { margin-top: 0; margin-bottom: 0; margin-left: 0;"
-                                                   + " margin-right: 0; font-family: %s; font-size: %dpt;  }"
-                                                   + "img {max-width: 100%%; height: auto; max-height: %dpt; }";
+                STYLESHEET = "body { margin-top: 0; margin-bottom: 0; margin-left: 0; margin-right: 0;"
+                        + " font-family: %s; font-size: %dpt;  }"
+                        + "a, p, li { margin-top: 0; margin-bottom: 0; margin-left: 0;"
+                        + " margin-right: 0; font-family: %s; font-size: %dpt;  }"
+                        + "img {max-width: 100%%; height: auto; max-height: %dpt; }";
 
-                                           // Dodaj dane obrazów base64 do listy
-                                           // Ustawianie preferowanego rozmiaru JLabel (rozmiar obrazka)
-                                           for (int i = 0; i < labelsImages.size(); i++) {
+                // Dodaj dane obrazów base64 do listy
+                // Ustawianie preferowanego rozmiaru JLabel (rozmiar obrazka)
+                for (int i = 0; i < labelsImages.size(); i++) {
 
-                                               // Dekodowanie Base64 do obrazka
-                                               ImageIcon imageIcon = new ImageIcon(Base64.getDecoder().decode(baseImages.get(i)));
+                    // Dekodowanie Base64 do obrazka
+                    ImageIcon imageIcon = new ImageIcon(Base64.getDecoder().decode(baseImages.get(i)));
 
-                                               // Dostosowanie obrazka do żądanych rozmiarów
-                                               Image scaledImage = imageIcon.getImage().getScaledInstance(imagesize, imagesize,Image.SCALE_FAST);
-                                               ImageIcon scaledImageIcon = new ImageIcon(scaledImage);
+                    // Dostosowanie obrazka do żądanych rozmiarów
+                    Image scaledImage = imageIcon.getImage().getScaledInstance(imagesize, imagesize, Image.SCALE_FAST);
+                    ImageIcon scaledImageIcon = new ImageIcon(scaledImage);
 
-                                               labelsImages.get(i).setPreferredSize(new Dimension(imagesize, imagesize));
-                                               labelsImages.get(i).setIcon(scaledImageIcon);
-                                           }
-                                           // większ rozmiar czcionki i obrazów
-                                           setHtmlFont(htmlDocument, font,imagesize);
-                                           chatTextPane.setCaretPosition(htmlDocument.getLength());
-                                       }
-                                   }
-        );
+                    labelsImages.get(i).setPreferredSize(new Dimension(imagesize, imagesize));
+                    labelsImages.get(i).setIcon(scaledImageIcon);
+                }
+                // większ rozmiar czcionki i obrazów
+                setHtmlFont(htmlDocument, font, imagesize);
+                chatTextPane.setCaretPosition(htmlDocument.getLength());
+            }
+        });
 
-        getMessage = new getMessage(socket,this);
     }
 
 
@@ -233,105 +302,110 @@ public class Panel extends JPanel implements KeyListener{
 
     //wyślij plik
     private void sendFile() {
-        JFileChooser fileChooser = new JFileChooser();
-        int result = fileChooser.showOpenDialog(null);
 
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile(); // jak wybierze plik to
-            try {
-                byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
+        Runnable sendMeaasgeRun = ()-> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(frame);
 
-                if (selectedFile.getName().endsWith(".mp4") || selectedFile.getName().endsWith(".avi") || selectedFile.getName().endsWith(".mp3")) {
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile(); // jak wybierze plik to
+                try {
+                    byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
 
-                    boolean wyslao = false;
+                    if (selectedFile.getName().endsWith(".mp4") || selectedFile.getName().endsWith(".avi") || selectedFile.getName().endsWith(".mp3")) {
 
-                    System.out.println("dzielę wideo na części");
-                    PartFiles(selectedFile.toString());
-                    System.out.println("wysyłam video..");
-                    byte[] video = "[VID]".getBytes();
+                        boolean wyslao = false;
 
-                    OutputStream outputStream = socket.getOutputStream();
-                    outputStream.write(video);
+                        System.out.println("dzielę wideo na części");
+                        PartFiles(selectedFile.toString());
+                        System.out.println("wysyłam video..");
+                        byte[] video = "[VID]".getBytes();
 
-                    outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                    outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                        OutputStream outputStream = socket.getOutputStream();
+                        outputStream.write(video);
 
-                    outputStream.write(username.getBytes(StandardCharsets.UTF_8));
+                        outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                        outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
 
-                    outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                    outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                        outputStream.write(username.getBytes(StandardCharsets.UTF_8));
 
-                    String filname = selectedFile.getName();
-                    outputStream.write(filname.getBytes());
+                        outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                        outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
 
-                    outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                    outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                        String filname = selectedFile.getName();
+                        outputStream.write(filname.getBytes());
 
-                    String sciezka = biezacyKatalog + "Pliki\\";
+                        outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                        outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
 
-                    for (int i = 0; i < fs.partFilesName.size(); i++) {
+                        String sciezka = biezacyKatalog + "Pliki\\";
 
-                        try (FileInputStream fis = new FileInputStream(sciezka + fs.partFilesName.get(i))) {
+                        for (int i = 0; i < fs.partFilesName.size(); i++) {
 
-                            String pathFromFilesName = fs.partFilesName.get(i);
-                            Path path = Path.of(sciezka + pathFromFilesName);
+                            try (FileInputStream fis = new FileInputStream(sciezka + fs.partFilesName.get(i))) {
 
-                            String name = fs.partFilesName.get(i);
-                            System.out.println(">>>>wysyłąm plik podzielony?: " + name);
+                                String pathFromFilesName = fs.partFilesName.get(i);
+                                Path path = Path.of(sciezka + pathFromFilesName);
 
-                            //wyślij nazwe pliku
+                                String name = fs.partFilesName.get(i);
+                                System.out.println(">>>>wysyłąm plik podzielony?: " + name);
 
-                            outputStream.write(name.getBytes());
+                                //wyślij nazwe pliku
 
-                            outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                            outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                                outputStream.write(name.getBytes());
 
-                            //wyślij długość pliku
+                                outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                                outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
 
-                            long length = fis.readAllBytes().length;
-                            String lengthString = Long.toString(length);
-                            outputStream.write(lengthString.getBytes());
+                                //wyślij długość pliku
 
-                            outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                            outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                                long length = fis.readAllBytes().length;
+                                String lengthString = Long.toString(length);
+                                outputStream.write(lengthString.getBytes());
 
-                            //wyślij dane pliku!!
-                            byte[] fileData = Files.readAllBytes(Paths.get(path.toString()));
+                                outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                                outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
 
-                            // Zakoduj dane przy użyciu Base64
-                            String encodedData = Base64.getEncoder().encodeToString(fileData);
-                            byte[] data = encodedData.getBytes();
+                                //wyślij dane pliku!!
+                                byte[] fileData = Files.readAllBytes(Paths.get(path.toString()));
 
-                            // Wysyłanie zakodowanych danych do serwera
-                            outputStream.write(data);
+                                // Zakoduj dane przy użyciu Base64
+                                String encodedData = Base64.getEncoder().encodeToString(fileData);
+                                byte[] data = encodedData.getBytes();
 
-                            outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                            outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                                // Wysyłanie zakodowanych danych do serwera
+                                outputStream.write(data);
 
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
+                                outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                                outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
+
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
+                        wyslao = true;
+
+                        //usuń stworzone częsci
+                        usunCzesci(wyslao);
                     }
-                    wyslao = true;
 
-                    //usuń stworzone częsci
-                    usunCzesci(wyslao);
+                    if (selectedFile.getName().endsWith(".jpg") || selectedFile.getName().endsWith(".gif") || selectedFile.getName().endsWith(".png")) {
+                        String base64Image = Base64.getEncoder().encodeToString(fileBytes); //base 64 koduje plik obrazu jpg,png,gif do stringa
+                        //przekształca tablicwe bajtów w stringa
+
+                        OutputStream outputStream = socket.getOutputStream();
+                        outputStream.write("[IMAGE]".getBytes()); //wysłanie sygnału, że przesyła obraz
+                        outputStream.write(base64Image.getBytes()); // wysłanie zakodowanego obrazu w stringu
+                        outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
+                        outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-                if (selectedFile.getName().endsWith(".jpg") || selectedFile.getName().endsWith(".gif") || selectedFile.getName().endsWith(".png")) {
-                    String base64Image = Base64.getEncoder().encodeToString(fileBytes); //base 64 koduje plik obrazu jpg,png,gif do stringa
-                    //przekształca tablicwe bajtów w stringa
-
-                    OutputStream outputStream = socket.getOutputStream();
-                    outputStream.write("[IMAGE]".getBytes()); //wysłanie sygnału, że przesyła obraz
-                    outputStream.write(base64Image.getBytes()); // wysłanie zakodowanego obrazu w stringu
-                    outputStream.write("\r\n".getBytes()); //sygnał o końcu kodu - znak przejscia do poczatku wierszxa
-                    outputStream.flush(); // wysyła w "pakiecie" wwszystko po kolei
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        }
+        };
+        fileSendingThread = new Thread(sendMeaasgeRun);
+        fileSendingThread.start();
     }
 
     private void usunCzesci(boolean wyslano) {
@@ -454,7 +528,6 @@ public class Panel extends JPanel implements KeyListener{
             if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                 // System.out.println("testKEY");
 
-
             }
         }
     }
@@ -465,4 +538,83 @@ public class Panel extends JPanel implements KeyListener{
     }
 
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == showScreenFolder){
+            String userDir = biezacyKatalog + "Screenshots\\";
+            try {
+                Desktop.getDesktop().open(new File(userDir));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Błąd podczas otwierania eksploratora plików", "Błąd", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        if (e.getSource() == showvideoFolder){
+            String userDir = pathVideoName;
+            if (pathVideoName.length() < 2) {
+                userDir = biezacyKatalog;
+            }
+            try {
+                Desktop.getDesktop().open(new File(userDir));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Błąd podczas otwierania eksploratora plików", "Błąd", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+
+        if (e.getSource() == changeSaveFolder){
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int result = fileChooser.showOpenDialog(frame);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                pathVideoName = String.valueOf(fileChooser.getSelectedFile());///
+                System.out.println(pathImeges);
+                videoname = pathVideoName + "\\" + videoname;
+                System.out.println(videoname + "<-scieżka do video");
+            }
+
+        }
+
+
+        if (e.getSource() == recordConversation){
+            isRecording = !isRecording;
+
+            if (isRecording) {
+                System.out.println("record! videoname: " + videoname);
+
+                recordConversation.setText("Stop Recording!");
+                imageRecordingHandler = new ImageRecordingHandler(frame,this,videoname,pathImeges);
+                imageRecordingHandler.record(isRecording);
+            }else {
+                System.out.println("nie nagrywam!");
+                recordConversation.setText("Start Recording!");
+                imageRecordingHandler.record(isRecording);
+            }
+
+        }
+
+        if (e.getSource() == changeNameOfVideo){
+            String t = ld.toString();
+            String ldt = t.substring(0, 16).replace(":", "_");
+
+
+            System.out.println("zmiana nazwy video!");
+            String input = JOptionPane.showInputDialog("give new videoname");
+            System.out.println(input);
+            prevideoName = input;
+            videoname = prevideoName + ldt + ".mp4";
+            System.out.println("nowa nazwa wideo = " + videoname);
+            defaultVideoname = !defaultVideoname;
+        }
+
+        if (e.getSource() == helpStore){
+            System.out.println("help");
+            JOptionPane.showMessageDialog(frame,"pytaj na www.google.pl");
+        }
+
+    }
 }
