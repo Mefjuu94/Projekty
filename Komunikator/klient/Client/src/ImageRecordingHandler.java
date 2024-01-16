@@ -1,3 +1,5 @@
+import com.xuggle.mediatool.event.IFlushEvent;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -89,6 +91,9 @@ public class ImageRecordingHandler {
 
     private void recordFrame() {
         BufferedImage image = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
+        if (frame.getWidth() %2 != 0 || frame.getHeight()%2 != 0){
+            frameDimension();
+        }
         frame.paint(image.getGraphics());
         frame.repaint();
 
@@ -121,5 +126,18 @@ public class ImageRecordingHandler {
         System.out.println("zakończono proces usuwania klatek");
         JOptionPane.showMessageDialog(frame, "Wideo zostało zapisane.");
     }
+
+    private void frameDimension(){
+        if (frame.getHeight() %2 != 0){
+            frame.setSize(frame.getWidth(),(frame.getHeight()/2) * 2);
+        }
+        if (frame.getWidth() %2 != 0){
+            frame.setSize((frame.getWidth()/2)*2,frame.getHeight());
+        }
+        if (frame.getWidth() %2 != 0 || frame.getHeight()%2 != 0){
+            frameDimension();
+        }
+    }
+
 
 }

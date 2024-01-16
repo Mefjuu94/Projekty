@@ -33,6 +33,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
 
     JMenuBar menuBar;
     public JMenuItem changeSaveFolder;
+    public JMenuItem changeSaveScreenFolder;
     public JMenuItem changeNameOfVideo;
     JMenuItem showScreenFolder = new JMenuItem("Pokaż uchwycone screeny");
     JMenuItem showvideoFolder = new JMenuItem("Pokaż nagrane video");
@@ -44,6 +45,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
     LocalDateTime ld = LocalDateTime.now();
 
     boolean defaultVideoname = true;
+    String pathScreenFolder = "";
     String prevideoName = "video";
     String videoname = prevideoName;
     String pathVideoName = "";
@@ -88,11 +90,14 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
 
 
         JMenu edit = new JMenu("Edycja");
-        changeSaveFolder = new JMenuItem("zmień folder zapisu");
+        changeSaveFolder = new JMenuItem("zmień folder zapisu video");
         changeSaveFolder.addActionListener(this);
+        changeSaveScreenFolder = new JMenuItem("zmień folder zapisu Screenów");
+        changeSaveScreenFolder.addActionListener(this);
         changeNameOfVideo = new JMenuItem("zmień nazwę video");
         changeNameOfVideo.addActionListener(this);
         edit.add(changeSaveFolder);
+        edit.add(changeSaveScreenFolder);
         edit.add(changeNameOfVideo);
 
         JMenu help = new JMenu("Pomoc");
@@ -188,11 +193,15 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
 
+                //////////////////////////////
                 int size = (frame.getWidth() + frame.getHeight()) / 50;
+
+                frameDimension();
+                    System.out.println("frame H= " + frame.getHeight() );
+                System.out.println("frame W= " + frame.getWidth() );
                 //// zabespieczenie przed błędem "IllegalArgumentException: Component 1 height should be a multiple of 2 for colorspace: YUV420J"
-                int newHeight = (frame.getHeight() / 2) * 2;
-                HEIGHT = newHeight;
-                System.out.println(HEIGHT);
+
+
 
                 if (size < 15) {
                     size = 15;
@@ -230,25 +239,52 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
 
     }
 
+    private void frameDimension(){
+        if (frame.getHeight() %2 != 0){
+            frame.setSize(frame.getWidth(),(frame.getHeight()/2) * 2);
+        }
+        if (frame.getWidth() %2 != 0){
+            frame.setSize((frame.getWidth()/2)*2,frame.getHeight());
+        }
+    }
+
 
     private void takeSnapshot() throws IOException, AWTException {
-        String DataTime = ld.toString().substring(0, 16);
+        LocalDateTime ld1 = LocalDateTime.now();
+        String DataTime = ld1.toString().substring(0, 16);
         String formatedDataTime = DataTime.replace(":", "_");
         System.out.println(formatedDataTime);
 
         try {
             Robot robot = new Robot();
-            Container panel = frame.getContentPane();
-            Point pos = panel.getLocationOnScreen();
-            Rectangle bounds = panel.getBounds();
-            bounds.x = pos.x;
-            bounds.y = pos.y;
-            bounds.x -= 1;
-            bounds.y -= 1;
-            bounds.width += 2;
-            bounds.height += 2;
-            BufferedImage snapShot = robot.createScreenCapture(bounds);
-            ImageIO.write(snapShot, "png", new File("Screenshots\\Snap" + formatedDataTime + ".png"));
+//            Container panel = frame.getContentPane();
+//            Point pos = panel.getLocationOnScreen();
+//            Rectangle bounds = panel.getBounds();
+//            bounds.x = pos.x;
+//            bounds.y = pos.y;
+//            bounds.x -= 1;
+//            bounds.y -= 1;
+//            bounds.width += 2;
+//            bounds.height += 2;
+//            BufferedImage snapShot = robot.createScreenCapture(bounds);
+            Container contentPane = frame.getContentPane();
+            Point contentPaneLocation = contentPane.getLocationOnScreen();
+
+            JMenuBar menuBar = frame.getJMenuBar();
+            Point menuBarLocation = menuBar.getLocationOnScreen();
+            int x = Math.min(contentPaneLocation.x, menuBarLocation.x);
+            int y = Math.min(contentPaneLocation.y, menuBarLocation.y);
+            int width = Math.max(contentPaneLocation.x + contentPane.getWidth(), menuBarLocation.x + menuBar.getWidth()) - x;
+            int height = Math.max(contentPaneLocation.y + contentPane.getHeight(), menuBarLocation.y + menuBar.getHeight()) - y;
+
+            // Utwórz zrzut ekranu
+            BufferedImage snapShot = robot.createScreenCapture(new Rectangle(x, y, width, height));
+
+            if (pathScreenFolder.length() < 2) {
+                ImageIO.write(snapShot, "png", new File("Screenshots\\Snap" + formatedDataTime + ".png"));
+            }else {
+                ImageIO.write(snapShot, "png", new File(pathScreenFolder + "Snap" + formatedDataTime + ".png"));
+            }
             System.out.println("Screenshot Captured!");
         } catch (Exception ex) {
             System.out.println("capture screenshot failed");
@@ -540,12 +576,24 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
 
         if (e.getSource() == showScreenFolder) {
             String userDir = biezacyKatalog + "Screenshots\\";
-            try {
-                Desktop.getDesktop().open(new File(userDir));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Błąd podczas otwierania eksploratora plików", "Błąd", JOptionPane.ERROR_MESSAGE);
+            if (pathScreenFolder.equals("")) {
+                try {
+                    Desktop.getDesktop().open(new File(userDir));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Błąd podczas otwierania eksploratora plików", "Błąd", JOptionPane.ERROR_MESSAGE);
+                }
             }
+            else {
+                userDir = pathScreenFolder;
+                try {
+                    Desktop.getDesktop().open(new File(userDir));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Błąd podczas otwierania eksploratora plików", "Błąd", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
         }
 
         if (e.getSource() == showvideoFolder) {
@@ -571,7 +619,20 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
                 pathVideoName = String.valueOf(fileChooser.getSelectedFile());///
                 System.out.println(pathImeges);
                 videoname = pathVideoName + "\\" + videoname;
-                System.out.println(videoname + "<-scieżka do video");
+                System.out.println(videoname + "<-scieżka do viadeo");
+            }
+
+        }
+
+        if (e.getSource() == changeSaveScreenFolder) {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int result = fileChooser.showOpenDialog(frame);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                pathScreenFolder = String.valueOf(fileChooser.getSelectedFile());///
+                pathScreenFolder = pathScreenFolder + "\\";
+                System.out.println(pathScreenFolder + "<-scieżka do screenów");
             }
 
         }

@@ -14,11 +14,13 @@ public class ChatClient {
 
         if (host.equals("")) {
             socket = new Socket("localhost", 9999);
-        }else {
+            Panel panel = new Panel(socket);
+        } else {
             socket = new Socket(host, 9999);
+            Panel panel = new Panel(socket);
         }
 
-        Panel panel = new Panel(socket);
+
 
 
 
