@@ -2,10 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="17805235-990b-4b91-9d27-7d031d406f76" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/MiniView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Client.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Client.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pliki/1.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pliki/1_1.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Client/ChatClient.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Client/ChatClient.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Client/Panel.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Client/Panel.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ImageRecordingHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ImageRecordingHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Panel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/getMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/getMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/video.mp4" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,5 +120,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/MiniView.java</url>
+          <line>40</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

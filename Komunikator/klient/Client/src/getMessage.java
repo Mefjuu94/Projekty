@@ -1,5 +1,6 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -23,7 +24,6 @@ public class getMessage {
     Panel panel;
     int someImage = 0;
     boolean largeImage = false;
-    boolean ifVideo = false;
     boolean zatrzymajPliki = false;
 
     getMessage(Socket socket, Panel Panel) throws IOException {

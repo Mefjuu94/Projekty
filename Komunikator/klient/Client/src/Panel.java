@@ -1,6 +1,7 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
+import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 
 
-public class Panel extends JPanel implements KeyListener, ActionListener {
+public class Panel extends JPanel implements KeyListener, ActionListener{
 
     getMessage getMessage;
     JEditorPane chatTextPane;
@@ -30,6 +31,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
     boolean gif = false;
     Thread listenThread = new Thread();
     Thread fileSendingThread = new Thread();
+    Thread BuildingVideoThread = new Thread();
 
     JMenuBar menuBar;
     public JMenuItem changeSaveFolder;
@@ -55,15 +57,19 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
 
     HTMLEditorKit editorKit = new HTMLEditorKit();
 
-    int WIDTH = 400;
-    int HEIGHT = 300;
+    int WIDTH = 600;
+    int HEIGHT = 450;
     JFrame frame = new JFrame("Chat Client");
 
-    ImageRecordingHandler imageRecordingHandler = new ImageRecordingHandler(frame, this, videoname, pathImeges);
+    ImageRecordingHandler imageRecordingHandler = new ImageRecordingHandler(frame, this, videoname, pathImeges, BuildingVideoThread);
 
     ArrayList<JLabel> labelsImages = new ArrayList<>();
     ArrayList<String> baseImages = new ArrayList<>();
     HTMLDocument htmlDocument;
+
+    JFrame miniView;
+    JPanel miniJpanel;
+    MiniView miniViewClass;
 
     private String STYLESHEET;
 
@@ -143,7 +149,40 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                 openLink(e.getURL().toString());
             }
+
+            if (e.getEventType() == HyperlinkEvent.EventType.ENTERED) {
+                System.out.println("najechałem myszą!!!!");
+
+                miniView = new JFrame();
+                miniJpanel = new JPanel();
+                miniViewClass = new MiniView();
+
+                miniView.add(miniJpanel);
+                miniView.setLocationRelativeTo(frame);
+                miniView.setVisible(true);
+
+                String url = String.valueOf(e.getURL());
+                String cleanUrl = url.substring(7);
+
+                if (cleanUrl.endsWith(".jpg") || cleanUrl.endsWith(".png") || cleanUrl.endsWith(".jpeg")) {
+                    System.out.println("o kurdę! to obrazek!");
+                    try {
+                        miniViewClass.displayIMG(cleanUrl, miniJpanel);   // zmienić na wszystkie typy
+                    } catch (IOException ex) {
+                        System.out.println("Plik nie został odnaleziony!");
+                        miniView.dispose();
+                    }
+                } else if (cleanUrl.endsWith(".avi") || cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".mov")) {
+                    
+                }
+                miniView.pack();
+            }else {
+                miniView.dispose();
+            }
+
         });
+
+
 
         sendMessageButton.addActionListener(e -> sendMessage(messageField.getText()));
         sendFileButton.addActionListener(e -> sendFile());
@@ -257,16 +296,6 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
 
         try {
             Robot robot = new Robot();
-//            Container panel = frame.getContentPane();
-//            Point pos = panel.getLocationOnScreen();
-//            Rectangle bounds = panel.getBounds();
-//            bounds.x = pos.x;
-//            bounds.y = pos.y;
-//            bounds.x -= 1;
-//            bounds.y -= 1;
-//            bounds.width += 2;
-//            bounds.height += 2;
-//            BufferedImage snapShot = robot.createScreenCapture(bounds);
             Container contentPane = frame.getContentPane();
             Point contentPaneLocation = contentPane.getLocationOnScreen();
 
@@ -306,7 +335,6 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
     }
 
 
-    //stworzenie linku
     private void openLink(String url) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
@@ -646,7 +674,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener {
 
                 recordConversation.setText("Stop Recording!");
                 frame.setResizable(false);
-                imageRecordingHandler = new ImageRecordingHandler(frame, this, videoname, pathImeges);
+                imageRecordingHandler = new ImageRecordingHandler(frame, this, videoname, pathImeges,BuildingVideoThread);
                 imageRecordingHandler.record(isRecording);
             } else {
                 System.out.println("nie nagrywam!");

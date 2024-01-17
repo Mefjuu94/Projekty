@@ -15,17 +15,19 @@ public class ImageRecordingHandler {
     private int frameNumber = 0;
     JFrame frame;
     List<String> imageFiles = new ArrayList<>();
-    public Thread BuildingVideoThread;
+    Thread BuildingVideoThread;
     Panel panel;
+    Runnable buildVideoThreadRun;
 
     String videoname ;
     String pathImeges ;
 
-    public ImageRecordingHandler(JFrame frame, Panel panel,String videoname,String pathImages) {
+    public ImageRecordingHandler(JFrame frame, Panel panel,String videoname,String pathImages, Thread buildingVideoThread) {
         this.frame = frame;
         this.videoname = videoname;
         this.panel = panel;
         this.pathImeges = pathImages;
+        this.BuildingVideoThread = buildingVideoThread;
     }
 
     public void record(boolean isRecording) {
@@ -41,8 +43,6 @@ public class ImageRecordingHandler {
     public void toggleRecording(boolean buttonStartStop) throws InterruptedException {
         if (isRecording) {
             stopRecording();
-            BuildingVideoThread.join();
-            deleteImages(imageFiles);
         } else {
             startRecording();
         }
@@ -59,11 +59,12 @@ public class ImageRecordingHandler {
         });
 
         recordingThread.start();
+
     }
 
     private void stopRecording() {
 
-        Runnable buildVideoThreadRun = () -> {
+        buildVideoThreadRun = () -> {
 
             isRecording = false;
             try {
@@ -72,16 +73,16 @@ public class ImageRecordingHandler {
                     InterruptedException e) {
                 e.printStackTrace();
             }
+
             System.out.println("Zakończono nagrywanie.");
 
             try {
-                System.out.println(videoname + " przed kodeikiem");
                 JCodecPNGtoMP4 codecPNGtoMP4 = new JCodecPNGtoMP4(videoname, pathImeges);
                 codecPNGtoMP4.makeVideo();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
+            deleteImages(imageFiles);
         };
         BuildingVideoThread = new Thread(buildVideoThreadRun);
         BuildingVideoThread.start();
@@ -114,6 +115,7 @@ public class ImageRecordingHandler {
 
 
     private void deleteImages(List<String> imageFiles) {
+
         System.out.println("Usuwanie zdjęć po zakończeniu nagrywania.");
         for (String imageName : imageFiles) {
             File imageFile = new File("capture", imageName);
