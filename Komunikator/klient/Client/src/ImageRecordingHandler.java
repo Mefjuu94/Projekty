@@ -1,5 +1,3 @@
-import com.xuggle.mediatool.event.IFlushEvent;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;

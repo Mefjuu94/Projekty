@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+
 /**
  * @author Leonardo Pereira
  * 18/03/2019 23:01
@@ -23,7 +24,7 @@ public class JCodecPNGtoMP4 {
  String videoFilename;
  String pathImages;
 
- JCodecPNGtoMP4(String videoFilename,String pathImages) throws Exception {
+ JCodecPNGtoMP4(String videoFilename,String pathImages){
      this.videoFilename = videoFilename;
      this.pathImages = pathImages;
 
@@ -34,21 +35,22 @@ public class JCodecPNGtoMP4 {
  }
 
     private void sortByNumber(File[] files) {
-        Arrays.sort(files, new Comparator<File>() {
+        Arrays.sort(files, new Comparator<>() {
             @Override
             public int compare(File o1, File o2) {
                 int n1 = extractNumber(o1.getName());
                 int n2 = extractNumber(o2.getName());
                 return n1 - n2;
             }
+
             private int extractNumber(String name) {
                 int i = 0;
                 try {
-                    int s = name.lastIndexOf('_')+1;
+                    int s = name.lastIndexOf('_') + 1;
                     int e = name.lastIndexOf('.');
                     String number = name.substring(s, e);
                     i = Integer.parseInt(number);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     i = 0; // if filename does not match the format then default to 0
                 }
                 return i;
