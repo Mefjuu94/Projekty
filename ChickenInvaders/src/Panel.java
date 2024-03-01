@@ -15,7 +15,6 @@ public class Panel extends JPanel {
 
     int enemiesNumber = 3; //(max 16x na szerokość ekranu)
     List<Enemy> enemies = new ArrayList<>();
-    List<Obstacle> obstacles = new ArrayList<Obstacle>();
     List<EnemyBullets> bosseBullets = new ArrayList<>();
     int iloscNaOS = 3;
 
@@ -28,7 +27,7 @@ public class Panel extends JPanel {
 
     ImageIcon background = new ImageIcon("src/Backgrounds/level1Recznie.jpg");
     int movebackgroundY = -1600;
-    int allEnemiesKilled = 0;
+    int allEnemiesKilled = 432;
     int allShootsBulletsnumber = 0;
     int bulletsMissed = allShootsBulletsnumber - allEnemiesKilled;
 
@@ -36,7 +35,7 @@ public class Panel extends JPanel {
     Obstacle obstacle = new Obstacle();
     Help firstaid = new Help();
 
-    TalentPoints talentPoints = new TalentPoints(this,obstacle.obstacleActive,obstacle);
+    TalentPoints talentPoints = new TalentPoints(this, obstacle.obstacleActive, obstacle);
     int health = 5 + talentPoints.healthPoints;
     MENU menu = new MENU(talentPoints, hero, this, save, load, exit);
 
@@ -102,13 +101,14 @@ public class Panel extends JPanel {
             boos.ActiveBoss = true;
         }
 
-        if (enemiesNumber <= 1){
+        if (enemiesNumber <= 1) {
             CreateEnemiesAgain();
             obstacle.obstacleActive = false;
         }
 
-        if (talentPoints.LEVEL > 1){
+        if (talentPoints.LEVEL > 1) {
             obstacle = new Obstacle();
+            quantityOfObstacle();
             obstacle.obstacleActive = true;
         }
 
@@ -217,14 +217,14 @@ public class Panel extends JPanel {
                 checkBoss();
                 kolizjeBoss();
                 checkEnemyShoot();
-//                if (obstacle.obstacleActive) {
-//                    obstacleCollision();
-//                }
+                if (obstacle.obstacleActive) {
+                    obstacleCollision();
+                }
             } else {
                 this.kolizje();
                 for (Enemy i : enemies) {  //eneny to jest "i"
                     i.update(talentPoints);
-                    if (enemies.size() <= 0){
+                    if (enemies.size() <= 0) {
                         obstacle.obstacleActive = false;
                     }
                     if (obstacle.obstacleActive) {
@@ -233,8 +233,6 @@ public class Panel extends JPanel {
                 }
                 this.checkEnemyY();
             }
-
-
 
 
         }
@@ -267,9 +265,9 @@ public class Panel extends JPanel {
                 }
             }
 
-        if (hero.bullets.get(i).yShoot < 0) {
-            bulletsMissed++;
-        }
+            if (hero.bullets.get(i).yShoot < 0) {
+                bulletsMissed++;
+            }
 
 
         }
@@ -375,29 +373,51 @@ public class Panel extends JPanel {
 
 
 
-            for (int i = 0; i < hero.bullets.size(); i++) {
+        for (int i = 0; i < hero.bullets.size(); i++) {
 
-                for (int j = 0; j < obstacle.quantity; j++) {
+            for (int j = 0; j < obstacle.quantity; j++) {
 
-
-                    if (hero.bullets.get(i).yShoot <= obstacle.y[j] && hero.bullets.get(i).yShoot + 5 > obstacle.y[j] - 5 &&
-                            hero.bullets.get(i).xShoot > obstacle.x[j] - 5 && hero.bullets.get(i).xShoot <= obstacle.x[j] + obstacle.obstacleWidth[j]) {
-
-                        /////jakiś błąd tu jest!!!! naprawić wychdozi poza granice!~!
-
+                if (hero.bullets.get(i).yShoot <= obstacle.y[j] && hero.bullets.get(i).yShoot + 5 > obstacle.y[j] - 5 &&
+                        hero.bullets.get(i).xShoot > obstacle.x[j] - 5 && hero.bullets.get(i).xShoot <= obstacle.x[j] + obstacle.obstacleWidth[j] ) {
+                    if (!talentPoints.antiReflectBullet) {
+                        hero.setTurnOfBullet.set(i, -8); // odbija sie
+                    }else {
                         hero.bullets.get(i).yShoot = -209;
                         hero.bullets.get(i).xShoot = 1000;
-
-                        System.out.println(" kładka nr: " + j + " dostała");
-                        System.out.println("trafiłem kładkę");
-
                     }
-
+                }
 
             }
+
+            if (hero.bullets.get(i).xShoot >= hero.x && hero.bullets.get(i).xShoot + 5 <= hero.x + 48 &&
+                    hero.bullets.get(i).yShoot > hero.y && hero.bullets.get(i).yShoot < hero.y + 48) {
+                health--;
+                hero.bullets.get(i).yShoot = -209;
+                hero.bullets.get(i).xShoot = 1000;
+            }
+
+            hero.removeBullets();
         }
 
 
+    }
+
+    private void quantityOfObstacle() {
+
+        if (talentPoints.LEVEL > 1 && talentPoints.LEVEL < 6) {
+            obstacle.setQuantity(talentPoints.LEVEL);
+        }
+        if (talentPoints.LEVEL > 6) {
+            obstacle.setQuantity(5);
+        }
+        if (talentPoints.LEVEL == 8) {
+            obstacle.quantity = 2;
+        }
+        if (talentPoints.LEVEL > 8) {
+            obstacle.quantity = 2;
+        }
+
+        obstacle.setQuantity(7);
     }
 
     public void checkEnemyY() {

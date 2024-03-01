@@ -3,6 +3,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Iterator;
 import javax.swing.*;
@@ -20,6 +21,7 @@ public class Hero implements KeyListener {
 
     List<Bullet> bullets = new ArrayList<>();
     int bulletCounter = 0;
+    List<Integer> setTurnOfBullet = new ArrayList<>();
 
     int allBulletsShoots = 0;
     boolean trippeShoots = false;
@@ -97,14 +99,9 @@ public class Hero implements KeyListener {
 
         g2d.setColor(Color.WHITE);
 
-
-
-
         for (int i = 0; i < bullets.size(); i++) {
-
-
             g2d.fillOval(bullets.get(i).xShoot, bullets.get(i).yShoot, 6, 6);
-            bullets.get(i).yShoot -= 8;
+            bullets.get(i).yShoot -= setTurnOfBullet.get(i);
         }
 
 
@@ -130,19 +127,25 @@ public class Hero implements KeyListener {
             bullets.add(new Bullet(x + 20, y )); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
+            setTurnOfBullet.add(8);
         }else {
             bullets.add(new Bullet(x + 20, y)); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
+            setTurnOfBullet.add(8);
         }
 
         if (trippeShoots){
             bullets.add(new Bullet(x, y + 20)); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
+            setTurnOfBullet.add(8);
+
             bullets.add(new Bullet(x + 40, y + 20)); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
+            setTurnOfBullet.add(8);
+
         }
 
 

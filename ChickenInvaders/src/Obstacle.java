@@ -3,7 +3,7 @@ import java.util.Random;
 
 public class Obstacle {
 
-    int quantity = 18;
+    int quantity = 3;
     int[] x = new int[quantity];
     int[] y = new int[quantity];
 
@@ -12,8 +12,6 @@ public class Obstacle {
     int[] obstacleSpeed = new int[quantity];
     int[] obstacleWidth = new int[quantity];
     Color[] colors = new Color[quantity];
-
-
 
 
     Obstacle(){
@@ -37,9 +35,23 @@ public class Obstacle {
         moveObstacle();
     }
 
+    public void setQuantity(int liczba){
+        quantity = liczba;
+        System.out.println("ilość przeszkód ( kładek = " + quantity);
+
+        x = new int[quantity];
+        y = new int[quantity];
+
+        obstacleSpeed = new int[quantity];
+        obstacleWidth = new int[quantity];
+        colors = new Color[quantity];
+        for (int i = 0; i < quantity; i++) {
+            generateRandomPosition(i);
+        }
+    }
+
     private void generateRandomPosition(int i){
         Random random = new Random();
-
 
             x[i] = random.nextInt(500) + 75;
             System.out.println(x[i] + " x");

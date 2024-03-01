@@ -29,7 +29,7 @@ public class Enemy {
         if (talentPoints.LEVEL > 5){
             enemySpeed = 2;
         }
-        y = y + enemySpeed;
+        //y = y + enemySpeed;
 
     }
 
