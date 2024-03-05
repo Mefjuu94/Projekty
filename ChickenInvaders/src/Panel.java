@@ -13,6 +13,8 @@ public class Panel extends JPanel {
     String name = "";
     boolean death = false;
 
+    int countTurn = 0;
+
     int enemiesNumber = 3; //(max 16x na szerokość ekranu)
     List<Enemy> enemies = new ArrayList<>();
     List<EnemyBullets> bosseBullets = new ArrayList<>();
@@ -27,7 +29,7 @@ public class Panel extends JPanel {
 
     ImageIcon background = new ImageIcon("src/Backgrounds/level1Recznie.jpg");
     int movebackgroundY = -1600;
-    int allEnemiesKilled = 432;
+    int allEnemiesKilled = 0;
     int allShootsBulletsnumber = 0;
     int bulletsMissed = allShootsBulletsnumber - allEnemiesKilled;
 
@@ -36,8 +38,9 @@ public class Panel extends JPanel {
     Help firstaid = new Help();
 
     TalentPoints talentPoints = new TalentPoints(this, obstacle.obstacleActive, obstacle);
-    int health = 5 + talentPoints.healthPoints;
+    int health = 599999 + talentPoints.healthPoints;
     MENU menu = new MENU(talentPoints, hero, this, save, load, exit);
+    boolean[][] reflectOfBullet = new boolean[350][obstacle.getQuantity()];
 
     public Panel() {
 
@@ -47,7 +50,6 @@ public class Panel extends JPanel {
         this.setDoubleBuffered(true);
         this.addKeyListener(this.hero);
         this.setFocusable(true);
-
 
         this.add(start);
         start.setVisible(false);
@@ -65,10 +67,11 @@ public class Panel extends JPanel {
         MENU,
         GAME,
         Pause,
-        TalentPoints
+        TalentPoints,
+        SHOP
     }
 
-    public static STATE State = STATE.GAME; /// zmienic na GAME zebyh grac STATE.STATE.TalentPoints
+    public static STATE State = STATE.TalentPoints; /// zmienic na GAME zebyh grac STATE.STATE.TalentPoints
 
     public void CreateEnemiesAgain() {
 
@@ -101,18 +104,31 @@ public class Panel extends JPanel {
             boos.ActiveBoss = true;
         }
 
-        if (enemiesNumber <= 1) {
-            CreateEnemiesAgain();
-            obstacle.obstacleActive = false;
+        if (enemies.size() <= 1) {
+            howManyEnemiesInLine();
+            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
+
+            int alotOfEnemiesGap = enemiesNumber / 25;
+            System.out.println(enemiesNumber);
+            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
+
+            for (int i = 0; i < enemiesNumber; i++) {
+                if (i % iloscNaOS == 0) {
+                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
+                }
+
+                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50)));
+            }
         }
 
-        if (talentPoints.LEVEL > 1) {
+        if (talentPoints.LEVEL > 0) {
             obstacle = new Obstacle();
             quantityOfObstacle();
             obstacle.obstacleActive = true;
         }
-
-
+        
+       // System.out.println(enemiesNumber + " ilość przeciwników co do lvlu");
+       // System.out.println(enemies.size() + " wielkość tablicy która powinna być taka sama co ilość przeciwników");
     }
 
     private void howManyEnemiesInLine() {
@@ -223,7 +239,7 @@ public class Panel extends JPanel {
             } else {
                 this.kolizje();
                 for (Enemy i : enemies) {  //eneny to jest "i"
-                    i.update(talentPoints);
+                    i.update(talentPoints,this);
                     if (enemies.size() <= 0) {
                         obstacle.obstacleActive = false;
                     }
@@ -259,7 +275,7 @@ public class Panel extends JPanel {
                     enemies.remove(j);
                     allEnemiesKilled++;
                     hero.bullets.get(i).yShoot = -209;
-                    hero.bullets.get(i).xShoot = 1000;
+                    hero.bullets.get(i).xShoot = -1000;
                     System.out.println("pozostało pzzeciwników " + enemies.size());
                     break;
                 }
@@ -281,7 +297,7 @@ public class Panel extends JPanel {
             bulletsMissed = hero.bulletCounter - enemiesNumber;
             System.out.println(bulletsMissed + "<< ilosc nietarfionych");
 
-            talentPoints.calcualteStats(enemiesNumber, health, hero.bulletCounter); // pocli9cz se punkty po grze
+            scorePoints = scorePoints + talentPoints.calcualteStats(enemiesNumber, health, hero.bulletCounter); // pocli9cz se punkty po grze
             talentPoints.LEVEL++;
             System.out.println("promote to level: " + talentPoints.LEVEL);
             talentPoints.firstLoad = true;
@@ -314,30 +330,25 @@ public class Panel extends JPanel {
 
     public void kolizjeBoss() {
 
-        Iterator<Bullet> i = hero.bullets.iterator(); // wywołanie iteratora na klasie Hero (liczenie pocisków)
-        while (i.hasNext()) {
-
-            Bullet bullet = i.next();
-
+        // wywołanie iteratora na klasie Hero (liczenie pocisków)
+        for (Bullet bullet : hero.bullets) {
 
             if (bullet.yShoot <= boos.y + 150 && bullet.yShoot > boos.y && bullet.xShoot <= boos.x + 120 && bullet.xShoot > boos.x - 20) {
                 boos.bossHP--;
                 //i.remove();
                 bullet.yShoot = -209;
-                bullet.xShoot = 1000;
+                bullet.xShoot = -1000;
                 System.out.println(boos.bossHP + " << pozostało hp");
             }
 
-            Iterator<EnemyBullets> e = boos.bullets.iterator();
-            while (e.hasNext()) {
-                EnemyBullets enemyBullets = e.next();
+            for (int i = 0; i < boos.bullets.size(); i++) {
 
-                if (bullet.yShoot <= enemyBullets.yShoot + 30 && bullet.yShoot > enemyBullets.yShoot && bullet.xShoot <= enemyBullets.xShoot + 30 && bullet.xShoot > enemyBullets.xShoot) {
+
+                if (bullet.yShoot <= boos.bullets.get(i).yShoot + 30 && bullet.yShoot > boos.bullets.get(i).yShoot && bullet.xShoot <= boos.bullets.get(i).xShoot + 30 && bullet.xShoot > boos.bullets.get(i).xShoot) {
                     System.out.println("trafione");
-                    e.remove(); // pociski przelatują przez jaja
+                    boos.bullets.remove(i);
                     bullet.yShoot = -209;
-                    bullet.xShoot = 1000;
-                    //i.remove();
+                    bullet.xShoot = -1000;
                     break;
                 }
 
@@ -372,34 +383,54 @@ public class Panel extends JPanel {
     private void obstacleCollision() {
 
 
-
+        int calc = 0;
         for (int i = 0; i < hero.bullets.size(); i++) {
 
-            for (int j = 0; j < obstacle.quantity; j++) {
+            if (hero.bullets.get(i).yShoot > 0 && hero.bullets.get(i).yShoot < 800) {
 
-                if (hero.bullets.get(i).yShoot <= obstacle.y[j] && hero.bullets.get(i).yShoot + 5 > obstacle.y[j] - 5 &&
-                        hero.bullets.get(i).xShoot > obstacle.x[j] - 5 && hero.bullets.get(i).xShoot <= obstacle.x[j] + obstacle.obstacleWidth[j] ) {
-                    if (!talentPoints.antiReflectBullet) {
-                        hero.setTurnOfBullet.set(i, -8); // odbija sie
-                    }else {
-                        hero.bullets.get(i).yShoot = -209;
-                        hero.bullets.get(i).xShoot = 1000;
+                calc++;
+                for (int j = 0; j < obstacle.quantity; j++) {
+
+                    if (hero.bullets.get(i).yShoot <= obstacle.y[j] && hero.bullets.get(i).yShoot + 5 > obstacle.y[j] - 5 &&
+                            hero.bullets.get(i).xShoot > obstacle.x[j] - 5 && hero.bullets.get(i).xShoot <= obstacle.x[j] + obstacle.obstacleWidth[j]
+                            && !reflectOfBullet[i][j]) {
+
+                        System.out.println("zawróć! " + i);
+
+                        if (!talentPoints.antiReflectBullet) {
+                            hero.setTurnOfBullet.set(i, hero.setTurnOfBullet.get(i) * (-1)); // odbija sie
+
+                            makeArrayToCheckReflect();
+                            reflectOfBullet[i][j] = true;
+
+                        } else {
+                            hero.bullets.get(i).yShoot = -209;
+                            hero.bullets.get(i).xShoot = -1000;
+                            makeArrayToCheckReflect();
+                            reflectOfBullet[i][j] = true;
+
+                        }
+
                     }
+
                 }
 
-            }
+                if (hero.bullets.get(i).xShoot >= hero.x + 10 && hero.bullets.get(i).xShoot + 5 <= hero.x + 48 &&
+                        hero.bullets.get(i).yShoot > hero.y && hero.bullets.get(i).yShoot < hero.y + 48 && hero.setTurnOfBullet.get(i) == -8) {
 
-            if (hero.bullets.get(i).xShoot >= hero.x && hero.bullets.get(i).xShoot + 5 <= hero.x + 48 &&
-                    hero.bullets.get(i).yShoot > hero.y && hero.bullets.get(i).yShoot < hero.y + 48) {
-                health--;
-                hero.bullets.get(i).yShoot = -209;
-                hero.bullets.get(i).xShoot = 1000;
+                    System.out.println("sam się ustrzeliłeś! :O");
+                    System.out.println(countTurn);
+                    health--;
+                }
             }
 
             hero.removeBullets();
         }
 
 
+        System.out.println(hero.bullets.size() + " ilość bulletów w danej chwili");
+        System.out.println(calc + " długość boolien (pocisków) również w planszy");
+//        System.out.println("=============");
     }
 
     private void quantityOfObstacle() {
@@ -414,10 +445,18 @@ public class Panel extends JPanel {
             obstacle.quantity = 2;
         }
         if (talentPoints.LEVEL > 8) {
-            obstacle.quantity = 2;
+            obstacle.quantity = 7;
         }
 
-        obstacle.setQuantity(7);
+        obstacle.setQuantity(15);
+
+        makeArrayToCheckReflect();
+        System.out.println(obstacle.getQuantity() + " << ilość kładek");
+
+    }
+
+    public void makeArrayToCheckReflect(){
+        reflectOfBullet = new boolean[350][obstacle.getQuantity()];
     }
 
     public void checkEnemyY() {
@@ -439,7 +478,7 @@ public class Panel extends JPanel {
             if (boos.bullets.get(b).yShoot > 780) {
                 //boos.bullets.remove(b);
                 boos.bullets.get(b).yShoot = -209;
-                boos.bullets.get(b).xShoot = 1000;
+                boos.bullets.get(b).xShoot = -1000;
                 health = health - 1;
                 System.out.println("przeciwniik ma punkt");
             }
@@ -547,7 +586,7 @@ public class Panel extends JPanel {
 
 
     public Dimension getPreferredSize() {
-        return new Dimension(800, 800);
+        return new Dimension(WIDTH, HEIGHT);
     }
 }
 

@@ -1,7 +1,12 @@
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Obstacle {
+
+    public int getQuantity() {
+        return quantity;
+    }
 
     int quantity = 3;
     int[] x = new int[quantity];
@@ -31,7 +36,6 @@ public class Obstacle {
 
         }
 
-
         moveObstacle();
     }
 
@@ -48,17 +52,18 @@ public class Obstacle {
         for (int i = 0; i < quantity; i++) {
             generateRandomPosition(i);
         }
+
     }
 
     private void generateRandomPosition(int i){
         Random random = new Random();
 
             x[i] = random.nextInt(500) + 75;
-            System.out.println(x[i] + " x");
+            //System.out.println(x[i] + " x");
             y[i] = random.nextInt(550) + 70;
-            System.out.println(y[i]  + " y");
+            //System.out.println(y[i]  + " y");
             obstacleWidth[i] = random.nextInt(50) + 30;
-            System.out.println("długość kładki " + i + " = " +  obstacleWidth[i] );
+            //System.out.println("długość kładki " + i + " = " +  obstacleWidth[i] );
             obstacleSpeed[i] = random.nextInt(4) + 1;
             colors[i] = new Color(random.nextInt(255),random.nextInt(255),random.nextInt(255));
 

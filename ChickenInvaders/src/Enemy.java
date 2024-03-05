@@ -10,6 +10,7 @@ public class Enemy {
     int enemyMiddle = 24;
 
     int enemySpeed = 1;
+    int[] ensmiesSpeed;
 
     ImageIcon enemyIcon = new ImageIcon("src/ICONS/enemy48.png");
     int x, y;
@@ -25,11 +26,16 @@ public class Enemy {
 
     }
 
-    public void update(TalentPoints talentPoints){
-        if (talentPoints.LEVEL > 5){
+    public void update(TalentPoints talentPoints, Panel panel) {
+
+        ensmiesSpeed = new int[panel.enemiesNumber];
+
+        if (talentPoints.LEVEL > 5) {
             enemySpeed = 2;
         }
         //y = y + enemySpeed;
+
+        ///dopisać ruchy w lewo i prawo
 
     }
 

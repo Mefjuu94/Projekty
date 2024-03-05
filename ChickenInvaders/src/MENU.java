@@ -86,6 +86,7 @@ public class MENU implements MouseListener, KeyListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 play = true;
+                panel.makeArrayToCheckReflect();
                 Panel.State = Panel.STATE.GAME;
                 start.setVisible(false);
                 exit.setVisible(false);
@@ -361,6 +362,7 @@ public class MENU implements MouseListener, KeyListener {
 
         if (code == 27) {
             Panel.STATE State = Panel.STATE.GAME;
+            panel.makeArrayToCheckReflect();
         }
 
     }

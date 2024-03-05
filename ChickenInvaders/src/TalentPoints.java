@@ -15,18 +15,19 @@ public class TalentPoints implements ActionListener {
 
     ImageIcon shoot3x = new ImageIcon("src/ICONS/shoot3x.png");
     JButton trippleShoot = new JButton(shoot3x);
-    boolean tripleShoots = false;
-    int trippleShootsPoints = 0;
+    boolean tripleShoots = true;
+    int trippleShootsPoints = 10;
 
     ImageIcon biggerShootIcon = new ImageIcon("src/ICONS/BigSHoot.png");
     JButton bigShoot = new JButton(biggerShootIcon);
     boolean bigShootEnable = false;
     int bigShootsPoints = 0;
 
-    int LEVEL = 4;
+    int LEVEL = 6; // default 1
     public int score = 0;
 
     JButton returnToMenu = new JButton("<<-return to menu");
+    JButton goToShop = new JButton("*goToShop*");
 
     boolean firstLoad = true;
     JButton nextLevelButton = new JButton();
@@ -37,8 +38,8 @@ public class TalentPoints implements ActionListener {
 
     ImageIcon antiReflectBulletIcon = new ImageIcon("src/ICONS/reflect.png");
     JButton antiReflectButton = new JButton(antiReflectBulletIcon);
-    boolean antiReflectBullet = true;
-    int antiReflectPoints = 1;
+    boolean antiReflectBullet = false;
+    int antiReflectPoints = 0;
 
 
     TalentPoints(Panel panel, boolean obstacleActove, Obstacle obstacle) {
@@ -52,6 +53,9 @@ public class TalentPoints implements ActionListener {
         returnToMenu.addActionListener(this);
         nextLevelButton.addActionListener(this);
         bigShoot.addActionListener(this);
+        antiReflectButton.addActionListener(this);
+
+        goToShop.addActionListener(this);
 
         setButtons(true);
     }
@@ -69,84 +73,97 @@ public class TalentPoints implements ActionListener {
 
     public void paintTalentTree(Graphics2D g2d, JPanel panel, Panel mainPanel) {
 
-        g2d.setColor(Color.white);
-        Font statsFont = new Font("Arial", Font.BOLD, 22);
-        g2d.setFont(statsFont);
+        if (Panel.State == Panel.STATE.TalentPoints) {
+            g2d.setColor(Color.white);
+            Font statsFont = new Font("Arial", Font.BOLD, 22);
+            g2d.setFont(statsFont);
 
-        Font levelFont = new Font("Arial", Font.BOLD, 18);
-
-
-        additionalHealth.setBounds(350, 20, 80, 80);
-        additionalHealth.setBackground(Color.black);
-        panel.add(additionalHealth);
-        g2d.drawString(" health points: " + healthPoints + " / 5", 300, 120);
+            Font levelFont = new Font("Arial", Font.BOLD, 18);
 
 
-        trippleShoot.setBounds(350, 150, 80, 80);
-        trippleShoot.setBackground(Color.black);
-        panel.add(trippleShoot);
-        g2d.drawString("Tripple shoot points :" + trippleShootsPoints + " / 10", 250, 250);
+            additionalHealth.setBounds(350, 20, 80, 80);
+            additionalHealth.setBackground(Color.black);
+            panel.add(additionalHealth);
+            g2d.drawString(" health points: " + healthPoints + " / 5", 300, 120);
 
 
-        bigShoot.setBounds(350, 280, 80, 80);
-        bigShoot.setBackground(Color.black);
-        panel.add(bigShoot);
-        g2d.drawString("BIG shoot points :" + bigShootsPoints + " / 1", 250, 390);
-
-        antiReflectButton.setBounds(350, 410, 80, 80);
-        antiReflectButton.setBackground(Color.black);
-        panel.add(antiReflectButton);
-        g2d.drawString("anti reflection :" + antiReflectPoints + " / 1", 250, 520);
+            trippleShoot.setBounds(350, 150, 80, 80);
+            trippleShoot.setBackground(Color.black);
+            panel.add(trippleShoot);
+            g2d.drawString("Tripple shoot points :" + trippleShootsPoints + " / 10", 250, 250);
 
 
-        returnToMenu.setVisible(true);
-        returnToMenu.setBounds(20, 700, 200, 40);
-        returnToMenu.setBackground(new Color(204, 30, 41));
-        returnToMenu.setFont(levelFont);
-        panel.add(returnToMenu);
+            bigShoot.setBounds(350, 280, 80, 80);
+            bigShoot.setBackground(Color.black);
+            panel.add(bigShoot);
+            g2d.drawString("BIG shoot points :" + bigShootsPoints + " / 1", 250, 390);
+
+            antiReflectButton.setBounds(350, 410, 80, 80);
+            antiReflectButton.setBackground(Color.black);
+            panel.add(antiReflectButton);
+            g2d.drawString("anti reflection :" + antiReflectPoints + " / 1", 250, 520);
 
 
-        nextLevelButton.setToolTipText("GO AHEAD!");
-        nextLevelButton.setBounds(550, 700, 200, 40);
-        nextLevelButton.setBackground(new Color(204, 30, 41));
-        nextLevelButton.setFont(levelFont);
-        nextLevelButton.setText("Next Level: " + LEVEL);
-        panel.add(nextLevelButton);
-
-        g2d.setColor(Color.ORANGE);
+            goToShop.setVisible(true);
+            goToShop.setBounds(20, 500, 200, 40);
+            goToShop.setBackground(new Color(204, 30, 41));
+            goToShop.setFont(levelFont);
+            panel.add(goToShop);
 
 
-        g2d.drawRect(580, 150, 300, 380);
+            returnToMenu.setVisible(true);
+            returnToMenu.setBounds(20, 700, 200, 40);
+            returnToMenu.setBackground(new Color(204, 30, 41));
+            returnToMenu.setFont(levelFont);
+            panel.add(returnToMenu);
 
-        g2d.drawString("All bullets counter :", 600, 180);
-        g2d.drawString(String.valueOf(mainPanel.allShootsBulletsnumber), 600, 210);
 
-        g2d.drawString("Enemies Killed :", 600, 280);
-        g2d.drawString(String.valueOf(mainPanel.allEnemiesKilled), 600, 310);
+            nextLevelButton.setToolTipText("GO AHEAD!");
+            nextLevelButton.setBounds(550, 700, 200, 40);
+            nextLevelButton.setBackground(new Color(204, 30, 41));
+            nextLevelButton.setFont(levelFont);
+            nextLevelButton.setText("Next Level: " + LEVEL);
+            panel.add(nextLevelButton);
 
-        g2d.drawString("Bullets missed :", 600, 380);
-        g2d.drawString(String.valueOf(mainPanel.bulletsMissed), 600, 410);
+            g2d.setColor(Color.ORANGE);
 
-        double ratio = 0;
-        String ratioString = "";
-        if (mainPanel.allEnemiesKilled > 0 && mainPanel.allShootsBulletsnumber > 0) {
-            ratio = (double) mainPanel.allEnemiesKilled / mainPanel.allShootsBulletsnumber;
-            DecimalFormat df = new DecimalFormat("#.##");
-            ratioString = df.format(ratio);
+
+            g2d.drawRect(580, 150, 300, 380);
+
+            g2d.drawString("All bullets counter :", 600, 180);
+            g2d.drawString(String.valueOf(mainPanel.allShootsBulletsnumber), 600, 210);
+
+            g2d.drawString("Enemies Killed :", 600, 280);
+            g2d.drawString(String.valueOf(mainPanel.allEnemiesKilled), 600, 310);
+
+            g2d.drawString("Bullets missed :", 600, 380);
+            g2d.drawString(String.valueOf(mainPanel.bulletsMissed), 600, 410);
+
+            double ratio = 0;
+            String ratioString = "";
+            if (mainPanel.allEnemiesKilled > 0 && mainPanel.allShootsBulletsnumber > 0) {
+                ratio = (double) mainPanel.allEnemiesKilled / mainPanel.allShootsBulletsnumber;
+                DecimalFormat df = new DecimalFormat("#.##");
+                ratioString = df.format(ratio);
+            }
+            g2d.drawString("ratio: ", 600, 480);
+            g2d.drawString(ratioString, 600, 510);
+
+
+            g2d.drawString("Score points :", 300, 730);
+            g2d.drawString(String.valueOf(score), 350, 760);
+
+
+            setButtons(true);
+            if (firstLoad) {
+                CheckIfTalentCanBeActive();
+                firstLoad = false;
+            }
+        } else if (Panel.State == Panel.STATE.SHOP) {
+
         }
-        g2d.drawString("ratio: ", 600, 480);
-        g2d.drawString(ratioString, 600, 510);
 
 
-        g2d.drawString("Score points :", 300, 730);
-        g2d.drawString(String.valueOf(score), 350, 760);
-
-
-        setButtons(true);
-        if (firstLoad) {
-            CheckIfTalentCanBeActive();
-            firstLoad = false;
-        }
     }
 
     public void setButtons(boolean tf) {
@@ -157,6 +174,7 @@ public class TalentPoints implements ActionListener {
         bigShoot.setVisible(tf);
         returnToMenu.setVisible(tf);
         antiReflectButton.setVisible(tf);
+        goToShop.setVisible(tf);
 
     }
 
@@ -224,6 +242,11 @@ public class TalentPoints implements ActionListener {
             bigShoot.setToolTipText("Big Shoot enabled");
         }
 
+        if (antiReflectPoints == 5) {
+            antiReflectButton.setBorder(BorderFactory.createLineBorder(new Color(0, 154, 0)));
+            antiReflectButton.setToolTipText("Anti Reflect Shoot enabled");
+        }
+
     }
 
 
@@ -256,18 +279,38 @@ public class TalentPoints implements ActionListener {
         }
 
         if (e.getSource() == antiReflectButton) {
-            if (antiReflectPoints < 1 && score > 0) {
+            if (antiReflectPoints < 5 && score > 0) {
                 antiReflectPoints++;
                 score--;
             }
             updateByTalents();
         }
 
+        if (e.getSource() == goToShop) {
+            if (Panel.State == Panel.STATE.TalentPoints) {
+                Panel.State = Panel.STATE.SHOP;
+                additionalHealth.setVisible(false);
+                trippleShoot.setVisible(false);
+                nextLevelButton.setVisible(false);
+                bigShoot.setVisible(false);
+                returnToMenu.setVisible(false);
+                antiReflectButton.setVisible(false);
+                goToShop.setText("back to Talent Points");
+            }else {
+                Panel.State = Panel.STATE.TalentPoints;
+                goToShop.setText("go to Shop");
+            }
+
+        }
 
         if (e.getSource() == nextLevelButton) {
+            panel.makeArrayToCheckReflect();
             System.out.println("next LEVEL!");
             updateByTalents();
-            System.out.println(tripleShoots);
+            System.out.println(healthPoints + " << health points " + addHealth);
+            System.out.println(trippleShootsPoints + " << tripple shots points " + tripleShoots);
+            System.out.println(bigShootsPoints + " << bigShooot points " + bigShootEnable);
+            System.out.println(antiReflectPoints + " << Anti reflect points " + antiReflectBullet );
             obstacleActive = true;
             //tutaj zapis
             Panel.State = Panel.STATE.GAME;

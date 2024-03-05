@@ -1,11 +1,8 @@
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Iterator;
 import javax.swing.*;
 
 public class Hero implements KeyListener {
@@ -18,6 +15,10 @@ public class Hero implements KeyListener {
 
     public ImageIcon heroIcon = new ImageIcon("src/ICONS/hero1.png"); // zrobić ścieżkę
     ImageIcon bigShootIcon = new ImageIcon("src/ICONS/big.png");
+
+    public int getBullets() {
+        return bullets.size();
+    }
 
     List<Bullet> bullets = new ArrayList<>();
     int bulletCounter = 0;
@@ -116,7 +117,6 @@ public class Hero implements KeyListener {
             x -= 8;
         }
 
-        removeBullets();
 
     }
 
@@ -127,7 +127,6 @@ public class Hero implements KeyListener {
             bullets.add(new Bullet(x + 20, y )); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
-            setTurnOfBullet.add(8);
         }else {
             bullets.add(new Bullet(x + 20, y)); // twórz pocisk)=
             bulletCounter++;
@@ -145,7 +144,6 @@ public class Hero implements KeyListener {
             bulletCounter++;
             allBulletsShoots++;
             setTurnOfBullet.add(8);
-
         }
 
 
@@ -167,11 +165,12 @@ public class Hero implements KeyListener {
 //        }
 
         for (int i = 0; i < bullets.size(); i++) {
-            if (bullets.get(i).yShoot < -5) {
-                //bullets.remove(i);
-                bullets.get(i).yShoot = -209;
-                bullets.get(i).xShoot = 1000;
-                //System.out.println("usunieto " + bullets.size());
+            if (bullets.get(i).yShoot < -5 || bullets.get(i).yShoot > 805) {
+                System.out.println("index do wyrzucenia = " + i);
+                bullets.remove(i);
+                setTurnOfBullet.remove(i);
+
+
             }
         }
 
