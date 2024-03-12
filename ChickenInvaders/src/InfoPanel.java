@@ -7,9 +7,10 @@ public class InfoPanel {
     ImageIcon bulletIcon = new ImageIcon("src/ICONS/bullet.png");
     ImageIcon enemyIcon = new ImageIcon("src/ICONS/enemy30.png");
     ImageIcon firstAidKitIcon = new ImageIcon("src/ICONS/firstAid30.png");
+    ImageIcon coinIcon = new ImageIcon("src/ICONS/smallCoin-unscreen.gif");
 
 
-    public void paintInfopanel(Graphics2D g2d, int enemiesnumber, int health,int bulletcounter, int healthkit, JPanel panel){
+    public void paintInfopanel(Graphics2D g2d, int enemiesnumber, int health,int bulletcounter, int healthkit,int coinsQantity , JPanel panel){
 
         g2d.setColor(Color.gray);
         g2d.fillRect(0,0,800,70);
@@ -26,6 +27,9 @@ public class InfoPanel {
 
         enemyIcon.paintIcon(panel,g2d,400,5);
         g2d.drawString("  " + enemiesnumber ,400,50);
+
+        coinIcon.paintIcon(panel,g2d,500,0);
+        g2d.drawString("  " + coinsQantity ,505,50);
 
         bulletIcon.paintIcon(panel,g2d,740,0);
         g2d.drawString("    " + bulletcounter,700,50);

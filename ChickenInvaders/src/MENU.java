@@ -21,21 +21,26 @@ public class MENU implements MouseListener, KeyListener {
     boolean loadStats = false;
     JButton save;
     JButton exit;
+    JButton goToShop;
     Panel panel;
 
     ArrayList<String> namesList = new ArrayList<String>();
     String[][] loadData = new String[99][11];
 
 
-    public MENU(TalentPoints talentPoints, Hero hero, Panel panel, JButton save, JButton load, JButton exit) {
+    public MENU(TalentPoints talentPoints, Hero hero, Panel panel, JButton save, JButton load, JButton exit,JButton goToShop) {
         this.talentPoints = talentPoints;
         this.hero = hero;
         this.panel = panel;
         this.save = save;
         this.load = load;
         this.exit = exit;
+        this.goToShop = goToShop;
+
         save.addMouseListener(this);
         load.addMouseListener(this);
+        exit.addMouseListener(this);
+        goToShop.addMouseListener(this);
     }
 
     public void Draw(Graphics2D g2d, JButton start, JButton exit) {
@@ -75,6 +80,11 @@ public class MENU implements MouseListener, KeyListener {
             exit.setFocusable(false);
             exit.setVisible(true);
 
+            goToShop.setBounds(650, 750, 150, 30);
+            goToShop.setSize(150, 30);
+            goToShop.setFocusable(false);
+            goToShop.setVisible(true);
+
         }
     }
 
@@ -92,6 +102,7 @@ public class MENU implements MouseListener, KeyListener {
                 exit.setVisible(false);
                 load.setVisible(false);
                 save.setVisible(false);
+                goToShop.setVisible(false);
             }
         });
 
@@ -118,6 +129,11 @@ public class MENU implements MouseListener, KeyListener {
                 System.exit(0);
             }
         });
+
+        goToShop.setBounds(630, 750, 150, 30);
+        goToShop.setSize(150, 30);
+        goToShop.setVisible(true);
+
 
     }
 
@@ -331,6 +347,19 @@ public class MENU implements MouseListener, KeyListener {
 
         if (e.getSource() == exit){
             System.exit(0);
+        }
+
+        if (e.getSource() == goToShop){
+            if (panel.allEnemiesKilled == 0 && talentPoints.LEVEL < 2 && panel.scorePoints < 1) {
+                int dialog = JOptionPane.showConfirmDialog(panel, "first Load game or get some points!", "SHOP Warning", 0);
+            }else {
+                panel.start.setVisible(false);
+                load.setVisible(false);
+                save.setVisible(false);
+                exit.setVisible(false);
+                goToShop.setVisible(false);
+                Panel.State = Panel.STATE.TalentPoints;
+            }
         }
 
     }

@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class Enemy {
 
@@ -13,6 +14,7 @@ public class Enemy {
     int[] ensmiesSpeed;
 
     ImageIcon enemyIcon = new ImageIcon("src/ICONS/enemy48.png");
+
     int x, y;
 
     public Enemy(int x, int y) {
@@ -33,7 +35,7 @@ public class Enemy {
         if (talentPoints.LEVEL > 5) {
             enemySpeed = 2;
         }
-        //y = y + enemySpeed;
+        y = y + enemySpeed;
 
         ///dopisać ruchy w lewo i prawo
 

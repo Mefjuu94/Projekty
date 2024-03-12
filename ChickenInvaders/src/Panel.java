@@ -8,6 +8,7 @@ public class Panel extends JPanel {
     final int HEIGHT = 800;
 
     int scorePoints = 0;
+    int coinsMoney = 100;
 
     Hero hero = new Hero();
     String name = "";
@@ -26,6 +27,8 @@ public class Panel extends JPanel {
     JButton exit = new JButton(new ImageIcon("src/ICONS/ExitGame.png"));
     JButton load = new JButton(new ImageIcon("src/ICONS/LoadGame.png"));
     JButton save = new JButton(new ImageIcon("src/ICONS/saveGame.png"));
+    JButton goToShop = new JButton("Go to Shop>>>");
+
 
     ImageIcon background = new ImageIcon("src/Backgrounds/level1Recznie.jpg");
     int movebackgroundY = -1600;
@@ -36,10 +39,11 @@ public class Panel extends JPanel {
     Boos boos = new Boos();
     Obstacle obstacle = new Obstacle();
     Help firstaid = new Help();
+    List<Coins> coinsQuantity = new ArrayList<>();
 
     TalentPoints talentPoints = new TalentPoints(this, obstacle.obstacleActive, obstacle);
     int health = 599999 + talentPoints.healthPoints;
-    MENU menu = new MENU(talentPoints, hero, this, save, load, exit);
+    MENU menu = new MENU(talentPoints, hero, this, save, load, exit,goToShop);
     boolean[][] reflectOfBullet = new boolean[350][obstacle.getQuantity()];
 
     public Panel() {
@@ -59,6 +63,8 @@ public class Panel extends JPanel {
         load.setVisible(false);
         this.add(save);
         save.setVisible(false);
+        this.add(goToShop);
+        goToShop.setVisible(false);
 
     }
 
@@ -71,7 +77,7 @@ public class Panel extends JPanel {
         SHOP
     }
 
-    public static STATE State = STATE.TalentPoints; /// zmienic na GAME zebyh grac STATE.STATE.TalentPoints
+    public static STATE State = STATE.TalentPoints; /// zmienic na GAME zeby grac STATE.STATE.TalentPoints
 
     public void CreateEnemiesAgain() {
 
@@ -159,6 +165,7 @@ public class Panel extends JPanel {
             load.setVisible(false);
             save.setVisible(false);
             exit.setVisible(false);
+            goToShop.setVisible(false);
 
             background.paintIcon(this, g2d, 0, movebackgroundY);
             movebackgroundY = movebackgroundY + 1;
@@ -201,11 +208,16 @@ public class Panel extends JPanel {
                 firstAidKolizje();
             }
 
+            //rysuj pieniążek!
+            for (Coins c: coinsQuantity) {
+                c.paint(g2d,this);
+            }
+
             //infopanel
             if (!boos.ActiveBoss) {
-                this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter, firstaid.firstAidleft, this);
+                this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney,this);
             } else {
-                this.info.paintInfopanel(g2d, boos.bossHP, health, hero.bulletCounter, firstaid.firstAidleft, this); //< info zamiast kurczków to hp bosa
+                this.info.paintInfopanel(g2d, boos.bossHP, health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney,this); //< info zamiast kurczków to hp bosa
             }
 
         } else if (State == STATE.Pause) {
@@ -226,6 +238,7 @@ public class Panel extends JPanel {
     public void move() {
 
         if (State == STATE.GAME) {
+
             this.hero.updateMove();
 
             if (boos != null && boos.ActiveBoss) {
@@ -248,6 +261,12 @@ public class Panel extends JPanel {
                     }
                 }
                 this.checkEnemyY();
+
+                kolizjeCoins();
+
+                for (Coins c: coinsQuantity) {
+                    c.update(c);
+                }
             }
 
 
@@ -272,7 +291,12 @@ public class Panel extends JPanel {
 
                 if (hero.bullets.get(i).yShoot <= enemies.get(j).y + 48 && hero.bullets.get(i).yShoot > enemies.get(j).y &&
                         hero.bullets.get(i).xShoot <= enemies.get(j).x + 48 && hero.bullets.get(i).xShoot > enemies.get(j).x) {
+
+
+                    coinsQuantity.add(new Coins(enemies.get(j).x,enemies.get(j).y));
                     enemies.remove(j);
+                    System.out.println("dodano " + j + " do coins");
+
                     allEnemiesKilled++;
                     hero.bullets.get(i).yShoot = -209;
                     hero.bullets.get(i).xShoot = -1000;
@@ -324,6 +348,19 @@ public class Panel extends JPanel {
                 firstaid.y[i] = -20;
             }
 
+        }
+
+    }
+
+    public void kolizjeCoins(){
+        for (int i = 0; i < coinsQuantity.size(); i++) {
+
+            if (coinsQuantity.get(i).y + 40 >= hero.y && coinsQuantity.get(i).y < hero.y + 48 && coinsQuantity.get(i).x + 30 < hero.x + 48 && coinsQuantity.get(i).x + 10 > hero.x) {
+                System.out.println("dostałem KASE!");
+                // coins
+                coinsMoney++;
+                coinsQuantity.remove(i);
+            }
         }
 
     }
@@ -381,8 +418,6 @@ public class Panel extends JPanel {
     }
 
     private void obstacleCollision() {
-
-
         int calc = 0;
         for (int i = 0; i < hero.bullets.size(); i++) {
 
@@ -428,8 +463,8 @@ public class Panel extends JPanel {
         }
 
 
-        System.out.println(hero.bullets.size() + " ilość bulletów w danej chwili");
-        System.out.println(calc + " długość boolien (pocisków) również w planszy");
+//        System.out.println(hero.bullets.size() + " ilość bulletów w danej chwili");
+//        System.out.println(calc + " długość boolien (pocisków) również w planszy");
 //        System.out.println("=============");
     }
 
@@ -462,17 +497,18 @@ public class Panel extends JPanel {
     public void checkEnemyY() {
 
         for (Enemy e : enemies) {
-            if (e.y > 780) {
+            if (e.y > 780 ) {
                 e.y = -50; // wyjdzie jeszcze raz zza ekranu
                 health--;
                 System.out.println("przeciwniik ma punkt");
             }
         }
+
+        coinsQuantity.removeIf(c -> c.y > 780);
         checkHealth();
     }
 
     public void checkEnemyShoot() {
-
 
         for (int b = 0; b < boos.bullets.size(); b++) {
             if (boos.bullets.get(b).yShoot > 780) {
