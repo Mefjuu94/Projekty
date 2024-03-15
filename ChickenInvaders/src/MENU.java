@@ -61,6 +61,7 @@ public class MENU implements MouseListener, KeyListener {
 
     public void pause(Graphics2D g2d) {
 
+        //TODO ogarnąć temat pauzy
         if (Panel.State == Panel.STATE.Pause) {
             g2d.setColor(Color.darkGray);
             g2d.fillRect(150, 150, 500, 500);
@@ -358,7 +359,14 @@ public class MENU implements MouseListener, KeyListener {
                 save.setVisible(false);
                 exit.setVisible(false);
                 goToShop.setVisible(false);
+                talentPoints.tabbedPane.setVisible(true);
+                talentPoints.turnOnOffShopButtons(true);
+                talentPoints.AddPanel();
+                talentPoints.setButtons(true);
+                talentPoints.turnOnOffShopButtons(true);
+
                 Panel.State = Panel.STATE.TalentPoints;
+
             }
         }
 

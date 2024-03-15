@@ -4,13 +4,15 @@ import java.util.List;
 import java.util.*;
 
 public class Panel extends JPanel {
+
     final int WIDTH = 800;
     final int HEIGHT = 800;
 
-    int scorePoints = 0;
+    int scorePoints = 10;
     int coinsMoney = 100;
 
     Hero hero = new Hero();
+    Enemy enemy;
     String name = "";
     boolean death = false;
 
@@ -41,10 +43,12 @@ public class Panel extends JPanel {
     Help firstaid = new Help();
     List<Coins> coinsQuantity = new ArrayList<>();
 
-    TalentPoints talentPoints = new TalentPoints(this, obstacle.obstacleActive, obstacle);
-    int health = 599999 + talentPoints.healthPoints;
+    TalentPoints talentPoints = new TalentPoints(this, obstacle.obstacleActive, obstacle,hero,enemy);
+    int health = 99 + talentPoints.healthPoints;
     MENU menu = new MENU(talentPoints, hero, this, save, load, exit,goToShop);
     boolean[][] reflectOfBullet = new boolean[350][obstacle.getQuantity()];
+
+
 
     public Panel() {
 
@@ -74,10 +78,9 @@ public class Panel extends JPanel {
         GAME,
         Pause,
         TalentPoints,
-        SHOP
     }
 
-    public static STATE State = STATE.TalentPoints; /// zmienic na GAME zeby grac STATE.STATE.TalentPoints
+    public static STATE State = STATE.MENU; /// zmienic na GAME zeby grac STATE.STATE.TalentPoints
 
     public void CreateEnemiesAgain() {
 
@@ -104,7 +107,7 @@ public class Panel extends JPanel {
                     randomArray = generateRandomArray(iloscNaOS, 0, 15);
                 }
 
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50)));
+                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50),talentPoints));
             }
         } else {
             boos.ActiveBoss = true;
@@ -123,7 +126,7 @@ public class Panel extends JPanel {
                     randomArray = generateRandomArray(iloscNaOS, 0, 15);
                 }
 
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50)));
+                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50),talentPoints));
             }
         }
 
@@ -160,6 +163,7 @@ public class Panel extends JPanel {
         if (State == STATE.MENU) {
             menu.Draw(g2d, start, exit);
         } else if (State == STATE.GAME) {
+            this.removeAll(); // < czyści żeby zostały wsyztskie potrzebne info
             talentPoints.setButtons(false); // ukrywa buttony z talentów
 
             load.setVisible(false);
@@ -173,10 +177,10 @@ public class Panel extends JPanel {
                 movebackgroundY = -1600;
             }
 
+
             this.hero.paint(g2d, this, talentPoints.tripleShoots, talentPoints.bigShootEnable);   // rysuje również  pocisk
 
             // rysuj przeciwnika
-
             for (Enemy i : enemies) {  //eneny to jest "i"
                 i.paint(g2d, this);
             }
@@ -213,7 +217,9 @@ public class Panel extends JPanel {
                 c.paint(g2d,this);
             }
 
+
             //infopanel
+            assert boos != null;
             if (!boos.ActiveBoss) {
                 this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney,this);
             } else {
@@ -225,8 +231,9 @@ public class Panel extends JPanel {
             menu.pause(g2d);
 
         } else if (State == STATE.TalentPoints) {
+
             hero.bullets.removeAll(hero.bullets);
-            talentPoints.paintTalentTree(g2d, this, this);
+            talentPoints.paintTalentTree(g2d, this);
             hero.bulletCounter = 0; // wyzeropwanie licznika pocisków wystrzerlonych PODCZAS SESJI
             firstaid = new Help();
         }
@@ -324,6 +331,11 @@ public class Panel extends JPanel {
             scorePoints = scorePoints + talentPoints.calcualteStats(enemiesNumber, health, hero.bulletCounter); // pocli9cz se punkty po grze
             talentPoints.LEVEL++;
             System.out.println("promote to level: " + talentPoints.LEVEL);
+            talentPoints.tabbedPane.setVisible(true);
+            talentPoints.turnOnOffShopButtons(true);
+            talentPoints.AddPanel();
+            talentPoints.setButtons(true);
+            talentPoints.turnOnOffShopButtons(true);
             talentPoints.firstLoad = true;
             State = STATE.TalentPoints;   /// zmień na okno punktów talentów do wydania punktów
         }
@@ -426,7 +438,7 @@ public class Panel extends JPanel {
                 calc++;
                 for (int j = 0; j < obstacle.quantity; j++) {
 
-                    if (hero.bullets.get(i).yShoot <= obstacle.y[j] && hero.bullets.get(i).yShoot + 5 > obstacle.y[j] - 5 &&
+                    if (hero.bullets.get(i).yShoot <= obstacle.y[j] && hero.bullets.get(i).yShoot + 7 > obstacle.y[j] - 7 &&
                             hero.bullets.get(i).xShoot > obstacle.x[j] - 5 && hero.bullets.get(i).xShoot <= obstacle.x[j] + obstacle.obstacleWidth[j]
                             && !reflectOfBullet[i][j]) {
 
@@ -483,7 +495,7 @@ public class Panel extends JPanel {
             obstacle.quantity = 7;
         }
 
-        obstacle.setQuantity(15);
+        //obstacle.setQuantity(12);
 
         makeArrayToCheckReflect();
         System.out.println(obstacle.getQuantity() + " << ilość kładek");
@@ -576,6 +588,16 @@ public class Panel extends JPanel {
     public void checkBoss() {
 
         checkHealth();
+    }
+
+    public int enemySkin(){
+
+        if (talentPoints.chickenEnemySkin3bool){
+            return 3;
+        }
+
+
+        return 0;
     }
 
 

@@ -14,6 +14,8 @@ public class Hero implements KeyListener {
     public int y = 750;
 
     public ImageIcon heroIcon = new ImageIcon("src/ICONS/hero1.png"); // zrobić ścieżkę
+
+
     ImageIcon bigShootIcon = new ImageIcon("src/ICONS/big.png");
 
     public int getBullets() {

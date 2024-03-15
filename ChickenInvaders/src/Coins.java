@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Coins {
 
-    int coinsSpeed = 2;
+    int coinsSpeed = 3;
     ImageIcon coinIcon = new ImageIcon("src/ICONS/smallCoin-unscreen.gif");
     int x, y;
 
