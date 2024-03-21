@@ -4,11 +4,11 @@ import java.awt.*;
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         JFrame ramka = new JFrame("Chicken Invaders");
-        Panel panel = new Panel();
+        Panel panel = new Panel(ramka);
         ramka.add(panel);
         //ramka.setIconImage();
         ramka.setVisible(true);
-        ramka.setResizable(false);
+        ramka.setResizable(true);
         ramka.setDefaultCloseOperation(3);
         ramka.pack();
 

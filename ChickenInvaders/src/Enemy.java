@@ -10,7 +10,7 @@ public class Enemy {
     int enemySize = 48; //px
     int enemyMiddle = 24;
 
-    int enemySpeed = 1;
+    int enemySpeed = 2;
     int[] ensmiesSpeed;
 
 
@@ -49,9 +49,9 @@ public class Enemy {
 
         ensmiesSpeed = new int[panel.enemiesNumber];
 
-        if (talentPoints.LEVEL > 5) {
-            enemySpeed = 2;
-        }
+//        if (talentPoints.LEVEL > 5) {
+//            enemySpeed = 3;
+//        }
         y = y + enemySpeed;
 
         ///dopisać ruchy w lewo i prawo

@@ -5,7 +5,7 @@ import java.util.Random;
 public class Help {
 
 
-    int firstAidQuantity = 5;
+    int firstAidQuantity = 25;
     ImageIcon firstAidIcon = new ImageIcon("src/ICONS/firstAid.png");
     int firstAidleft = firstAidQuantity;
 
@@ -15,38 +15,42 @@ public class Help {
     int i = 0;
 
     {
-        for (int i = 0; i <firstAidQuantity ; i++) {
+        for (int i = 0; i < firstAidQuantity; i++) {
             goDown[i] = false;
         }
     }
 
+    int widthOfFirstAid;
+
     boolean helpActive = true;
 
 
-    Help(){
 
+    Help(int widthOfFirstAid) {
+        this.widthOfFirstAid = widthOfFirstAid;
         generateRandomPosition();
     }
 
-    private void generateRandomPosition(){
+    private void generateRandomPosition() {
         Random random = new Random();
 
         for (int i = 0; i < firstAidQuantity; i++) {
-            x[i] = random.nextInt(500);
+
+            x[i] = random.nextInt(widthOfFirstAid - 150);
             y[i] = 0;
         }
     }
 
 
-    public void drawHelp(Graphics2D g2d, Panel panel){
+    public void drawHelp(Graphics2D g2d, Panel panel) {
 
 
-       for (int i = 0; i < firstAidQuantity; i++) {
-           this.firstAidIcon.paintIcon(panel, g2d, x[i], y[i]);
-           if (goDown[i]){
-               y[i] += 2;
-           }
-       }
+        for (int i = 0; i < firstAidQuantity; i++) {
+            this.firstAidIcon.paintIcon(panel, g2d, x[i], y[i]);
+            if (goDown[i]) {
+                y[i] += 2;
+            }
+        }
     }
 
     public int Generate() {
@@ -54,7 +58,7 @@ public class Help {
         //zrobić!!
         Random rand = new Random();
 
-        if (rand.nextInt(150) == 25 && i < firstAidQuantity){
+        if (rand.nextInt(26) == 25 && i < firstAidQuantity) {
             System.out.println("pomoc nadchodzi!!");
             goDown[i] = true;
             i++;
@@ -65,8 +69,8 @@ public class Help {
 
     }
 
-    public void odpalPomoc(Graphics2D g2d, Panel panel){
+    public void odpalPomoc(Graphics2D g2d, Panel panel) {
         Generate();
-        drawHelp(g2d,panel);
+        drawHelp(g2d, panel);
     }
 }

@@ -27,6 +27,7 @@ public class MENU implements MouseListener, KeyListener {
     ArrayList<String> namesList = new ArrayList<String>();
     String[][] loadData = new String[99][11];
 
+    JButton setFullscreen = new JButton("Fullscreen Mode");
 
     public MENU(TalentPoints talentPoints, Hero hero, Panel panel, JButton save, JButton load, JButton exit,JButton goToShop) {
         this.talentPoints = talentPoints;
@@ -41,6 +42,9 @@ public class MENU implements MouseListener, KeyListener {
         load.addMouseListener(this);
         exit.addMouseListener(this);
         goToShop.addMouseListener(this);
+        setFullscreen.addMouseListener(this);
+        panel.add(setFullscreen);
+        setFullscreen.setVisible(false);
     }
 
     public void Draw(Graphics2D g2d, JButton start, JButton exit) {
@@ -50,7 +54,11 @@ public class MENU implements MouseListener, KeyListener {
         } else {
             y = 0;
         }
-        logo.paintIcon(panel, g2d, 0, y);
+        if (panel.fullScreenMode || panel.resizeMode){
+        logo.paintIcon(panel, g2d, panel.getWidth()/2-400, y);
+        }else {
+            logo.paintIcon(panel, g2d, 0, y);
+        }
 
         if (y == 0) {
             mainMenu(start, exit);
@@ -81,7 +89,7 @@ public class MENU implements MouseListener, KeyListener {
             exit.setFocusable(false);
             exit.setVisible(true);
 
-            goToShop.setBounds(650, 750, 150, 30);
+            goToShop.setBounds(panel.getWidth()-150, 750, 150, 30);
             goToShop.setSize(150, 30);
             goToShop.setFocusable(false);
             goToShop.setVisible(true);
@@ -91,37 +99,38 @@ public class MENU implements MouseListener, KeyListener {
 
     public void mainMenu(JButton start, JButton exit) {
 
-        start.setBounds(300, 350, 150, 50);
+        start.setBounds(panel.getWidth()/2 - 100, 350, 150, 50);
         start.setSize(200, 76);
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 play = true;
-                panel.makeArrayToCheckReflect();
+                //panel.makeArrayToCheckReflect();
                 Panel.State = Panel.STATE.GAME;
                 start.setVisible(false);
                 exit.setVisible(false);
                 load.setVisible(false);
                 save.setVisible(false);
                 goToShop.setVisible(false);
+                setFullscreen.setVisible(false);
             }
         });
 
 
-        load.setBounds(300, 450, 150, 50);
+        load.setBounds(panel.getWidth()/2 - 100, 450, 150, 50);
         load.setSize(200, 76);
         load.setVisible(true);
 
 
-        ////dokonczyc save button!!!!!!
-        save.setBounds(300, 550, 150, 50);
+        // TODO//dokonczyc save button!!!!!!
+        save.setBounds(panel.getWidth()/2 - 100, 550, 150, 50);
         save.setSize(200, 76);
         save.setVisible(true);
 
 
         start.setVisible(true);
 
-        exit.setBounds(300, 650, 150, 50);
+        exit.setBounds(panel.getWidth()/2 - 100, 650, 150, 50);
         exit.setSize(200, 76);
         exit.setVisible(true);
         exit.addActionListener(new ActionListener() {
@@ -131,49 +140,54 @@ public class MENU implements MouseListener, KeyListener {
             }
         });
 
-        goToShop.setBounds(630, 750, 150, 30);
+        goToShop.setBounds(panel.getWidth() - 180, panel.getHeight() - 50, 150, 30);
         goToShop.setSize(150, 30);
         goToShop.setVisible(true);
 
+
+        setFullscreen.setBounds(50, panel.getHeight() - 50, 150, 30);
+        setFullscreen.setSize(150, 30);
+        setFullscreen.setFocusable(false);
+        setFullscreen.setVisible(true);
 
     }
 
     private void drawCurrentStatsAndName(Graphics2D g2d) {
 
-        Font statsFont = new Font("Arial", Font.BOLD, 22);
-        g2d.setFont(statsFont);
-
-
-        g2d.setColor(Color.ORANGE);
-
-        g2d.drawRect(0, 350, 250, 380);
-
-        g2d.drawString("All bullets counter :", 10, 380);
-        g2d.drawString(String.valueOf(panel.allShootsBulletsnumber), 10, 410);
-
-        g2d.drawString("Enemies Killed :", 10, 480);
-        g2d.drawString(String.valueOf(panel.allEnemiesKilled), 10, 510);
-
-        g2d.drawString("Bullets missed :", 10, 580);
-        g2d.drawString(String.valueOf(panel.bulletsMissed), 10, 610);
-
-        double ratio = 0;
-        String ratioString = "";
-        if (panel.allEnemiesKilled > 0 && panel.allShootsBulletsnumber > 0) {
-            ratio = (double) panel.allEnemiesKilled / panel.allShootsBulletsnumber;
-            DecimalFormat df = new DecimalFormat("#.##");
-            ratioString = df.format(ratio);
-        }
-        g2d.drawString("ratio: ", 10, 680);
-        g2d.drawString(ratioString, 10, 710);
-
-        g2d.drawRect(600, 500, 180, 220);
-
-        g2d.drawString("current level :", 610, 540);
-        g2d.drawString(String.valueOf(talentPoints.LEVEL), 610, 570);
-
-        g2d.drawString("Score points :", 610, 640);
-        g2d.drawString(String.valueOf(talentPoints.score), 610, 670);
+//        Font statsFont = new Font("Arial", Font.BOLD, 22);
+//        g2d.setFont(statsFont);
+//
+//
+//        g2d.setColor(Color.ORANGE);
+//
+//        g2d.drawRect(0, 350, 250, 380);
+//
+//        g2d.drawString("All bullets counter :", 10, 380);
+//        g2d.drawString(String.valueOf(panel.allShootsBulletsnumber), 10, 410);
+//
+//        g2d.drawString("Enemies Killed :", 10, 480);
+//        g2d.drawString(String.valueOf(panel.allEnemiesKilled), 10, 510);
+//
+//        g2d.drawString("Bullets missed :", 10, 580);
+//        g2d.drawString(String.valueOf(panel.bulletsMissed), 10, 610);
+//
+//        double ratio = 0;
+//        String ratioString = "";
+//        if (panel.allEnemiesKilled > 0 && panel.allShootsBulletsnumber > 0) {
+//            ratio = (double) panel.allEnemiesKilled / panel.allShootsBulletsnumber;
+//            DecimalFormat df = new DecimalFormat("#.##");
+//            ratioString = df.format(ratio);
+//        }
+//        g2d.drawString("ratio: ", 10, 680);
+//        g2d.drawString(ratioString, 10, 710);
+//
+//        g2d.drawRect(panel.getWidth()-200, 500, 180, 220);
+//
+//        g2d.drawString("current level :", panel.getWidth()-190, 540);
+//        g2d.drawString(String.valueOf(talentPoints.LEVEL), panel.getWidth()-190, 570);
+//
+//        g2d.drawString("Score points :", panel.getWidth()-190, 640);
+//        g2d.drawString(String.valueOf(talentPoints.score), panel.getWidth()-190, 670);
 
 
     }
@@ -359,14 +373,44 @@ public class MENU implements MouseListener, KeyListener {
                 save.setVisible(false);
                 exit.setVisible(false);
                 goToShop.setVisible(false);
-                talentPoints.tabbedPane.setVisible(true);
-                talentPoints.turnOnOffShopButtons(true);
-                talentPoints.AddPanel();
+                setFullscreen.setVisible(false);
+
+                talentPoints.AddPanel(panel.fullScreenMode,panel.resizeMode);
                 talentPoints.setButtons(true);
                 talentPoints.turnOnOffShopButtons(true);
 
                 Panel.State = Panel.STATE.TalentPoints;
+            }
 
+        }
+
+        if (e.getSource() == setFullscreen){
+            System.out.println("klik na fullSCREEN!");
+
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            int screenHeight = screenSize.height;
+            int screenWidth = screenSize.width;
+            System.out.println(screenHeight);
+            System.out.println(screenWidth);
+            System.out.println("panel " + panel.getHeight());
+            System.out.println("panel: " + panel.getWidth());
+
+            if (panel.getHeight() < screenHeight && panel.getWidth() < screenWidth ){
+
+                //panel.setMaximumSize(new Dimension());
+                System.out.println("jest mniejsze powinienem powiększyć");
+                panel.ramka.setExtendedState(panel.ramka.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+                panel.fullScreenMode = !panel.fullScreenMode;
+                setFullscreen.setText("SmallScreen mode");
+                panel.firstaid = new Help(panel.ramka.getWidth());
+                hero.x = panel.ramka.getWidth()/2-50;
+            }else if (panel.getHeight() == screenHeight -71 && panel.getWidth() == screenWidth){
+                System.out.println("jest większe powienien zmienjszyc");
+                panel.ramka.setSize(800,830);
+                panel.firstaid = new Help(panel.ramka.getWidth());
+                setFullscreen.setText("Fullscreen Mode");
+                hero.x = panel.ramka.getWidth()/2-50;
+                panel.fullScreenMode = !panel.fullScreenMode;
             }
         }
 
@@ -399,7 +443,7 @@ public class MENU implements MouseListener, KeyListener {
 
         if (code == 27) {
             Panel.STATE State = Panel.STATE.GAME;
-            panel.makeArrayToCheckReflect();
+            //panel.makeArrayToCheckReflect();
         }
 
     }

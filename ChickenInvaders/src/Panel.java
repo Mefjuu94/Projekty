@@ -1,12 +1,29 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.io.File;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.*;
+import java.util.Timer;
 
 public class Panel extends JPanel {
 
-    final int WIDTH = 800;
-    final int HEIGHT = 800;
+    public void setWIDTH(int WIDTH) {
+        this.WIDTH = WIDTH;
+    }
+
+    public void setHEIGHT(int HEIGHT) {
+        this.HEIGHT = HEIGHT;
+    }
+
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int WIDTH = 800;
+    int HEIGHT = 800;
+    boolean fullScreenMode = false;
+    boolean resizeMode = false;
 
     int scorePoints = 10;
     int coinsMoney = 100;
@@ -15,6 +32,11 @@ public class Panel extends JPanel {
     Enemy enemy;
     String name = "";
     boolean death = false;
+    RandomGameBonus gameBonus = new RandomGameBonus();
+    boolean bonusActivated = false;
+    boolean speedIdUp = false;
+    LocalDateTime czas = LocalDateTime.now();
+    int czasNano;
 
     int countTurn = 0;
 
@@ -33,24 +55,31 @@ public class Panel extends JPanel {
 
 
     ImageIcon background = new ImageIcon("src/Backgrounds/level1Recznie.jpg");
+    ImageIcon backgroundSpeed = new ImageIcon("src/Backgrounds/BackgroundSpace1.gif");
     int movebackgroundY = -1600;
-    int allEnemiesKilled = 0;
+    int allEnemiesKilled = 60;
     int allShootsBulletsnumber = 0;
     int bulletsMissed = allShootsBulletsnumber - allEnemiesKilled;
 
     Boos boos = new Boos();
-    Obstacle obstacle = new Obstacle();
-    Help firstaid = new Help();
+    Obstacle obstacle = new Obstacle(this);
+    Help firstaid;
     List<Coins> coinsQuantity = new ArrayList<>();
 
-    TalentPoints talentPoints = new TalentPoints(this, obstacle.obstacleActive, obstacle,hero,enemy);
+    TalentPoints talentPoints = new TalentPoints(this, obstacle.obstacleActive, obstacle, hero, enemy);
     int health = 99 + talentPoints.healthPoints;
-    MENU menu = new MENU(talentPoints, hero, this, save, load, exit,goToShop);
+    MENU menu = new MENU(talentPoints, hero, this, save, load, exit, goToShop);
     boolean[][] reflectOfBullet = new boolean[350][obstacle.getQuantity()];
 
 
+    Panel panelItself;
+    JFrame ramka;
 
-    public Panel() {
+    public Panel(JFrame ramka) {
+        this.ramka = ramka;
+
+
+        panelItself = this;
 
         CreateEnemiesAgain();
 
@@ -70,6 +99,20 @@ public class Panel extends JPanel {
         this.add(goToShop);
         goToShop.setVisible(false);
 
+        ramka.addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent componentEvent) {
+                if (ramka.getWidth() > 1000 ) {
+                    resizeMode = true;
+                }else if (fullScreenMode){
+                    resizeMode = false;
+                }
+                System.out.println(resizeMode);
+                if (State == STATE.TalentPoints && resizeMode){
+                    talentPoints.AddPanel(fullScreenMode, resizeMode);
+                }
+            }
+        });
+
     }
 
 
@@ -80,77 +123,26 @@ public class Panel extends JPanel {
         TalentPoints,
     }
 
-    public static STATE State = STATE.MENU; /// zmienic na GAME zeby grac STATE.STATE.TalentPoints
+    public static STATE State = STATE.TalentPoints; /// zmienic na GAME zeby grac STATE.STATE.TalentPoints
 
-    public void CreateEnemiesAgain() {
-
-        if (death) {
-            enemiesNumber = 3;
-            death = false;
-        }
-
-        enemiesNumber = (talentPoints.LEVEL * enemiesNumber) - (talentPoints.LEVEL * enemiesNumber / 3);
-        if (talentPoints.LEVEL > 4) {
-            enemiesNumber = (talentPoints.LEVEL * 10);
-        }
-
-        if (talentPoints.LEVEL % 8 != 0) {
-            howManyEnemiesInLine();
-            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
-
-            int alotOfEnemiesGap = enemiesNumber / 25;
-            System.out.println(enemiesNumber);
-            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
-
-            for (int i = 0; i < enemiesNumber; i++) {
-                if (i % iloscNaOS == 0) {
-                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
-                }
-
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50),talentPoints));
-            }
-        } else {
-            boos.ActiveBoss = true;
-        }
-
-        if (enemies.size() <= 1) {
-            howManyEnemiesInLine();
-            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
-
-            int alotOfEnemiesGap = enemiesNumber / 25;
-            System.out.println(enemiesNumber);
-            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
-
-            for (int i = 0; i < enemiesNumber; i++) {
-                if (i % iloscNaOS == 0) {
-                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
-                }
-
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50),talentPoints));
-            }
-        }
-
-        if (talentPoints.LEVEL > 0) {
-            obstacle = new Obstacle();
-            quantityOfObstacle();
-            obstacle.obstacleActive = true;
-        }
-        
-       // System.out.println(enemiesNumber + " ilość przeciwników co do lvlu");
-       // System.out.println(enemies.size() + " wielkość tablicy która powinna być taka sama co ilość przeciwników");
-    }
 
     private void howManyEnemiesInLine() {
 
-        if (talentPoints.LEVEL >= 3) {
-            iloscNaOS = 4;
-        }
 
-        if (talentPoints.LEVEL >= 6) {
-            iloscNaOS = 6;
-        }
-        if (talentPoints.LEVEL >= 9) {
-            iloscNaOS = 8;
+        if (ramka.getWidth() > 0){
+            iloscNaOS = ramka.getWidth()/160;
+        }else {
+
+            if (talentPoints.LEVEL >= 3) {
+                iloscNaOS = 4;
+            }
+
+            if (talentPoints.LEVEL >= 6) {
+                iloscNaOS = 6;
+            }
+            if (talentPoints.LEVEL >= 9) {
+                iloscNaOS = 8;
+            }
         }
 
     }
@@ -163,15 +155,18 @@ public class Panel extends JPanel {
         if (State == STATE.MENU) {
             menu.Draw(g2d, start, exit);
         } else if (State == STATE.GAME) {
-            this.removeAll(); // < czyści żeby zostały wsyztskie potrzebne info
-            talentPoints.setButtons(false); // ukrywa buttony z talentów
+            turnOffButtonsAndPanelsToPlay(false);
 
-            load.setVisible(false);
-            save.setVisible(false);
-            exit.setVisible(false);
-            goToShop.setVisible(false);
 
             background.paintIcon(this, g2d, 0, movebackgroundY);
+            if (fullScreenMode || resizeMode){
+                int backgroundX = ramka.getWidth() / 820;
+                int xBackground = 0;
+                for (int i = 0; i < backgroundX +1 ; i++) {
+                    background.paintIcon(this,g2d,xBackground,movebackgroundY);
+                    xBackground+=820;
+                }
+            }
             movebackgroundY = movebackgroundY + 1;
             if (movebackgroundY == 0) {
                 movebackgroundY = -1600;
@@ -197,6 +192,8 @@ public class Panel extends JPanel {
             } else {                 // jak boss jest aktywny nie usuwaj bulletów, bo automatycznie usuwa gdy chickenów małych jest 0 i wychodzi do menu
                 if (enemies.size() < 1) {
                     obstacle.obstacleActive = false;
+                    bonusActivated = false;
+                    coinsQuantity.removeAll(coinsQuantity);
                     hero.bullets.removeAll(hero.bullets);
                     CreateEnemiesAgain();
                 }
@@ -213,17 +210,41 @@ public class Panel extends JPanel {
             }
 
             //rysuj pieniążek!
-            for (Coins c: coinsQuantity) {
-                c.paint(g2d,this);
+            for (Coins c : coinsQuantity) {
+                c.paint(g2d, this);
+            }
+
+            //rysuj ewentualny Bonus
+            gameBonus.LosowanieBonusu(g2d, this);
+            bonusKolizja();
+
+
+            //TODO zrobić bo nie oblciza dobrze czasu przy +55 sek
+            if (bonusActivated) {
+                System.out.println("int: " + czasNano);
+                czas = LocalDateTime.now();
+                int sekundy = czas.getSecond();
+                System.out.println("localdataTime: " + czas.getSecond());
+                if (czasNano > 55) {
+                    czasNano = czasNano - 60;
+                }
+
+
+                if (czas.getSecond() > czasNano + 5) {
+                    for (Enemy value : enemies) {
+                        value.enemySpeed = 2;
+                    }
+                    bonusActivated = false;
+                }
             }
 
 
-            //infopanel
+            // infopanel
             assert boos != null;
             if (!boos.ActiveBoss) {
-                this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney,this);
+                this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney, this);
             } else {
-                this.info.paintInfopanel(g2d, boos.bossHP, health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney,this); //< info zamiast kurczków to hp bosa
+                this.info.paintInfopanel(g2d, boos.bossHP, health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney, this); //< info zamiast kurczków to hp bosa
             }
 
         } else if (State == STATE.Pause) {
@@ -234,8 +255,9 @@ public class Panel extends JPanel {
 
             hero.bullets.removeAll(hero.bullets);
             talentPoints.paintTalentTree(g2d, this);
+            talentPoints.buttonsAndScore.setVisible(true);
             hero.bulletCounter = 0; // wyzeropwanie licznika pocisków wystrzerlonych PODCZAS SESJI
-            firstaid = new Help();
+            firstaid = new Help(WIDTH);
         }
 
 
@@ -246,10 +268,10 @@ public class Panel extends JPanel {
 
         if (State == STATE.GAME) {
 
-            this.hero.updateMove();
+            hero.updateMove();
 
             if (boos != null && boos.ActiveBoss) {
-                this.boos.updateMove();
+                boos.updateMove();
                 checkBoss();
                 kolizjeBoss();
                 checkEnemyShoot();
@@ -257,9 +279,9 @@ public class Panel extends JPanel {
                     obstacleCollision();
                 }
             } else {
-                this.kolizje();
+                kolizje();
                 for (Enemy i : enemies) {  //eneny to jest "i"
-                    i.update(talentPoints,this);
+                    i.update(talentPoints, panelItself);
                     if (enemies.size() <= 0) {
                         obstacle.obstacleActive = false;
                     }
@@ -267,11 +289,11 @@ public class Panel extends JPanel {
                         obstacleCollision();
                     }
                 }
-                this.checkEnemyY();
+                checkEnemyY();
 
                 kolizjeCoins();
 
-                for (Coins c: coinsQuantity) {
+                for (Coins c : coinsQuantity) {
                     c.update(c);
                 }
             }
@@ -279,6 +301,19 @@ public class Panel extends JPanel {
 
         }
         this.repaint();
+    }
+
+    private void turnOffButtonsAndPanelsToPlay(boolean tf){
+        talentPoints.setButtons(tf); // ukrywa buttony z talentów
+        talentPoints.buttonsAndScore.setVisible(tf);
+        talentPoints.FullscreenMode.setVisible(tf);
+        talentPoints.tabbedPane.setVisible(tf);
+
+        load.setVisible(tf);
+        save.setVisible(tf);
+        exit.setVisible(tf);
+        goToShop.setVisible(tf);
+        menu.setFullscreen.setVisible(tf);
     }
 
 
@@ -300,7 +335,7 @@ public class Panel extends JPanel {
                         hero.bullets.get(i).xShoot <= enemies.get(j).x + 48 && hero.bullets.get(i).xShoot > enemies.get(j).x) {
 
 
-                    coinsQuantity.add(new Coins(enemies.get(j).x,enemies.get(j).y));
+                    coinsQuantity.add(new Coins(enemies.get(j).x, enemies.get(j).y));
                     enemies.remove(j);
                     System.out.println("dodano " + j + " do coins");
 
@@ -324,16 +359,19 @@ public class Panel extends JPanel {
             firstaid.firstAidQuantity += 1;
             obstacle.quantity += 1;
 
+            hero.bullets.removeAll(hero.bullets);
+            hero.setTurnOfBullet.removeAll(hero.setTurnOfBullet);
+
             firstaid.helpActive = false;
             bulletsMissed = hero.bulletCounter - enemiesNumber;
             System.out.println(bulletsMissed + "<< ilosc nietarfionych");
 
-            scorePoints = scorePoints + talentPoints.calcualteStats(enemiesNumber, health, hero.bulletCounter); // pocli9cz se punkty po grze
+            scorePoints = scorePoints + talentPoints.calcualteStats(enemiesNumber, hero.bulletCounter); // pocli9cz se punkty po grze
             talentPoints.LEVEL++;
             System.out.println("promote to level: " + talentPoints.LEVEL);
             talentPoints.tabbedPane.setVisible(true);
             talentPoints.turnOnOffShopButtons(true);
-            talentPoints.AddPanel();
+            talentPoints.AddPanel(fullScreenMode, resizeMode);
             talentPoints.setButtons(true);
             talentPoints.turnOnOffShopButtons(true);
             talentPoints.firstLoad = true;
@@ -341,6 +379,32 @@ public class Panel extends JPanel {
         }
 
     }
+
+    private void bonusKolizja() {
+
+        if (gameBonus.y + 80 >= hero.y && gameBonus.y < hero.y + 48 && gameBonus.x + 30 < hero.x + 48 && gameBonus.x + 10 > hero.x) {
+            System.out.println("Aktywacja bonusu!");
+            gameBonus.y = -5900;
+            gameBonus.x = -5900;
+            if (gameBonus.chooseBonus() == 0) {
+                for (int i = 0; i < enemies.size(); i++) {
+                    enemies.get(i).enemySpeed = 5;
+                }
+
+            }
+            if (gameBonus.chooseBonus() == 1) {
+                for (int i = 0; i < enemies.size(); i++) {
+                    enemies.get(i).enemySpeed = 1;
+                }
+
+            }
+            bonusActivated = true;
+            czas = LocalDateTime.now();
+            czasNano = LocalDateTime.now().getSecond();
+        }
+
+    }
+
 
     private void firstAidKolizje() {
 
@@ -354,7 +418,7 @@ public class Panel extends JPanel {
                 firstaid.y[i] = -20;
             }
             //przenieś i przestań ruszać
-            if (firstaid.y[i] > 800) {
+            if (firstaid.y[i] > getHeight()) {
                 firstaid.goDown[i] = false;
                 firstaid.x[i] = -20;
                 firstaid.y[i] = -20;
@@ -364,7 +428,7 @@ public class Panel extends JPanel {
 
     }
 
-    public void kolizjeCoins(){
+    public void kolizjeCoins() {
         for (int i = 0; i < coinsQuantity.size(); i++) {
 
             if (coinsQuantity.get(i).y + 40 >= hero.y && coinsQuantity.get(i).y < hero.y + 48 && coinsQuantity.get(i).x + 30 < hero.x + 48 && coinsQuantity.get(i).x + 10 > hero.x) {
@@ -433,27 +497,29 @@ public class Panel extends JPanel {
         int calc = 0;
         for (int i = 0; i < hero.bullets.size(); i++) {
 
-            if (hero.bullets.get(i).yShoot > 0 && hero.bullets.get(i).yShoot < 800) {
+            if (hero.bullets.get(i).yShoot > 0 && hero.bullets.get(i).yShoot < getHeight()) {
 
                 calc++;
                 for (int j = 0; j < obstacle.quantity; j++) {
 
                     if (hero.bullets.get(i).yShoot <= obstacle.y[j] && hero.bullets.get(i).yShoot + 7 > obstacle.y[j] - 7 &&
                             hero.bullets.get(i).xShoot > obstacle.x[j] - 5 && hero.bullets.get(i).xShoot <= obstacle.x[j] + obstacle.obstacleWidth[j]
-                            && !reflectOfBullet[i][j]) {
+                            && !hero.bullets.get(i).obstacles[j]) { // tu ejst błąd
 
                         System.out.println("zawróć! " + i);
 
                         if (!talentPoints.antiReflectBullet) {
-                            hero.setTurnOfBullet.set(i, hero.setTurnOfBullet.get(i) * (-1)); // odbija sie
+                            //hero.setTurnOfBullet.set(i, hero.setTurnOfBullet.get(i) * (-1)); // odbija sie
+                            hero.bullets.get(i).turn *= -1;
 
-                            makeArrayToCheckReflect();
-                            reflectOfBullet[i][j] = true;
+                            makeArrayToCheckReflect(i);
+                            hero.bullets.get(i).obstacles[j] = true;
+                            //reflectOfBullet[i][j] = true;
 
                         } else {
                             hero.bullets.get(i).yShoot = -209;
                             hero.bullets.get(i).xShoot = -1000;
-                            makeArrayToCheckReflect();
+                            makeArrayToCheckReflect(i);
                             reflectOfBullet[i][j] = true;
 
                         }
@@ -495,35 +561,36 @@ public class Panel extends JPanel {
             obstacle.quantity = 7;
         }
 
-        //obstacle.setQuantity(12);
+        obstacle.setQuantity(12);
 
-        makeArrayToCheckReflect();
+        //makeArrayToCheckReflect(i);
         System.out.println(obstacle.getQuantity() + " << ilość kładek");
 
     }
 
-    public void makeArrayToCheckReflect(){
-        reflectOfBullet = new boolean[350][obstacle.getQuantity()];
+    public void makeArrayToCheckReflect(int i) {
+        //reflectOfBullet = new boolean[350][obstacle.getQuantity()];
+        Arrays.fill(hero.bullets.get(i).obstacles, false);
     }
 
     public void checkEnemyY() {
 
         for (Enemy e : enemies) {
-            if (e.y > 780 ) {
+            if (e.y > getHeight()) {
                 e.y = -50; // wyjdzie jeszcze raz zza ekranu
                 health--;
                 System.out.println("przeciwniik ma punkt");
             }
         }
 
-        coinsQuantity.removeIf(c -> c.y > 780);
+        coinsQuantity.removeIf(c -> c.y > getHeight());
         checkHealth();
     }
 
     public void checkEnemyShoot() {
 
         for (int b = 0; b < boos.bullets.size(); b++) {
-            if (boos.bullets.get(b).yShoot > 780) {
+            if (boos.bullets.get(b).yShoot > getHeight()) {
                 //boos.bullets.remove(b);
                 boos.bullets.get(b).yShoot = -209;
                 boos.bullets.get(b).xShoot = -1000;
@@ -539,6 +606,9 @@ public class Panel extends JPanel {
             ImageIcon die = new ImageIcon("src/ICONS/skull.png");
             JOptionPane.showMessageDialog(this, "Straciłeś wszystkie życia!", "Koniec Gry", 0, die);
             resetStatsAfterDeath();
+            bosseBullets.retainAll(bosseBullets);
+            hero.bullets.removeAll(hero.bullets);
+            coinsQuantity.removeAll(coinsQuantity);
             death = true;
             obstacle.obstacleActive = false;
             State = STATE.MENU;
@@ -590,14 +660,133 @@ public class Panel extends JPanel {
         checkHealth();
     }
 
-    public int enemySkin(){
+    public void makeButtonsMenuVisible(boolean tf) {
+        load.setVisible(tf);
+        save.setVisible(tf);
+        exit.setVisible(tf);
+        goToShop.setVisible(tf);
+    }
 
-        if (talentPoints.chickenEnemySkin3bool){
-            return 3;
+    public void CreateEnemiesAgain() {
+
+        if (death) {
+            enemiesNumber = 3;
+            death = false;
         }
 
+        enemiesNumber = (talentPoints.LEVEL * enemiesNumber) - (talentPoints.LEVEL * enemiesNumber / 3);
+        if (talentPoints.LEVEL > 4) {
+            enemiesNumber = (talentPoints.LEVEL * 10);
+        }
 
-        return 0;
+        if (talentPoints.LEVEL % 8 != 0) {
+            howManyEnemiesInLine();
+            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
+            // size ramka.getwidth/160                        max ramka.getWidth/80
+
+            int alotOfEnemiesGap = enemiesNumber / 25;
+            System.out.println(enemiesNumber);
+            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
+
+            for (int i = 0; i < enemiesNumber; i++) {
+                if (i % iloscNaOS == 0) {
+                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
+                }
+
+                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
+            }
+        } else {
+            boos.ActiveBoss = true;
+        }
+
+        if (enemies.size() <= 1) {
+            howManyEnemiesInLine();
+            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
+
+            int alotOfEnemiesGap = enemiesNumber / 25;
+            System.out.println(enemiesNumber);
+            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
+
+            for (int i = 0; i < enemiesNumber; i++) {
+                if (i % iloscNaOS == 0) {
+                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
+                }
+
+                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
+            }
+        }
+
+        if (talentPoints.LEVEL > 0) {
+            obstacle = new Obstacle(this);
+            quantityOfObstacle();
+            obstacle.obstacleActive = true;
+        }
+
+        firstaid = new Help(WIDTH);
+
+        // System.out.println(enemiesNumber + " ilość przeciwników co do lvlu");
+        // System.out.println(enemies.size() + " wielkość tablicy która powinna być taka sama co ilość przeciwników");
+    }
+
+    public void CreateEnemiesAgainResizeMode() {
+
+        if (death) {
+            enemiesNumber = 3;
+            death = false;
+        }
+
+        enemiesNumber = (talentPoints.LEVEL * enemiesNumber) - (talentPoints.LEVEL * enemiesNumber / 3);
+        if (talentPoints.LEVEL > 4) {
+            enemiesNumber = (talentPoints.LEVEL * 10);
+        }
+
+        if (talentPoints.LEVEL % 8 != 0) {
+            howManyEnemiesInLine();
+            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
+            // size ramka.getwidth/160                        max ramka.getWidth/80
+
+            int alotOfEnemiesGap = enemiesNumber / 25;
+            System.out.println(enemiesNumber);
+            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
+
+            for (int i = 0; i < enemiesNumber; i++) {
+                if (i % iloscNaOS == 0) {
+                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
+                }
+
+                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
+            }
+        } else {
+            boos.ActiveBoss = true;
+        }
+
+        if (enemies.size() <= 1) {
+            howManyEnemiesInLine();
+            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
+
+            int alotOfEnemiesGap = enemiesNumber / 25;
+            System.out.println(enemiesNumber);
+            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
+
+            for (int i = 0; i < enemiesNumber; i++) {
+                if (i % iloscNaOS == 0) {
+                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
+                }
+
+                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
+            }
+        }
+
+        if (talentPoints.LEVEL > 0) {
+            obstacle = new Obstacle(this);
+            quantityOfObstacle();
+            obstacle.obstacleActive = true;
+        }
+
+        firstaid = new Help(WIDTH);
+
+        // System.out.println(enemiesNumber + " ilość przeciwników co do lvlu");
+        // System.out.println(enemies.size() + " wielkość tablicy która powinna być taka sama co ilość przeciwników");
     }
 
 
@@ -644,7 +833,10 @@ public class Panel extends JPanel {
 
 
     public Dimension getPreferredSize() {
-        return new Dimension(WIDTH, HEIGHT);
+        if (!fullScreenMode) {
+            return new Dimension(WIDTH, HEIGHT);
+        }else
+            return new Dimension(screenSize.width,screenSize.height);
     }
 }
 

@@ -18,8 +18,10 @@ public class Obstacle {
     int[] obstacleWidth = new int[quantity];
     Color[] colors = new Color[quantity];
 
+    Panel panel;
 
-    Obstacle(){
+    Obstacle(Panel panel){
+        this.panel = panel;
         for (int i = 0; i < quantity; i++) {
         generateRandomPosition(i);
         }
@@ -58,10 +60,9 @@ public class Obstacle {
     private void generateRandomPosition(int i){
         Random random = new Random();
 
-            x[i] = random.nextInt(500) + 75;
-            //System.out.println(x[i] + " x");
-            y[i] = random.nextInt(550) + 70;
-            //System.out.println(y[i]  + " y");
+            x[i] = random.nextInt(panel.WIDTH -300) + 75;
+            y[i] = random.nextInt(panel.HEIGHT - 250) + 70;
+
             obstacleWidth[i] = random.nextInt(50) + 30;
             //System.out.println("długość kładki " + i + " = " +  obstacleWidth[i] );
             obstacleSpeed[i] = random.nextInt(4) + 1;
@@ -74,7 +75,7 @@ public class Obstacle {
 
         for (int i = 0; i < quantity; i++) {
 
-            if (x[i] > 800 - obstacleWidth[i] || x[i] <= 2) {
+            if (x[i] > panel.getWidth() - obstacleWidth[i] || x[i] <= 2) {
                 obstacleSpeed[i] = obstacleSpeed[i] * -1;
             }
             x[i] += obstacleSpeed[i];

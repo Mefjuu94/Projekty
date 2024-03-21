@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -19,8 +20,8 @@ public class TalentPoints implements ActionListener {
 
     ImageIcon shoot3x = new ImageIcon("src/ICONS/shoot3x.png");
     JButton trippleShoot = new JButton(shoot3x);
-    boolean tripleShoots = false;
-    int trippleShootsPoints = 0;
+    boolean tripleShoots = true;
+    int trippleShootsPoints = 10;
     JLabel trippleShootshPointsLabel = new JLabel("Tripple shoot: " + trippleShootsPoints + " / 10");
 
     ImageIcon biggerShootIcon = new ImageIcon("src/ICONS/BigSHoot.png");
@@ -35,7 +36,7 @@ public class TalentPoints implements ActionListener {
     JPanel buttonsAndScore = new JPanel();
     JButton returnToMenu = new JButton("<<-return to menu");
     JButton nextLevelButton = new JButton();
-
+    JPanel FullscreenMode = new JPanel();
 
     boolean firstLoad = true;
 
@@ -53,6 +54,7 @@ public class TalentPoints implements ActionListener {
 
     JPanel talents = new JPanel();
     JPanel skins = new JPanel();
+    JPanel centerInfoPanel = new JPanel();
 
     JPanel enemySkins = new JPanel();
     JPanel shipSkins = new JPanel();
@@ -87,6 +89,20 @@ public class TalentPoints implements ActionListener {
     JLabel shipSkin2Label = new JLabel();
     boolean cartoonShipSkin1bool = false;
 
+    JLabel allshots;
+    JLabel allShotsCount;
+    JLabel enemiesKilled;
+    JLabel enemiesKilledCount;
+    JLabel bulletsMissed;
+    JLabel bulletsMissedCount;
+    JLabel ratioLabel;
+    JLabel ratioStringLabel;
+    JLabel scorePoints;
+    JLabel valueOfScore;
+    JLabel coinsmoney;
+    JLabel coinsmoneyImage;
+    ImageIcon coinIcon = new ImageIcon("src/ICONS/smallCoin-unscreen.gif");
+
 
     TalentPoints(Panel panel, boolean obstacleActove, Obstacle obstacle, Hero hero, Enemy enemy) {
 
@@ -99,7 +115,7 @@ public class TalentPoints implements ActionListener {
 
         if (Panel.State == Panel.STATE.TalentPoints) {
             panel.setLayout(new BorderLayout());
-            AddPanel();
+            AddPanel(panel.fullScreenMode,panel.resizeMode);
             setButtons(true);
             turnOnOffShopButtons(true);
             CheckIfTalentCanBeActive();
@@ -125,20 +141,141 @@ public class TalentPoints implements ActionListener {
 
     }
 
-    public void AddPanel() {
+    public void AddPanel(boolean fullScreen, boolean resizeMode) {
 
+        removePanels();
         panel.setLayout(new BorderLayout());
-        panel.add(tabbedPane, BorderLayout.WEST);
-        panel.add(buttonsAndScore,BorderLayout.SOUTH);
 
-        tabbedPane.setBackground(Color.LIGHT_GRAY);
-        tabbedPane.setPreferredSize(new Dimension(550,200));
-        tabbedPane.addChangeListener(e -> System.out.println(tabbedPane.getSelectedIndex()));
+        if (!fullScreen) {
 
-        tabbedPane.add("Talent", talents);
+            panel.add(tabbedPane, BorderLayout.WEST);
+            panel.add(buttonsAndScore, BorderLayout.SOUTH);
+
+            tabbedPane.setBackground(Color.LIGHT_GRAY);
+            tabbedPane.setPreferredSize(new Dimension(550, 200));
+            tabbedPane.addChangeListener(e -> System.out.print(""));
+
+            tabbedPane.add("Talent", talents);
+
+            talents.setBackground(Color.black);
+            talents.setPreferredSize(new Dimension(200, 400));
+            talents.setLayout(null);
+
+            Font statsFont = new Font("Arial", Font.BOLD, 22);
+
+            talents.add(additionalHealth);
+            talents.add(healthPointsLabel);
+            talents.add(bigShoot);
+            talents.add(BigShootPointsLabel);
+            talents.add(trippleShoot);
+            talents.add(trippleShootshPointsLabel);
+            talents.add(antiReflectButton);
+            talents.add(antiReflectPointsLabel);
+
+            additionalHealth.setBounds(60, 20, 80, 80);
+            additionalHealth.setBackground(Color.black);
+            healthPointsLabel.setForeground(Color.WHITE);
+            healthPointsLabel.setFont(statsFont);
+
+            healthPointsLabel.setBounds(160, 20, 180, 80);
+            healthPointsLabel.setBackground(Color.black);
+
+            trippleShoot.setBounds(60, 150, 80, 80);
+            trippleShoot.setBackground(Color.black);
+            trippleShootshPointsLabel.setForeground(Color.WHITE);
+            trippleShootshPointsLabel.setFont(statsFont);
+
+            trippleShootshPointsLabel.setBounds(160, 150, 280, 80);
+            trippleShootshPointsLabel.setBackground(Color.black);
+
+            bigShoot.setBounds(60, 280, 80, 80);
+            bigShoot.setBackground(Color.black);
+            BigShootPointsLabel.setForeground(Color.WHITE);
+            BigShootPointsLabel.setFont(statsFont);
+
+            BigShootPointsLabel.setBounds(160, 280, 280, 80);
+            BigShootPointsLabel.setBackground(Color.black);
+
+            antiReflectButton.setBounds(60, 410, 80, 80);
+            antiReflectButton.setBackground(Color.black);
+            antiReflectPointsLabel.setForeground(Color.WHITE);
+            antiReflectPointsLabel.setFont(statsFont);
+
+            antiReflectPointsLabel.setBounds(160, 410, 1280, 80);
+            antiReflectPointsLabel.setBackground(Color.black);
+
+            skins.setLayout(new GridLayout());
+            tabbedPane.add("Shop", skins);
+
+            skins.add(enemySkins);
+            enemySkins.setLayout(new GridLayout(3, 2));
+
+            enemySkins.add(chickenEnemySkin_1);
+            enemySkins.add(eSkin1Label);
+            enemySkins.add(chickenEnemySkin_2);
+            enemySkins.add(eSkin2Label);
+            enemySkins.add(chickenEnemySkin_3);
+            enemySkins.add(eSkin3Label);
+//
+            skins.add(shipSkins);
+//
+            shipSkins.add(spaceShipSkin_1);
+            shipSkins.add(shipSkin1Label);
+            shipSkins.add(cartoonShipSkin);
+            shipSkins.add(shipSkin2Label);
+
+            Border borderEnemy = new TitledBorder("Enemy Skins");
+            Border borderShip = new TitledBorder("Ship Skins");
+
+            enemySkins.setBorder(borderEnemy);
+            enemySkins.setBackground(Color.GRAY);
+
+            shipSkins.setBorder(borderShip);
+            shipSkins.setBackground(Color.GRAY);
+
+            buttonsAndScore.setLayout(new BorderLayout());
+            buttonsAndScore.add(returnToMenu, BorderLayout.LINE_START);
+            returnToMenu.setBackground(new Color(204, 30, 41));
+            nextLevelButton.setText("Go level " + LEVEL);
+            nextLevelButton.setToolTipText("GO AHEAD!");
+            buttonsAndScore.add(nextLevelButton, BorderLayout.LINE_END);
+            buttonsAndScore.setBackground(Color.black);
+            buttonsAndScore.setPreferredSize(new Dimension(800, 50));
+
+            returnToMenu.setVisible(true);
+            returnToMenu.setBounds(20, 700, 200, 40);
+
+            nextLevelButton.setBounds(550, 700, 200, 40);
+            nextLevelButton.setBackground(new Color(204, 30, 41));
+
+            tabbedPane.setVisible(true);
+
+            turnOnOffShopButtons(true);
+            setButtons(true);
+        } else {
+            removePanels();
+            FullscreenOrResizableMode();
+        }
+
+        if (resizeMode){
+            removePanels();
+            FullscreenOrResizableMode();
+        }
+
+    }
+
+    private void FullscreenOrResizableMode(){
+        panel.setLayout(new BorderLayout());
+
+        panel.add(talents, BorderLayout.WEST);
+        panel.add(centerInfoPanel,BorderLayout.CENTER);
+        panel.add(skins,BorderLayout.EAST);
+        panel.add(buttonsAndScore, BorderLayout.SOUTH);
 
         talents.setBackground(Color.black);
-        talents.setPreferredSize(new Dimension(200, 400));
+        Border talentsBorder = new LineBorder(Color.WHITE);
+        talents.setBorder(talentsBorder);
+        talents.setPreferredSize(new Dimension(450, 400));
         talents.setLayout(null);
 
         Font statsFont = new Font("Arial", Font.BOLD, 22);
@@ -183,12 +320,115 @@ public class TalentPoints implements ActionListener {
 
         antiReflectPointsLabel.setBounds(160, 410, 1280, 80);
         antiReflectPointsLabel.setBackground(Color.black);
+        //center inno panel
 
+        // centerInfoPanel.setLayout();
+        Border centerBorder = new LineBorder(Color.WHITE);
+        BoxLayout centerLayout = new BoxLayout(centerInfoPanel,BoxLayout.Y_AXIS);
+        centerInfoPanel.setLayout(centerLayout);
+        centerInfoPanel.setBorder(centerBorder);
+        centerInfoPanel.setBackground(Color.black);
+        centerInfoPanel.setPreferredSize(new Dimension(200,400));
+
+        allshots = new JLabel("All bullets counter :");
+        allshots.setBounds(0,180,200,40);
+        allshots.setFont(statsFont);
+        allshots.setForeground(Color.ORANGE);
+        allshots.setAlignmentX(Component.CENTER_ALIGNMENT);
+        allShotsCount = new JLabel(panel.allShootsBulletsnumber + "");
+        allShotsCount.setBounds(0,210,200,40);
+        allShotsCount.setFont(statsFont);
+        allShotsCount.setForeground(Color.ORANGE);
+        allShotsCount.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        centerInfoPanel.add(allshots);
+        centerInfoPanel.add(allShotsCount);
+
+        enemiesKilled = new JLabel("Enemies Killed :");
+        enemiesKilled.setFont(statsFont);
+        enemiesKilled.setBounds(0,280,200,40);
+        enemiesKilled.setForeground(Color.ORANGE);
+        enemiesKilled.setAlignmentX(Component.CENTER_ALIGNMENT);
+        enemiesKilledCount = new JLabel(panel.allEnemiesKilled + "");
+        enemiesKilledCount.setFont(statsFont);
+        enemiesKilledCount.setBounds(0,310,200,40);
+        enemiesKilledCount.setForeground(Color.ORANGE);
+        enemiesKilledCount.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        centerInfoPanel.add(enemiesKilled);
+        centerInfoPanel.add(enemiesKilledCount);
+
+        bulletsMissed = new JLabel("Bullets missed :");
+        bulletsMissed.setBounds(0,380,200,40);
+        bulletsMissed.setFont(statsFont);
+        bulletsMissed.setForeground(Color.ORANGE);
+        bulletsMissed.setAlignmentX(Component.CENTER_ALIGNMENT);
+        bulletsMissedCount = new JLabel(panel.bulletsMissed + "");
+        bulletsMissedCount.setBounds(0,410,200,40);
+        bulletsMissedCount.setFont(statsFont);
+        bulletsMissedCount.setForeground(Color.ORANGE);
+        bulletsMissedCount.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        centerInfoPanel.add(bulletsMissed);
+        centerInfoPanel.add(bulletsMissedCount);
+
+
+        double ratio = 0;
+        String ratioString = "";
+        if (panel.allEnemiesKilled > 0 && panel.allShootsBulletsnumber > 0) {
+            ratio = (double) panel.allEnemiesKilled / panel.allShootsBulletsnumber;
+            DecimalFormat df = new DecimalFormat("#.##");
+            ratioString = df.format(ratio);
+        }
+
+        ratioLabel = new JLabel("ratio: ");
+        ratioLabel.setBounds(0,380,200,40);
+        ratioLabel.setFont(statsFont);
+        ratioLabel.setForeground(Color.ORANGE);
+        ratioLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        ratioStringLabel = new JLabel(ratioString);
+        ratioStringLabel.setBounds(0,410,200,40);
+        ratioStringLabel.setFont(statsFont);
+        ratioStringLabel.setForeground(Color.ORANGE);
+        ratioStringLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        centerInfoPanel.add(ratioLabel);
+        centerInfoPanel.add(ratioStringLabel);
+
+
+        scorePoints = new JLabel("Score points :");
+        scorePoints.setBounds(0,600,200,40);
+        scorePoints.setFont(statsFont);
+        scorePoints.setForeground(Color.ORANGE);
+        scorePoints.setAlignmentX(Component.CENTER_ALIGNMENT);
+        valueOfScore = new JLabel(String.valueOf(score));
+        valueOfScore.setBounds(0,600,200,40);
+        valueOfScore.setFont(statsFont);
+        valueOfScore.setForeground(Color.ORANGE);
+        valueOfScore.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+        coinsmoney = new JLabel(panel.coinsMoney + "");
+        coinsmoney.setBounds(0,600,200,40);
+        coinsmoney.setFont(statsFont);
+        coinsmoney.setForeground(Color.ORANGE);
+        coinsmoney.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        coinsmoneyImage = new JLabel(coinIcon);
+        coinsmoneyImage.setBounds(0,600,200,40);
+        coinsmoneyImage.setFont(statsFont);
+        coinsmoneyImage.setForeground(Color.ORANGE);
+        coinsmoneyImage.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        centerInfoPanel.add(coinsmoney);
+        centerInfoPanel.add(coinsmoneyImage);
+
+        ////////////////////////////////
         skins.setLayout(new GridLayout());
-        tabbedPane.add("Shop", skins);
 
         skins.add(enemySkins);
         enemySkins.setLayout(new GridLayout(3, 2));
+
 
         enemySkins.add(chickenEnemySkin_1);
         enemySkins.add(eSkin1Label);
@@ -198,6 +438,15 @@ public class TalentPoints implements ActionListener {
         enemySkins.add(eSkin3Label);
 //
         skins.add(shipSkins);
+        Border skinsBorder = new LineBorder(Color.WHITE);;
+        skins.setBorder(skinsBorder);
+        if (panel.ramka.getWidth() < 1500){
+            skins.setPreferredSize(new Dimension(300,400));
+            System.out.println(panel.ramka.getWidth());
+        }else {
+            skins.setPreferredSize(new Dimension(800, 400));
+        }
+        shipSkins.setLayout(new GridLayout(2, 2));
 //
         shipSkins.add(spaceShipSkin_1);
         shipSkins.add(shipSkin1Label);
@@ -214,13 +463,13 @@ public class TalentPoints implements ActionListener {
         shipSkins.setBackground(Color.GRAY);
 
         buttonsAndScore.setLayout(new BorderLayout());
-        buttonsAndScore.add(returnToMenu,BorderLayout.LINE_START);
+        buttonsAndScore.add(returnToMenu, BorderLayout.LINE_START);
         returnToMenu.setBackground(new Color(204, 30, 41));
         nextLevelButton.setText("Go level " + LEVEL);
         nextLevelButton.setToolTipText("GO AHEAD!");
-        buttonsAndScore.add(nextLevelButton,BorderLayout.LINE_END);
+        buttonsAndScore.add(nextLevelButton, BorderLayout.LINE_END);
         buttonsAndScore.setBackground(Color.black);
-        buttonsAndScore.setPreferredSize(new Dimension(800,50));
+        buttonsAndScore.setPreferredSize(new Dimension(800, 50));
 
         returnToMenu.setVisible(true);
         returnToMenu.setBounds(20, 700, 200, 40);
@@ -232,10 +481,11 @@ public class TalentPoints implements ActionListener {
 
         turnOnOffShopButtons(true);
         setButtons(true);
+
     }
 
 
-    public int calcualteStats(int enemiesnumber, int health, int bulletcounter) {
+    public int calcualteStats(int enemiesnumber, int bulletcounter) {
 
         if (bulletcounter == 0) {
             score = (enemiesnumber * 100);
@@ -249,58 +499,11 @@ public class TalentPoints implements ActionListener {
     public void paintTalentTree(Graphics2D g2d, Panel mainPanel) {
 
 
-        g2d.setColor(Color.white);
-        Font statsFont = new Font("Arial", Font.BOLD, 22);
-        g2d.setFont(statsFont);
-
-        Font levelFont = new Font("Arial", Font.BOLD, 18);
-
-        g2d.drawString(" health: " + healthPoints + " / 5", 3, 120);
-
-        g2d.drawString("Tripple shoot:" + trippleShootsPoints + " / 10", 5, 250);
-
-        g2d.drawString("BIG shoot:" + bigShootsPoints + " / 1", 5, 390);
-
-        g2d.drawString("anti reflection :" + antiReflectPoints + " / 1", 5, 520);
-
-
-        g2d.setColor(Color.ORANGE);
-
-
-        g2d.drawRect(580, 150, 300, 380);
-
-        g2d.drawString("All bullets counter :", 600, 180);
-        g2d.drawString(String.valueOf(mainPanel.allShootsBulletsnumber), 600, 210);
-
-        g2d.drawString("Enemies Killed :", 600, 280);
-        g2d.drawString(String.valueOf(mainPanel.allEnemiesKilled), 600, 310);
-
-        g2d.drawString("Bullets missed :", 600, 380);
-        g2d.drawString(String.valueOf(mainPanel.bulletsMissed), 600, 410);
-
-        double ratio = 0;
-        String ratioString = "";
-        if (mainPanel.allEnemiesKilled > 0 && mainPanel.allShootsBulletsnumber > 0) {
-            ratio = (double) mainPanel.allEnemiesKilled / mainPanel.allShootsBulletsnumber;
-            DecimalFormat df = new DecimalFormat("#.##");
-            ratioString = df.format(ratio);
-        }
-        g2d.drawString("ratio: ", 600, 480);
-        g2d.drawString(ratioString, 600, 510);
-
-
-        g2d.drawString("Score points :", 300, 730);
-        g2d.drawString(String.valueOf(score), 350, 760);
-
-        g2d.drawString(" " + panel.coinsMoney, 600, 50);
-        ImageIcon coinIcon = new ImageIcon("src/ICONS/smallCoin-unscreen.gif");
-        coinIcon.paintIcon(panel,g2d,600,50);
-
         if (firstLoad) {
             CheckIfTalentCanBeActive();
             tabbedPane.setVisible(true);
             turnOnOffShopButtons(true);
-            AddPanel();
+            AddPanel(panel.fullScreenMode, panel.resizeMode);
             setButtons(true);
             turnOnOffShopButtons(true);
             firstLoad = false;
@@ -469,7 +672,35 @@ public class TalentPoints implements ActionListener {
         shipSkin2Label.setBounds(150, 500, 60, 60);
         shipSkin2Label.setText("points: " + shipSkin2Points + "/15");
 
+        talents.setVisible(tf);
+        centerInfoPanel.setVisible(tf);
+        skins.setVisible(tf);
+        enemySkins.setVisible(tf);
+        buttonsAndScore.setVisible(tf);
+    }
 
+    public void removePanels(){
+        panel.remove(tabbedPane);
+        panel.remove(talents);
+        panel.remove(centerInfoPanel);
+        panel.remove(skins);
+        panel.remove(enemySkins);
+        panel.remove(buttonsAndScore);
+
+        if (allshots != null) {
+            centerInfoPanel.remove(allshots);
+            centerInfoPanel.remove(allShotsCount);
+            centerInfoPanel.remove(enemiesKilled);
+            centerInfoPanel.remove(enemiesKilledCount);
+            centerInfoPanel.remove(bulletsMissed);
+            centerInfoPanel.remove(bulletsMissedCount);
+            centerInfoPanel.remove(ratioLabel);
+            centerInfoPanel.remove(ratioStringLabel);
+            centerInfoPanel.remove(scorePoints);
+            centerInfoPanel.remove(valueOfScore);
+            centerInfoPanel.remove(coinsmoney);
+            centerInfoPanel.remove(coinsmoneyImage);
+        }
     }
 
 
@@ -585,7 +816,7 @@ public class TalentPoints implements ActionListener {
                 spaceShipSkin_1.setBackground(new Color(0, 154, 0));
                 cartoonShipSkin.setBackground(Color.black);
                 hero.heroIcon = new ImageIcon("src/ICONS/spaceShipSkin1.png");
-                cartoonShipSkin1bool = true;
+                spaceShipSkin1bool = true;
                 chickenEnemySkin2bool = false;
             }
 
@@ -610,7 +841,7 @@ public class TalentPoints implements ActionListener {
 
 
         if (e.getSource() == nextLevelButton) {
-            panel.makeArrayToCheckReflect();
+            //panel.makeArrayToCheckReflect();
             System.out.println("next LEVEL!");
             updateByTalents();
             System.out.println(healthPoints + " << health points " + addHealth);
@@ -618,8 +849,21 @@ public class TalentPoints implements ActionListener {
             System.out.println(bigShootsPoints + " << bigShooot points " + bigShootEnable);
             System.out.println(antiReflectPoints + " << Anti reflect points " + antiReflectBullet);
             obstacleActive = true;
-            //tutaj zapis
+            //TODO automatyczny zapis
             tabbedPane.setVisible(false);
+            talents.setVisible(false);
+            skins.setVisible(false);
+            centerInfoPanel.setVisible(false);
+
+
+            setButtons(false);
+            turnOnOffShopButtons(false);
+            buttonsAndScore.setVisible(false);
+            removePanels();
+
+            panel.gameBonus = new RandomGameBonus();
+            panel.firstaid = new Help(panel.ramka.getWidth());
+            hero.x = panel.ramka.getWidth()/2-50;
             panel.setLayout(new FlowLayout());
             Panel.State = Panel.STATE.GAME;
         }
@@ -630,11 +874,12 @@ public class TalentPoints implements ActionListener {
             setButtons(false);
             turnOnOffShopButtons(false);
             tabbedPane.setVisible(false);
-            enemySkins.setVisible(false);
-            shipSkins.setVisible(false);
-
-            System.out.println();
-
+            talents.setVisible(false);
+            skins.setVisible(false);
+            centerInfoPanel.setVisible(false);
+            removePanels();
+//
+            panel.makeButtonsMenuVisible(false);
             panel.setLayout(new FlowLayout());
             Panel.State = Panel.STATE.MENU;
         }

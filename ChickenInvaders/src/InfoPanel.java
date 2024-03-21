@@ -10,10 +10,10 @@ public class InfoPanel {
     ImageIcon coinIcon = new ImageIcon("src/ICONS/smallCoin-unscreen.gif");
 
 
-    public void paintInfopanel(Graphics2D g2d, int enemiesnumber, int health,int bulletcounter, int healthkit,int coinsQantity , JPanel panel){
+    public void paintInfopanel(Graphics2D g2d, int enemiesnumber, int health,int bulletcounter, int healthkit,int coinsQantity , Panel panel){
 
         g2d.setColor(Color.gray);
-        g2d.fillRect(0,0,800,70);
+        g2d.fillRect(0,0,panel.getWidth(),70);
 
         g2d.setColor(Color.black);
         Font statsFont = new Font("Arial",Font.BOLD,18);
@@ -25,14 +25,14 @@ public class InfoPanel {
         firstAidKitIcon.paintIcon(panel,g2d,50,0);
         g2d.drawString("   " + healthkit ,45,50);
 
-        enemyIcon.paintIcon(panel,g2d,400,5);
-        g2d.drawString("  " + enemiesnumber ,400,50);
+        enemyIcon.paintIcon(panel,g2d,panel.getWidth()/2,5);
+        g2d.drawString("  " + enemiesnumber ,panel.getWidth()/2,50);
 
-        coinIcon.paintIcon(panel,g2d,500,0);
-        g2d.drawString("  " + coinsQantity ,505,50);
+        coinIcon.paintIcon(panel,g2d,panel.getWidth()/2+100,0);
+        g2d.drawString("  " + coinsQantity ,panel.getWidth()/2+105,50);
 
-        bulletIcon.paintIcon(panel,g2d,740,0);
-        g2d.drawString("    " + bulletcounter,700,50);
+        bulletIcon.paintIcon(panel,g2d,panel.getWidth()-60,0);
+        g2d.drawString("    " + bulletcounter,panel.getWidth()-100,50);
 
 
 

@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.*;
 
@@ -9,6 +10,8 @@ public class Hero implements KeyListener {
     public boolean left;
     public boolean right;
     public boolean shoot;
+
+    Panel panel;
 
     public int x = 250;
     public int y = 750;
@@ -29,6 +32,7 @@ public class Hero implements KeyListener {
     int allBulletsShoots = 0;
     boolean trippeShoots = false;
     boolean bigShoot = true;
+
 
     ArrayList<Integer> bigShotsIndex = new ArrayList<>();
     {
@@ -89,8 +93,11 @@ public class Hero implements KeyListener {
     ////rysowanie
     public void paint(Graphics2D g2d, JPanel panel, boolean trippeShoots, boolean bigShoot) {
 
+        y = panel.getHeight() -50;
+
         this.trippeShoots = trippeShoots;
         this.bigShoot = bigShoot;
+        this.panel = (Panel) panel;
 
         this.heroIcon.paintIcon(panel, g2d, this.x, this.y);
         this.paintBullets(g2d,panel);
@@ -104,7 +111,7 @@ public class Hero implements KeyListener {
 
         for (int i = 0; i < bullets.size(); i++) {
             g2d.fillOval(bullets.get(i).xShoot, bullets.get(i).yShoot, 6, 6);
-            bullets.get(i).yShoot -= setTurnOfBullet.get(i);
+            bullets.get(i).yShoot -= bullets.get(i).turn;
         }
 
 
@@ -113,7 +120,7 @@ public class Hero implements KeyListener {
 
     public void updateMove() {
 
-        if (right && x < 800 - 48) {
+        if (right && x < panel.getWidth() - 48) {
             x += 8;
         } else if (left && x > 0) {
             x -= 8;
@@ -126,23 +133,23 @@ public class Hero implements KeyListener {
     public void strzal() {
 
         if (bigShoot){
-            bullets.add(new Bullet(x + 20, y )); // twórz pocisk)=
+            bullets.add(new Bullet(x + 20, y ,8,panel.obstacle.getQuantity())); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
         }else {
-            bullets.add(new Bullet(x + 20, y)); // twórz pocisk)=
+            bullets.add(new Bullet(x + 20, y,8,panel.obstacle.getQuantity())); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
             setTurnOfBullet.add(8);
         }
 
         if (trippeShoots){
-            bullets.add(new Bullet(x, y + 20)); // twórz pocisk)=
+            bullets.add(new Bullet(x, y + 20,8,panel.obstacle.getQuantity())); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
             setTurnOfBullet.add(8);
 
-            bullets.add(new Bullet(x + 40, y + 20)); // twórz pocisk)=
+            bullets.add(new Bullet(x + 40, y + 20,8,panel.obstacle.getQuantity())); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
             setTurnOfBullet.add(8);
@@ -156,25 +163,26 @@ public class Hero implements KeyListener {
     public void removeBullets() {
 
         //generyk
-        //        Iterator<Bullet> i = bullets.iterator();
-//        while (i.hasNext()) {
-//
-//            Bullet bullet = i.next();
-//            if (bullet.yShoot < -5) {
-//                i.remove();
-//                System.out.println("usunieto " + bullets.size());
-//            }
-//        }
+                Iterator<Bullet> i = bullets.iterator();
 
-        for (int i = 0; i < bullets.size(); i++) {
-            if (bullets.get(i).yShoot < -5 || bullets.get(i).yShoot > 805) {
-                System.out.println("index do wyrzucenia = " + i);
-                bullets.remove(i);
-                setTurnOfBullet.remove(i);
+        while (i.hasNext()) {
 
-
+            Bullet bullet = i.next();
+            if (bullet.yShoot < -5 || bullet.yShoot > panel.getHeight() + 5) {
+                i.remove();
+                System.out.println("usunieto " + bullets.size());
             }
         }
+
+//        for (int i = 0; i < bullets.size(); i++) {
+//            if (bullets.get(i).yShoot < -5 || bullets.get(i).yShoot > 805) {
+//                System.out.println("index do wyrzucenia = " + i);
+//                bullets.remove(bullets.get(i));
+//                setTurnOfBullet.remove(setTurnOfBullet.get(i));
+//
+//
+//            }
+//        }
 
     }
 
