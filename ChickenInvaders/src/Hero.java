@@ -27,7 +27,7 @@ public class Hero implements KeyListener {
 
     List<Bullet> bullets = new ArrayList<>();
     int bulletCounter = 0;
-    List<Integer> setTurnOfBullet = new ArrayList<>();
+    //List<Integer> setTurnOfBullet = new ArrayList<>();
 
     int allBulletsShoots = 0;
     boolean trippeShoots = false;
@@ -133,26 +133,26 @@ public class Hero implements KeyListener {
     public void strzal() {
 
         if (bigShoot){
-            bullets.add(new Bullet(x + 20, y ,8,panel.obstacle.getQuantity())); // twórz pocisk)=
+            bullets.add(new Bullet(x + 20, y ,panel.obstacle.getQuantity())); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
         }else {
-            bullets.add(new Bullet(x + 20, y,8,panel.obstacle.getQuantity())); // twórz pocisk)=
+            bullets.add(new Bullet(x + 20, y,panel.obstacle.getQuantity())); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
-            setTurnOfBullet.add(8);
+            //setTurnOfBullet.add(8);
         }
 
         if (trippeShoots){
-            bullets.add(new Bullet(x, y + 20,8,panel.obstacle.getQuantity())); // twórz pocisk)=
+            bullets.add(new Bullet(x, y + 20,panel.obstacle.getQuantity())); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
-            setTurnOfBullet.add(8);
+//            setTurnOfBullet.add(8);
 
-            bullets.add(new Bullet(x + 40, y + 20,8,panel.obstacle.getQuantity())); // twórz pocisk)=
+            bullets.add(new Bullet(x + 40, y + 20,panel.obstacle.getQuantity())); // twórz pocisk)=
             bulletCounter++;
             allBulletsShoots++;
-            setTurnOfBullet.add(8);
+            //setTurnOfBullet.add(8);
         }
 
 
@@ -163,27 +163,30 @@ public class Hero implements KeyListener {
     public void removeBullets() {
 
         //generyk
-                Iterator<Bullet> i = bullets.iterator();
-
-        while (i.hasNext()) {
-
-            Bullet bullet = i.next();
-            if (bullet.yShoot < -5 || bullet.yShoot > panel.getHeight() + 5) {
-                i.remove();
-                System.out.println("usunieto " + bullets.size());
-            }
-        }
-
-//        for (int i = 0; i < bullets.size(); i++) {
-//            if (bullets.get(i).yShoot < -5 || bullets.get(i).yShoot > 805) {
-//                System.out.println("index do wyrzucenia = " + i);
-//                bullets.remove(bullets.get(i));
-//                setTurnOfBullet.remove(setTurnOfBullet.get(i));
+//                Iterator<Bullet> i = bullets.iterator();
 //
+//        while (i.hasNext()) {
 //
+//            Bullet bullet = i.next();
+//            if (bullet.yShoot < -5 || bullet.yShoot > panel.getHeight() + 5) {
+//                i.remove();
+//                System.out.println("usunieto " + bullets.size());
 //            }
 //        }
 
+        for (int i = 0; i < bullets.size(); i++) {
+            if (bullets.get(i).yShoot < -5 || bullets.get(i).yShoot > panel.getHeight()) {
+
+                bullets.remove(bullets.get(i));
+                //setTurnOfBullet.remove(setTurnOfBullet.get(i));
+
+            }
+        }
+
+    }
+    public void removeBullet(int i) {
+        bullets.remove(i);
+        //setTurnOfBullet.remove(i);
     }
 
 }

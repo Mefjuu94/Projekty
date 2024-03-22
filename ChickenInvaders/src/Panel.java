@@ -61,7 +61,7 @@ public class Panel extends JPanel {
     int allShootsBulletsnumber = 0;
     int bulletsMissed = allShootsBulletsnumber - allEnemiesKilled;
 
-    Boos boos = new Boos();
+    Boos boos = new Boos(this);
     Obstacle obstacle = new Obstacle(this);
     Help firstaid;
     List<Coins> coinsQuantity = new ArrayList<>();
@@ -101,15 +101,20 @@ public class Panel extends JPanel {
 
         ramka.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent componentEvent) {
-                if (ramka.getWidth() > 1000 ) {
+                if (ramka.getWidth() > 1000) {
                     resizeMode = true;
-                }else if (fullScreenMode){
+                } if (fullScreenMode || ramka.getWidth() < 1000){
                     resizeMode = false;
                 }
                 System.out.println(resizeMode);
                 if (State == STATE.TalentPoints && resizeMode){
                     talentPoints.AddPanel(fullScreenMode, resizeMode);
+                }else if (State == STATE.TalentPoints){
+                    talentPoints.AddPanel(fullScreenMode, resizeMode);
                 }
+                //TODO ogarnąć zeby enemies były na całości długości ekrannu
+                //CreateEnemiesAgainResizeMode();
+                firstaid = new Help(ramka.getWidth());
             }
         });
 
@@ -131,6 +136,7 @@ public class Panel extends JPanel {
 
         if (ramka.getWidth() > 0){
             iloscNaOS = ramka.getWidth()/160;
+            System.out.println("ramka większa");
         }else {
 
             if (talentPoints.LEVEL >= 3) {
@@ -167,7 +173,11 @@ public class Panel extends JPanel {
                     xBackground+=820;
                 }
             }
-            movebackgroundY = movebackgroundY + 1;
+            if (speedIdUp){
+                movebackgroundY = movebackgroundY + 3;
+            }else {
+                movebackgroundY = movebackgroundY + 1;
+            }
             if (movebackgroundY == 0) {
                 movebackgroundY = -1600;
             }
@@ -183,10 +193,10 @@ public class Panel extends JPanel {
 
             //rysuj bossa wraz z pociskiem!
             if (boos != null && boos.ActiveBoss) {
-                boos.paint(g2d, this);
+                boos.paint(g2d);
 
                 for (EnemyBullets e : bosseBullets) {  //eneny to jest "i"
-                    e.paint(g2d, this);
+                    e.paint(g2d);
                 }
 
             } else {                 // jak boss jest aktywny nie usuwaj bulletów, bo automatycznie usuwa gdy chickenów małych jest 0 i wychodzi do menu
@@ -235,6 +245,7 @@ public class Panel extends JPanel {
                         value.enemySpeed = 2;
                     }
                     bonusActivated = false;
+                    speedIdUp = false;
                 }
             }
 
@@ -337,12 +348,12 @@ public class Panel extends JPanel {
 
                     coinsQuantity.add(new Coins(enemies.get(j).x, enemies.get(j).y));
                     enemies.remove(j);
-                    System.out.println("dodano " + j + " do coins");
+                   // System.out.println("dodano " + j + " do coins");
 
                     allEnemiesKilled++;
                     hero.bullets.get(i).yShoot = -209;
                     hero.bullets.get(i).xShoot = -1000;
-                    System.out.println("pozostało pzzeciwników " + enemies.size());
+                   // System.out.println("pozostało pzzeciwników " + enemies.size());
                     break;
                 }
             }
@@ -360,7 +371,7 @@ public class Panel extends JPanel {
             obstacle.quantity += 1;
 
             hero.bullets.removeAll(hero.bullets);
-            hero.setTurnOfBullet.removeAll(hero.setTurnOfBullet);
+            //hero.setTurnOfBullet.removeAll(hero.setTurnOfBullet);
 
             firstaid.helpActive = false;
             bulletsMissed = hero.bulletCounter - enemiesNumber;
@@ -389,6 +400,7 @@ public class Panel extends JPanel {
             if (gameBonus.chooseBonus() == 0) {
                 for (int i = 0; i < enemies.size(); i++) {
                     enemies.get(i).enemySpeed = 5;
+                    speedIdUp = true;
                 }
 
             }
@@ -506,7 +518,7 @@ public class Panel extends JPanel {
                             hero.bullets.get(i).xShoot > obstacle.x[j] - 5 && hero.bullets.get(i).xShoot <= obstacle.x[j] + obstacle.obstacleWidth[j]
                             && !hero.bullets.get(i).obstacles[j]) { // tu ejst błąd
 
-                        System.out.println("zawróć! " + i);
+                        //System.out.println("zawróć! " + i);
 
                         if (!talentPoints.antiReflectBullet) {
                             //hero.setTurnOfBullet.set(i, hero.setTurnOfBullet.get(i) * (-1)); // odbija sie
@@ -528,11 +540,13 @@ public class Panel extends JPanel {
 
                 }
 
-                if (hero.bullets.get(i).xShoot >= hero.x + 10 && hero.bullets.get(i).xShoot + 5 <= hero.x + 48 &&
-                        hero.bullets.get(i).yShoot > hero.y && hero.bullets.get(i).yShoot < hero.y + 48 && hero.setTurnOfBullet.get(i) == -8) {
+                if (hero.bullets.get(i).xShoot >= hero.x  && hero.bullets.get(i).xShoot + 5 <= hero.x + 48 &&
+                        hero.bullets.get(i).yShoot > hero.y + 15 && hero.bullets.get(i).yShoot < hero.y + 48  && hero.bullets.get(i).turn == -8) {
+                    System.out.println("index danej kulki: " + i);
+                    hero.bullets.get(i).yShoot = -209;
+                    hero.bullets.get(i).xShoot = -1000;
 
-                    System.out.println("sam się ustrzeliłeś! :O");
-                    System.out.println(countTurn);
+                    hero.removeBullet(i);
                     health--;
                 }
             }
@@ -579,7 +593,7 @@ public class Panel extends JPanel {
             if (e.y > getHeight()) {
                 e.y = -50; // wyjdzie jeszcze raz zza ekranu
                 health--;
-                System.out.println("przeciwniik ma punkt");
+                System.out.println("-1 życia");
             }
         }
 
@@ -595,7 +609,7 @@ public class Panel extends JPanel {
                 boos.bullets.get(b).yShoot = -209;
                 boos.bullets.get(b).xShoot = -1000;
                 health = health - 1;
-                System.out.println("przeciwniik ma punkt");
+                System.out.println("przeciwniik ma punkt - 1 życia");
             }
         }
         checkHealth();
@@ -751,7 +765,7 @@ public class Panel extends JPanel {
 
             for (int i = 0; i < enemiesNumber; i++) {
                 if (i % iloscNaOS == 0) {
-                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
+                    randomArray = generateRandomArray(5, 0, 15);
                 }
 
                 enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
@@ -773,7 +787,7 @@ public class Panel extends JPanel {
                     randomArray = generateRandomArray(iloscNaOS, 0, 15);
                 }
 
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
+                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i)) * (-alotOfEnemiesGap * 50), talentPoints));
             }
         }
 

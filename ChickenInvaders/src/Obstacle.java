@@ -60,8 +60,13 @@ public class Obstacle {
     private void generateRandomPosition(int i){
         Random random = new Random();
 
-            x[i] = random.nextInt(panel.WIDTH -300) + 75;
+        if (panel.ramka == null || panel.ramka.getWidth() < 1) {
+            x[i] = random.nextInt(panel.WIDTH - 300) + 75;
             y[i] = random.nextInt(panel.HEIGHT - 250) + 70;
+        }else {
+            x[i] = random.nextInt(panel.ramka.getWidth() - 300) + 75;
+            y[i] = random.nextInt(panel.ramka.getHeight() - 250) + 70;
+        }
 
             obstacleWidth[i] = random.nextInt(50) + 30;
             //System.out.println("długość kładki " + i + " = " +  obstacleWidth[i] );

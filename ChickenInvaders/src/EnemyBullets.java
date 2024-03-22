@@ -5,11 +5,12 @@ public class EnemyBullets extends Boos {
     int xShoot;
     int yShoot;
 
-    EnemyBullets(int xShoot, int yShoot){
+    EnemyBullets(int xShoot, int yShoot,Panel panel){
+        super(panel);
+
         this.xShoot = xShoot;
         this.yShoot = yShoot;
     }
-
 
 
 }

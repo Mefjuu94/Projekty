@@ -30,7 +30,7 @@ public class TalentPoints implements ActionListener {
     int bigShootsPoints = 0;
     JLabel BigShootPointsLabel = new JLabel("BIG shoot: " + bigShootsPoints + " / 1");
 
-    int LEVEL = 1; // default 1
+    int LEVEL = 7; // default 1
     public int score = 10;
 
     JPanel buttonsAndScore = new JPanel();
@@ -147,7 +147,7 @@ public class TalentPoints implements ActionListener {
         panel.setLayout(new BorderLayout());
 
         if (!fullScreen) {
-
+            removePanels();
             panel.add(tabbedPane, BorderLayout.WEST);
             panel.add(buttonsAndScore, BorderLayout.SOUTH);
 
@@ -249,6 +249,109 @@ public class TalentPoints implements ActionListener {
             nextLevelButton.setBackground(new Color(204, 30, 41));
 
             tabbedPane.setVisible(true);
+            tabbedPane.setSelectedIndex(0);
+
+            panel.add(centerInfoPanel,BorderLayout.CENTER);
+            centerInfoPanel.setBackground(Color.BLACK);
+            Border centerInfoBorder = new LineBorder(Color.WHITE);
+            centerInfoPanel.setBorder(centerInfoBorder);
+            centerInfoPanel.setLayout(new BoxLayout(centerInfoPanel,BoxLayout.Y_AXIS));
+
+            allshots = new JLabel("All bullets counter :");
+            allshots.setBounds(0,180,200,40);
+            allshots.setFont(statsFont);
+            allshots.setForeground(Color.ORANGE);
+            allshots.setAlignmentX(Component.CENTER_ALIGNMENT);
+            allShotsCount = new JLabel(panel.allShootsBulletsnumber + "");
+            allShotsCount.setBounds(0,210,200,40);
+            allShotsCount.setFont(statsFont);
+            allShotsCount.setForeground(Color.ORANGE);
+            allShotsCount.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            centerInfoPanel.add(allshots);
+            centerInfoPanel.add(allShotsCount);
+
+            enemiesKilled = new JLabel("Enemies Killed :");
+            enemiesKilled.setFont(statsFont);
+            enemiesKilled.setBounds(0,280,200,40);
+            enemiesKilled.setForeground(Color.ORANGE);
+            enemiesKilled.setAlignmentX(Component.CENTER_ALIGNMENT);
+            enemiesKilledCount = new JLabel(panel.allEnemiesKilled + "");
+            enemiesKilledCount.setFont(statsFont);
+            enemiesKilledCount.setBounds(0,310,200,40);
+            enemiesKilledCount.setForeground(Color.ORANGE);
+            enemiesKilledCount.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            centerInfoPanel.add(enemiesKilled);
+            centerInfoPanel.add(enemiesKilledCount);
+
+            bulletsMissed = new JLabel("Bullets missed :");
+            bulletsMissed.setBounds(0,380,200,40);
+            bulletsMissed.setFont(statsFont);
+            bulletsMissed.setForeground(Color.ORANGE);
+            bulletsMissed.setAlignmentX(Component.CENTER_ALIGNMENT);
+            bulletsMissedCount = new JLabel(panel.bulletsMissed + "");
+            bulletsMissedCount.setBounds(0,410,200,40);
+            bulletsMissedCount.setFont(statsFont);
+            bulletsMissedCount.setForeground(Color.ORANGE);
+            bulletsMissedCount.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            centerInfoPanel.add(bulletsMissed);
+            centerInfoPanel.add(bulletsMissedCount);
+
+
+            double ratio = 0;
+            String ratioString = "";
+            if (panel.allEnemiesKilled > 0 && panel.allShootsBulletsnumber > 0) {
+                ratio = (double) panel.allEnemiesKilled / panel.allShootsBulletsnumber;
+                DecimalFormat df = new DecimalFormat("#.##");
+                ratioString = df.format(ratio);
+            }
+
+            ratioLabel = new JLabel("ratio: ");
+            ratioLabel.setBounds(0,380,200,40);
+            ratioLabel.setFont(statsFont);
+            ratioLabel.setForeground(Color.ORANGE);
+            ratioLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            ratioStringLabel = new JLabel(ratioString);
+            ratioStringLabel.setBounds(0,410,200,40);
+            ratioStringLabel.setFont(statsFont);
+            ratioStringLabel.setForeground(Color.ORANGE);
+            ratioStringLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            centerInfoPanel.add(ratioLabel);
+            centerInfoPanel.add(ratioStringLabel);
+
+
+            scorePoints = new JLabel("Score points :");
+            scorePoints.setBounds(0,600,200,40);
+            scorePoints.setFont(statsFont);
+            scorePoints.setForeground(Color.ORANGE);
+            scorePoints.setAlignmentX(Component.CENTER_ALIGNMENT);
+            valueOfScore = new JLabel(String.valueOf(score));
+            valueOfScore.setBounds(0,600,200,40);
+            valueOfScore.setFont(statsFont);
+            valueOfScore.setForeground(Color.ORANGE);
+            valueOfScore.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+            coinsmoney = new JLabel(panel.coinsMoney + "");
+            coinsmoney.setBounds(0,600,200,40);
+            coinsmoney.setFont(statsFont);
+            coinsmoney.setForeground(Color.ORANGE);
+            coinsmoney.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+            coinsmoneyImage = new JLabel(coinIcon);
+            coinsmoneyImage.setBounds(0,600,200,40);
+            coinsmoneyImage.setFont(statsFont);
+            coinsmoneyImage.setForeground(Color.ORANGE);
+            coinsmoneyImage.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            centerInfoPanel.add(coinsmoney);
+            centerInfoPanel.add(coinsmoneyImage);
+            centerInfoPanel.add(scorePoints);
+            centerInfoPanel.add(valueOfScore);
 
             turnOnOffShopButtons(true);
             setButtons(true);
@@ -414,6 +517,7 @@ public class TalentPoints implements ActionListener {
         coinsmoney.setForeground(Color.ORANGE);
         coinsmoney.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+
         coinsmoneyImage = new JLabel(coinIcon);
         coinsmoneyImage.setBounds(0,600,200,40);
         coinsmoneyImage.setFont(statsFont);
@@ -422,6 +526,8 @@ public class TalentPoints implements ActionListener {
 
         centerInfoPanel.add(coinsmoney);
         centerInfoPanel.add(coinsmoneyImage);
+        centerInfoPanel.add(scorePoints);
+        centerInfoPanel.add(valueOfScore);
 
         ////////////////////////////////
         skins.setLayout(new GridLayout());
@@ -804,11 +910,14 @@ public class TalentPoints implements ActionListener {
 
         }
 
+        //TODO dokończyć aktualizacje napisów labelów z pkt
+
         if (e.getSource() == spaceShipSkin_1) {
             if (shipSkin1Points < 15 && panel.coinsMoney > 0) {
                 shipSkin1Points++;
                 shipSkin1Label.setText("points: " + shipSkin1Points + "/15");
                 panel.coinsMoney--;
+                coinsmoney.setText(String.valueOf(panel.coinsMoney));
             }
 
 
@@ -827,6 +936,7 @@ public class TalentPoints implements ActionListener {
                 shipSkin2Points++;
                 shipSkin2Label.setText("points: " + shipSkin2Points + "/15");
                 panel.coinsMoney--;
+
             }
 
             if (shipSkin2Points == 15 && !chickenEnemySkin2bool){

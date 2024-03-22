@@ -20,5 +20,14 @@ public class Bullet extends Hero {
 
     }
 
+    public Bullet(int xShoot, int yShoot, int obstacleSize) {
+        this.xShoot = xShoot;
+        this.yShoot = yShoot;
+        this.turn = 8;
+
+        this.obstacles = new boolean[obstacleSize];
+
+    }
+
 
 }

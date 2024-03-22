@@ -5,7 +5,7 @@ import java.util.Random;
 public class Help {
 
 
-    int firstAidQuantity = 25;
+    int firstAidQuantity = 10;
     ImageIcon firstAidIcon = new ImageIcon("src/ICONS/firstAid.png");
     int firstAidleft = firstAidQuantity;
 
@@ -20,7 +20,7 @@ public class Help {
         }
     }
 
-    int widthOfFirstAid;
+    int widthOfFirstAid = 800;
 
     boolean helpActive = true;
 
@@ -58,7 +58,7 @@ public class Help {
         //zrobić!!
         Random rand = new Random();
 
-        if (rand.nextInt(26) == 25 && i < firstAidQuantity) {
+        if (rand.nextInt(150) == 25 && i < firstAidQuantity) {
             System.out.println("pomoc nadchodzi!!");
             goDown[i] = true;
             i++;

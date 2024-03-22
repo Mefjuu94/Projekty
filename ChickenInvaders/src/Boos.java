@@ -19,13 +19,15 @@ public class Boos {
     ImageIcon bossBulletsIcon = new ImageIcon("src/ICONS/BossBulletEgg.png");
     boolean ActiveBoss = false;
     int bossHP = 100;
+    Panel panel;
 
     List<EnemyBullets> bullets = new ArrayList<>();
 
-    Boos(){
+    Boos(Panel panel){
+        this.panel = panel;
     }
 
-    public void paint(Graphics2D g2d, JPanel panel) {
+    public void paint(Graphics2D g2d) {
 
         if (bossCounter == 1) {
             this.bossIcon.paintIcon(panel, g2d, this.x, this.y);
@@ -34,7 +36,7 @@ public class Boos {
         Random rand = new Random();
         if ( rand.nextInt(30) == 10){
             System.out.println("uwaga jajo!!!");
-            bullets.add(new EnemyBullets(this.x+ 50,this.y + 150));
+            bullets.add(new EnemyBullets(this.x+ 50,this.y + 150,panel));
         }
 
         for (int i = 0; i < bullets.size(); i++) {
@@ -47,7 +49,7 @@ public class Boos {
 
     public void updateMove() {
 
-        if (x > 800-150 || x <= 2){
+        if (x > panel.ramka.getWidth()-150 || x <= 2){
             boosSpeed = boosSpeed * -1;
         }
         x += boosSpeed;
@@ -63,7 +65,7 @@ public class Boos {
         while (i.hasNext()) {
 
             EnemyBullets bullet = i.next();
-            if (bullet.yShoot > 800) {
+            if (bullet.yShoot > panel.ramka.getHeight()) {
                 i.remove();
                 System.out.println("usunieto " + bullets.size());
             }
