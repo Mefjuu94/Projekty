@@ -24,6 +24,7 @@ public class Panel extends JPanel {
     int HEIGHT = 800;
     boolean fullScreenMode = false;
     boolean resizeMode = false;
+    int max = 15;
 
     int scorePoints = 10;
     int coinsMoney = 100;
@@ -78,10 +79,7 @@ public class Panel extends JPanel {
     public Panel(JFrame ramka) {
         this.ramka = ramka;
 
-
         panelItself = this;
-
-        CreateEnemiesAgain();
 
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
@@ -101,22 +99,80 @@ public class Panel extends JPanel {
 
         ramka.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent componentEvent) {
+
                 if (ramka.getWidth() > 1000) {
                     resizeMode = true;
-                } if (fullScreenMode || ramka.getWidth() < 1000){
+                }
+                if (fullScreenMode || ramka.getWidth() < 1000) {
                     resizeMode = false;
                 }
-                System.out.println(resizeMode);
-                if (State == STATE.TalentPoints && resizeMode){
+
+                if (State == STATE.TalentPoints && resizeMode) {
                     talentPoints.AddPanel(fullScreenMode, resizeMode);
-                }else if (State == STATE.TalentPoints){
+                } else if (State == STATE.TalentPoints) {
                     talentPoints.AddPanel(fullScreenMode, resizeMode);
                 }
-                //TODO ogarnąć zeby enemies były na całości długości ekrannu
-                //CreateEnemiesAgainResizeMode();
+
                 firstaid = new Help(ramka.getWidth());
+
+
+                if (ramka.getWidth() > WIDTH){
+                    WIDTH = ramka.getWidth();
+                    HEIGHT = ramka.getHeight();
+                }
+
+                max = ramka.getWidth() / 55;
+                CreateEnemiesAgainResize();
             }
         });
+
+    }
+
+    public void CreateEnemiesAgainResize() {
+        enemies.clear();
+
+        if (death) {
+            enemiesNumber = 3;
+            death = false;
+        }
+        if (talentPoints.LEVEL > 4) {
+            enemiesNumber = (talentPoints.LEVEL * 10);
+        }
+
+
+        if (ramka.getWidth() > WIDTH){
+            WIDTH = ramka.getWidth();
+            HEIGHT = ramka.getHeight();
+        }
+
+        max = WIDTH/55;
+
+        if (talentPoints.LEVEL % 8 != 0) {
+            howManyEnemiesInLine();
+            int[] randomArray = generateRandomArray(5, 0, max);  //3,0,15
+            // size ramka.getwidth/160                        max ramka.getWidth/80
+
+            int alotOfEnemiesGap = enemiesNumber / 25;
+
+            for (int i = 0; i < enemiesNumber; i++) {
+                if (i % iloscNaOS == 0) {
+                    randomArray = generateRandomArray(iloscNaOS, 0, max);
+                }
+
+                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
+            }
+        } else {
+            boos.ActiveBoss = true;
+        }
+
+
+        if (talentPoints.LEVEL > 0) {
+            obstacle = new Obstacle(this);
+            quantityOfObstacle();
+            obstacle.obstacleActive = true;
+        }
+
+        firstaid = new Help(WIDTH);
 
     }
 
@@ -128,28 +184,18 @@ public class Panel extends JPanel {
         TalentPoints,
     }
 
-    public static STATE State = STATE.TalentPoints; /// zmienic na GAME zeby grac STATE.STATE.TalentPoints
+    public static STATE State = STATE.MENU; /// zmienic na GAME zeby grac STATE.STATE.TalentPoints
 
 
-    private void howManyEnemiesInLine() {
+    public void howManyEnemiesInLine() {
 
 
-        if (ramka.getWidth() > 0){
-            iloscNaOS = ramka.getWidth()/160;
-            System.out.println("ramka większa");
-        }else {
-
-            if (talentPoints.LEVEL >= 3) {
-                iloscNaOS = 4;
-            }
-
-            if (talentPoints.LEVEL >= 6) {
-                iloscNaOS = 6;
-            }
-            if (talentPoints.LEVEL >= 9) {
-                iloscNaOS = 8;
-            }
+        if (ramka.getWidth() > 0) {
+            iloscNaOS = ramka.getWidth() / 160;
+        } else {
+            iloscNaOS = WIDTH / 160;
         }
+        System.out.println("ilość na os = " + iloscNaOS);
 
     }
 
@@ -165,17 +211,17 @@ public class Panel extends JPanel {
 
 
             background.paintIcon(this, g2d, 0, movebackgroundY);
-            if (fullScreenMode || resizeMode){
+            if (fullScreenMode || resizeMode) {
                 int backgroundX = ramka.getWidth() / 820;
                 int xBackground = 0;
-                for (int i = 0; i < backgroundX +1 ; i++) {
-                    background.paintIcon(this,g2d,xBackground,movebackgroundY);
-                    xBackground+=820;
+                for (int i = 0; i < backgroundX + 1; i++) {
+                    background.paintIcon(this, g2d, xBackground, movebackgroundY);
+                    xBackground += 820;
                 }
             }
-            if (speedIdUp){
+            if (speedIdUp) {
                 movebackgroundY = movebackgroundY + 3;
-            }else {
+            } else {
                 movebackgroundY = movebackgroundY + 1;
             }
             if (movebackgroundY == 0) {
@@ -314,7 +360,7 @@ public class Panel extends JPanel {
         this.repaint();
     }
 
-    private void turnOffButtonsAndPanelsToPlay(boolean tf){
+    private void turnOffButtonsAndPanelsToPlay(boolean tf) {
         talentPoints.setButtons(tf); // ukrywa buttony z talentów
         talentPoints.buttonsAndScore.setVisible(tf);
         talentPoints.FullscreenMode.setVisible(tf);
@@ -348,12 +394,12 @@ public class Panel extends JPanel {
 
                     coinsQuantity.add(new Coins(enemies.get(j).x, enemies.get(j).y));
                     enemies.remove(j);
-                   // System.out.println("dodano " + j + " do coins");
+                    // System.out.println("dodano " + j + " do coins");
 
                     allEnemiesKilled++;
                     hero.bullets.get(i).yShoot = -209;
                     hero.bullets.get(i).xShoot = -1000;
-                   // System.out.println("pozostało pzzeciwników " + enemies.size());
+                    // System.out.println("pozostało pzzeciwników " + enemies.size());
                     break;
                 }
             }
@@ -364,11 +410,16 @@ public class Panel extends JPanel {
 
 
         }
-        if (enemies.size() == 0) {    // jak liczba przeciwników dojdzie do 0 to pojawi się MENU/talentPoints
+        if (enemies.size() <= 0) {    // jak liczba przeciwników dojdzie do 0 to pojawi się MENU/talentPoints
 
             allShootsBulletsnumber = hero.allBulletsShoots;
             firstaid.firstAidQuantity += 1;
-            obstacle.quantity += 1;
+
+            if (obstacle.quantity > 11){
+                obstacle.quantity = 12;
+            }else {
+                obstacle.quantity += 1;
+            }
 
             hero.bullets.removeAll(hero.bullets);
             //hero.setTurnOfBullet.removeAll(hero.setTurnOfBullet);
@@ -486,6 +537,8 @@ public class Panel extends JPanel {
         }
         if (boos.bossHP <= 0) {    // jak boss będzie miał 0 HP
 
+            quantityOfObstacle();
+
             allShootsBulletsnumber = hero.allBulletsShoots;
 
             bulletsMissed = hero.bulletCounter - enemiesNumber;
@@ -540,8 +593,8 @@ public class Panel extends JPanel {
 
                 }
 
-                if (hero.bullets.get(i).xShoot >= hero.x  && hero.bullets.get(i).xShoot + 5 <= hero.x + 48 &&
-                        hero.bullets.get(i).yShoot > hero.y + 15 && hero.bullets.get(i).yShoot < hero.y + 48  && hero.bullets.get(i).turn == -8) {
+                if (hero.bullets.get(i).xShoot >= hero.x && hero.bullets.get(i).xShoot + 5 <= hero.x + 48 &&
+                        hero.bullets.get(i).yShoot > hero.y + 15 && hero.bullets.get(i).yShoot < hero.y + 48 && hero.bullets.get(i).turn == -8) {
                     System.out.println("index danej kulki: " + i);
                     hero.bullets.get(i).yShoot = -209;
                     hero.bullets.get(i).xShoot = -1000;
@@ -572,10 +625,12 @@ public class Panel extends JPanel {
             obstacle.quantity = 2;
         }
         if (talentPoints.LEVEL > 8) {
-            obstacle.quantity = 7;
+            obstacle.quantity = 5;
+        }
+        if (obstacle.quantity > 11){
+            obstacle.quantity = 12;
         }
 
-        obstacle.setQuantity(12);
 
         //makeArrayToCheckReflect(i);
         System.out.println(obstacle.getQuantity() + " << ilość kładek");
@@ -689,22 +744,30 @@ public class Panel extends JPanel {
         }
 
         enemiesNumber = (talentPoints.LEVEL * enemiesNumber) - (talentPoints.LEVEL * enemiesNumber / 3);
+        System.out.println(enemiesNumber);
+
         if (talentPoints.LEVEL > 4) {
             enemiesNumber = (talentPoints.LEVEL * 10);
         }
 
+        if (ramka.getWidth() > WIDTH){
+            WIDTH = ramka.getWidth();
+            HEIGHT = ramka.getHeight();
+        }
+
+        max = WIDTH/55;
+
         if (talentPoints.LEVEL % 8 != 0) {
             howManyEnemiesInLine();
-            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
+            int[] randomArray = generateRandomArray(5, 0, max);  //3,0,15
             // size ramka.getwidth/160                        max ramka.getWidth/80
 
             int alotOfEnemiesGap = enemiesNumber / 25;
-            System.out.println(enemiesNumber);
-            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
-
+            
             for (int i = 0; i < enemiesNumber; i++) {
+                System.out.println(enemiesNumber + " ile przeciwnikow");
                 if (i % iloscNaOS == 0) {
-                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
+                    randomArray = generateRandomArray(iloscNaOS, 0, max);
                 }
 
                 enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
@@ -713,22 +776,6 @@ public class Panel extends JPanel {
             boos.ActiveBoss = true;
         }
 
-        if (enemies.size() <= 1) {
-            howManyEnemiesInLine();
-            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
-
-            int alotOfEnemiesGap = enemiesNumber / 25;
-            System.out.println(enemiesNumber);
-            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
-
-            for (int i = 0; i < enemiesNumber; i++) {
-                if (i % iloscNaOS == 0) {
-                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
-                }
-
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
-            }
-        }
 
         if (talentPoints.LEVEL > 0) {
             obstacle = new Obstacle(this);
@@ -738,69 +785,6 @@ public class Panel extends JPanel {
 
         firstaid = new Help(WIDTH);
 
-        // System.out.println(enemiesNumber + " ilość przeciwników co do lvlu");
-        // System.out.println(enemies.size() + " wielkość tablicy która powinna być taka sama co ilość przeciwników");
-    }
-
-    public void CreateEnemiesAgainResizeMode() {
-
-        if (death) {
-            enemiesNumber = 3;
-            death = false;
-        }
-
-        enemiesNumber = (talentPoints.LEVEL * enemiesNumber) - (talentPoints.LEVEL * enemiesNumber / 3);
-        if (talentPoints.LEVEL > 4) {
-            enemiesNumber = (talentPoints.LEVEL * 10);
-        }
-
-        if (talentPoints.LEVEL % 8 != 0) {
-            howManyEnemiesInLine();
-            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
-            // size ramka.getwidth/160                        max ramka.getWidth/80
-
-            int alotOfEnemiesGap = enemiesNumber / 25;
-            System.out.println(enemiesNumber);
-            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
-
-            for (int i = 0; i < enemiesNumber; i++) {
-                if (i % iloscNaOS == 0) {
-                    randomArray = generateRandomArray(5, 0, 15);
-                }
-
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
-            }
-        } else {
-            boos.ActiveBoss = true;
-        }
-
-        if (enemies.size() <= 1) {
-            howManyEnemiesInLine();
-            int[] randomArray = generateRandomArray(5, 0, 15);  //3,0,15
-
-            int alotOfEnemiesGap = enemiesNumber / 25;
-            System.out.println(enemiesNumber);
-            System.out.println("level: " + talentPoints.LEVEL + " * enenmies number : " + enemiesNumber);
-
-            for (int i = 0; i < enemiesNumber; i++) {
-                if (i % iloscNaOS == 0) {
-                    randomArray = generateRandomArray(iloscNaOS, 0, 15);
-                }
-
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i)) * (-alotOfEnemiesGap * 50), talentPoints));
-            }
-        }
-
-        if (talentPoints.LEVEL > 0) {
-            obstacle = new Obstacle(this);
-            quantityOfObstacle();
-            obstacle.obstacleActive = true;
-        }
-
-        firstaid = new Help(WIDTH);
-
-        // System.out.println(enemiesNumber + " ilość przeciwników co do lvlu");
-        // System.out.println(enemies.size() + " wielkość tablicy która powinna być taka sama co ilość przeciwników");
     }
 
 
@@ -849,8 +833,8 @@ public class Panel extends JPanel {
     public Dimension getPreferredSize() {
         if (!fullScreenMode) {
             return new Dimension(WIDTH, HEIGHT);
-        }else
-            return new Dimension(screenSize.width,screenSize.height);
+        } else
+            return new Dimension(screenSize.width, screenSize.height);
     }
 }
 

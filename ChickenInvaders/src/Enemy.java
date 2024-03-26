@@ -49,6 +49,9 @@ public class Enemy {
     public void update(TalentPoints talentPoints, Panel panel) {
 
         ensmiesSpeed = new int[panel.enemiesNumber];
+        if (panel.resizeMode || panel.WIDTH > 1000){
+            enemySpeed = 1;
+        }
 
         y = y + enemySpeed;
 

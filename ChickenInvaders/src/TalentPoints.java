@@ -30,7 +30,7 @@ public class TalentPoints implements ActionListener {
     int bigShootsPoints = 0;
     JLabel BigShootPointsLabel = new JLabel("BIG shoot: " + bigShootsPoints + " / 1");
 
-    int LEVEL = 7; // default 1
+    int LEVEL = 1; // default 1
     public int score = 10;
 
     JPanel buttonsAndScore = new JPanel();
@@ -951,13 +951,8 @@ public class TalentPoints implements ActionListener {
 
 
         if (e.getSource() == nextLevelButton) {
-            //panel.makeArrayToCheckReflect();
-            System.out.println("next LEVEL!");
             updateByTalents();
-            System.out.println(healthPoints + " << health points " + addHealth);
-            System.out.println(trippleShootsPoints + " << tripple shots points " + tripleShoots);
-            System.out.println(bigShootsPoints + " << bigShooot points " + bigShootEnable);
-            System.out.println(antiReflectPoints + " << Anti reflect points " + antiReflectBullet);
+
             obstacleActive = true;
             //TODO automatyczny zapis
             tabbedPane.setVisible(false);
@@ -971,6 +966,7 @@ public class TalentPoints implements ActionListener {
             buttonsAndScore.setVisible(false);
             removePanels();
 
+            obstacle.obstacleActive = true;
             panel.gameBonus = new RandomGameBonus();
             panel.firstaid = new Help(panel.ramka.getWidth());
             hero.x = panel.ramka.getWidth()/2-50;
