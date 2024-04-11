@@ -34,6 +34,7 @@ public class Ball {
 
     public int x;
     public int y;
+    boolean hitObstacle;
 
     public boolean[] getReflect() {
         return reflect;
@@ -115,6 +116,7 @@ public class Ball {
         this.vX = vX;
         this.color = color;
         this.panel = panel;
+        hitObstacle = true;
 
         colors[0] = Color.RED;
         colors[1] = Color.GREEN;
@@ -176,14 +178,14 @@ public class Ball {
         }
         if (panel.raidusTooltip.isSelected()){
             if (mass < 20){
-                g2d.drawString(String.valueOf(getRadius()), x -10, y + (mass / 2));
+                g2d.drawString("r " + String.valueOf(getRadius()), x -10, y + (mass / 2));
             }else  {
-                g2d.drawString(String.valueOf(getRadius()), x + 10, y + (mass / 2));
+                g2d.drawString("r " + String.valueOf(getRadius()), x + 10, y + (mass / 2));
             }
         }
 
         if (panel.distance.isSelected()){
-                g2d.drawString(String.valueOf(roundDigit(distanceToNearest,2)), x + 40, y + (mass / 2));
+                g2d.drawString(String.valueOf(roundDigit(distanceToNearest,2)), x + 40, y + (mass / 2) + 30);
         }
 
 
@@ -211,11 +213,10 @@ public class Ball {
 
     }
 
-    public boolean[] setFalseToReflect(){
+    public void setFalseToReflect(){
 
         Arrays.fill(reflect, false);
 
-        return reflect;
     }
 
 }
