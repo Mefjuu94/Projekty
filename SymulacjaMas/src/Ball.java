@@ -1,7 +1,10 @@
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Arrays;
 
 public class Ball {
+
 
     int ballnumber = 0;
     public int getX() {
@@ -36,6 +39,21 @@ public class Ball {
     public int y;
     boolean hitObstacle;
 
+    public boolean[] getHitSquare() {
+        return hitSquare;
+    }
+
+    public void setHitSquare(boolean[] hitSquare) {
+        this.hitSquare = hitSquare;
+    }
+
+    public void manyHitSquare(int i){
+        this.hitSquare = new boolean[i];
+        Arrays.fill(hitSquare, false);
+    }
+
+    boolean[] hitSquare = new boolean[9];
+
     public boolean[] getReflect() {
         return reflect;
     }
@@ -48,6 +66,10 @@ public class Ball {
 
     public void setxV(double v) {
         this.vX = v;
+    }
+
+    public double getvX() {
+        return vX;
     }
 
     double vX;
@@ -74,6 +96,7 @@ public class Ball {
     double kierunek;
 
     int originalX;
+    public int originalY;
     double originalV;
 
     public int getMass() {
@@ -96,20 +119,64 @@ public class Ball {
     Color color;
     Panel panel;
 
+    public int getIndexLastHit() {
+        return indexLastHit;
+    }
+
+    public void setIndexLastHit(int indexLastHit) {
+        this.indexLastHit = indexLastHit;
+    }
+
+    private int indexLastHit = 999;
+
+
     public double getRadius() {
         return radius;
     }
 
-    public void setRadius(double radius) {
+    public void setRadius(int radius) {
         this.radius = radius;
     }
 
-    double radius;
+    int radius;
+    int distanseX;
+
+    public double getDistanseX() {
+        return distanseX;
+    }
+
+    public void setDistanseX(int distanseX) {
+        this.distanseX = distanseX;
+    }
+
+    public int getDistanseY() {
+        return distanseY;
+    }
+
+    public void setDistanseY(int distanseY) {
+        this.distanseY = distanseY;
+    }
+
+    public double getDISTANSE() {
+        return DISTANSE;
+    }
+
+    public void setDISTANSE(double DISTANSE) {
+        this.DISTANSE = DISTANSE;
+    }
+
+    int distanseY;
+    double DISTANSE;
+
+    double closeX;
+    double closeY;
+
 
     Ball(int x, int y, int mass,double vX,double kierunek,Color color, Panel panel){
         this.x = x;
         this.y = y;
         this.originalX = x;
+        this.originalY = y;
         this.originalV = vX;
         this.kierunek = kierunek;
         this.mass = mass;
@@ -184,9 +251,7 @@ public class Ball {
             }
         }
 
-        if (panel.distance.isSelected()){
-                g2d.drawString(String.valueOf(roundDigit(distanceToNearest,2)), x + 40, y + (mass / 2) + 30);
-        }
+
 
 
     }
@@ -210,6 +275,8 @@ public class Ball {
         this.panel = panel;
         this.reflect = reflect;
         this.ballnumber = ballnumber;
+        hitObstacle = true;
+
 
     }
 
@@ -218,5 +285,6 @@ public class Ball {
         Arrays.fill(reflect, false);
 
     }
+
 
 }

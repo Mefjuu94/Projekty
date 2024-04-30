@@ -8,9 +8,13 @@ public class InfoPanel {
     ImageIcon enemyIcon = new ImageIcon("src/ICONS/enemy30.png");
     ImageIcon firstAidKitIcon = new ImageIcon("src/ICONS/firstAid30.png");
     ImageIcon coinIcon = new ImageIcon("src/ICONS/smallCoin-unscreen.gif");
+    ImageIcon ammunition = new ImageIcon("src/ICONS/ammunition.png");
 
 
-    public void paintInfopanel(Graphics2D g2d, int enemiesnumber, int health,int bulletcounter, int healthkit,int coinsQantity , Panel panel){
+
+
+
+    public void paintInfopanel(Graphics2D g2d, int enemiesnumber, int health,int bulletcounter, int healthkit,int coinsQantity, int ammoleft , Panel panel){
 
         g2d.setColor(Color.gray);
         g2d.fillRect(0,0,panel.getWidth(),70);
@@ -30,6 +34,9 @@ public class InfoPanel {
 
         coinIcon.paintIcon(panel,g2d,panel.getWidth()/2+100,0);
         g2d.drawString("  " + coinsQantity ,panel.getWidth()/2+105,50);
+
+        ammunition.paintIcon(panel,g2d,panel.getWidth()/2-180,0);
+        g2d.drawString("left: " + panel.hero.ammo,panel.getWidth()/2-200,60);
 
         bulletIcon.paintIcon(panel,g2d,panel.getWidth()-60,0);
         g2d.drawString("    " + bulletcounter,panel.getWidth()-100,50);

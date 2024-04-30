@@ -56,7 +56,8 @@ public class RandomGameBonus {
 
     public int chooseBonus(){
         Random rand = new Random();
-        int wyloSowana = rand.nextInt(2);
+        int wyloSowana = rand.nextInt(3);
+//        int wyloSowana = 3; // tesowa
         System.out.println(wyloSowana);
         return wyloSowana;
     }

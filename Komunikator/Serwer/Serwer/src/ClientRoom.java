@@ -1,141 +1,19 @@
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
-import java.net.*;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Queue;
 
-public class ChatServer {
-    static List<ClientHandler> clients = new ArrayList<>();
-    static JButton show = new JButton("show Clients");
-    static JButton clearChatHistory = new JButton("Wyczyść historię czatu");
-    static List<String> clientsNames = new ArrayList<>();
-    static List<String> avatars = new ArrayList<>();
-    static List<String> ageOfClients = new ArrayList<>();
-    static List<String> localizationOfClients = new ArrayList<>();
-    static LocalDateTime ldt = LocalDateTime.now();
-    static String time = ldt.toString().substring(0, 10);
+public class ClientRoom extends Thread{
 
-    static BufferedWriter writeChatHistory;
-    static BufferedReader readChatHistory;
-    static String biezacyKatalog = System.getProperty("user.dir");
-    static File historyChat = new File("ChatHistory");
-
-    static Queue<String> messageHistory;
-
-
-    public static void main(String[] args) throws IOException {
-
-        JFrame frame = new JFrame("serwer");
-        JPanel panel = new JPanel();
-
-        frame.add(panel);
-        frame.setBounds(300, 300, 300, 300);
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-
-        show.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("pozostało klientów: ");
-                for (int i = 0; i < clientsNames.size(); i++) {
-
-                    System.out.println(clientsNames.get(i));
-                }
-            }
-        });
-        show.setVisible(true);
-        panel.add(show);
-
-        clearChatHistory.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (messageHistory != null){
-                    messageHistory.clear();
-                    System.out.println("usunięto Historię czatu!");
-                }
-            }
-        });
-        clearChatHistory.setVisible(true);
-        panel.add(clearChatHistory);
-
-
-        try {
-            ServerSocket serverSocket = new ServerSocket(9999);
-            System.out.println("Serwer nasłuchuje na porcie 9999...");
-
-            messageHistory = new ConcurrentLinkedQueue<>(); // utwórz linked Queue przed wczytaniem pliku
-            loadPrevoiusHistory(historyChat);// wczytgaj plik
-            writeChatHistory = new BufferedWriter(new FileWriter("ChatHistory")); // nadpisz
-
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    for (String message : messageHistory){
-                    writeChatHistory.append(message);
-                    writeChatHistory.newLine();
-                    }
-
-                } catch (RuntimeException | IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }));
-
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("Nowe połączenie: " + clientSocket);
-
-                ClientHandler clientHandler = new ClientHandler(clientSocket, clientsNames, avatars, ageOfClients, localizationOfClients, writeChatHistory, historyChat,readChatHistory,messageHistory);
-                clients.add(clientHandler);
-                clientHandler.start();
-            }
-        } catch (IOException e) {
-            writeChatHistory.close();
-        }
-    }
-
-    static void loadPrevoiusHistory(File Chatfile) throws IOException {
-
-        BufferedReader br = new BufferedReader(new FileReader(Chatfile));
-        String lineOfHistory = "";
-        while ( (lineOfHistory = br.readLine()) != null){
-            messageHistory.add(lineOfHistory);
-        }
-
-    }
-
-
-    static void broadcastMessage(String message) {
-        for (ClientHandler client : clients) {
-            client.sendMessage(message);
-        }
-    }
-
-    static void broadcastImage(String imageBase64) {
-        for (ClientHandler client : clients) {
-            client.sendImage(imageBase64);
-            System.out.println("wysłano obraz");
-        }
-    }
-
-    static void broadcastVideo(String VideoBase64) {
-        for (ClientHandler client : clients) {
-            client.sendVideo(VideoBase64);
-            //System.out.println("wysłano video do " + client.username);
-        }
-    }
-
-}
-
-class ClientHandler extends Thread {
     private Socket clientSocket;
     private BufferedReader reader;
     private PrintWriter writer;
     private InputStream in;
-    OutputStream out;
+    private OutputStream out;
     FileOutputStream fileOutputStream;
 
     List<String> clientsNames = new ArrayList<>();
@@ -154,7 +32,7 @@ class ClientHandler extends Thread {
 
     Queue<String> messageHistory;
 
-    ClientHandler(Socket socket, List clientsName, List avatars, List ageOfClients, List localizationOfClients, BufferedWriter chatHistory,File history, BufferedReader readChat, Queue<String> messageHistory) throws IOException {
+    ClientRoom(Socket socket, List clientsName) throws IOException {
         this.clientsNames = clientsName;
         this.clientSocket = socket;
         this.history = history;
@@ -184,12 +62,10 @@ class ClientHandler extends Thread {
         int indexOfCurrent = 0;
         try {
 
-            sendHistoryToNewUser();
 
             username = reader.readLine();
             System.out.println(username + " dołączył do czatu.");
 
-            messageHistory.add(username + " dołączył do czatu.");
 
             System.out.println("ilość klientów: " + clientsNames.size());
             clientsNames.add(username);
@@ -219,39 +95,26 @@ class ClientHandler extends Thread {
                     clientSocket.close();
                 }
 
+
                 if (message.startsWith("[IMAGE]")) {
                     ChatServer.broadcastMessage(username + ": ");
                     // Przesłano obrazek
                     ChatServer.broadcastImage(message.substring(7));
 
-                    messageHistory.add(username + ": ");
-                    messageHistory.add(message);
+//                    messageHistory.add(username + ": ");
+//                    messageHistory.add(message);
                     // utnij znacznik obrazka i reszte wyslij do klientów z tym samym dopiskiem
 
                 }
 
-                if (message.startsWith("%%PRV;")){
-                    System.out.println("PRYWATNA WIADOMOSC!!!");
-                    String[] priv = message.split(";");
-                    List<String> clients = new ArrayList<>();
-                    clients.add(priv[1]);
-                    clients.add(priv[2]);
-                    String mess = priv[3];
-                    System.out.println("cl1 : " + priv[1] + " cl2:" + priv[2]);
-                    ChatServer.broadcastMessage("%%PRV;" + priv[1] + ";" + priv[2]);
-                    ChatServer.broadcastMessage(mess);
 
-//                    ClientRoom clientRoom = new ClientRoom(clientSocket, clients);
-//                    clientRoom.start();
-
-                }
 
                 if (message.startsWith("[VID]")) {
                     zatrzymajPliki = false;
                     String filename = "";
                     System.out.println("odbieram wideo..");
 
-                    messageHistory.add(username + " send video");
+                    //messageHistory.add(username + " send video");
 
 
                     ChatServer.broadcastVideo("[VID]");
@@ -341,7 +204,7 @@ class ClientHandler extends Thread {
                     // Wyświetlanie w konsoli serwera
                     System.out.println(username + ": " + message);
 
-                    messageHistory.add(username + ": " + message);
+                    //messageHistory.add(username + ": " + message);
                     ChatServer.broadcastMessage(username + ": " + message);
                 }
             }
@@ -353,7 +216,7 @@ class ClientHandler extends Thread {
             System.out.println(username + " has left the Chat");
             sendMessage(username + " has left the Chat");
 
-            messageHistory.add(username + " has left the Chat");
+            //messageHistory.add(username + " has left the Chat");
 
             for (int i = 0; i < ChatServer.clients.size(); i++) {
                 if (clientsNames.get(i).equals(username)) {
@@ -386,23 +249,6 @@ class ClientHandler extends Thread {
         }
     }
 
-
-
-    public void getMessageHistory() throws IOException {
-        // Zwracamy historię wiadomości jako jeden ciąg znaków, gdzie wiadomości są oddzielone np. nową linią
-        for (String message : messageHistory) {
-            sendMessage(message);
-        }
-    }
-
-    // Metoda wywoływana, gdy nowy klient dołącza do czatu
-    public void sendHistoryToNewUser() throws IOException {
-        // Pobieramy historię wiadomości
-        getMessageHistory();
-        // Wysyłamy historię do nowego użytkownika (implementacja zależy od logiki aplikacji, np. można to zrealizować poprzez wysłanie wiadomości przez sieć)
-        System.out.println("Sending chat history to new user:\n" + history);
-
-    }
 
 
     public void Cookies(String username) throws IOException {
@@ -439,6 +285,5 @@ class ClientHandler extends Thread {
     void sendVideo(String base64Video) {
         writer.println(base64Video);
     }
-
 
 }

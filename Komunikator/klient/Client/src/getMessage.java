@@ -1,6 +1,5 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -13,8 +12,12 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 
 import static java.lang.Integer.parseInt;
 
@@ -26,6 +29,7 @@ public class getMessage {
     boolean largeImage = false;
     boolean zatrzymajPliki = false;
 
+
     getMessage(Socket socket, Panel Panel) throws IOException {
         writer = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
@@ -36,8 +40,24 @@ public class getMessage {
 
     }
 
-    public void listen(Panel panel) {
+
+    public void listen(Panel panel) throws IOException {
         writer.println(panel.username);
+        // tutaj wczytuje dane z pliku i wywyła i żeby przypisać do USERA
+        String pathname = "src\\" + panel.username + ".txt";
+        File userFile = new File(pathname);
+        if (userFile.exists()) {
+            System.out.println("znalazłem Dane USERA!!!");
+            try {
+                panel.sendInfoAboutProfile(pathname);
+            } catch (Exception ignored) {
+                System.out.println("nie udało się wysłac informacji o Użytkowniku");
+            }
+        } else {
+            pathname = "src\\DefaultProfile.txt";
+            panel.sendInfoAboutProfile(pathname);
+            System.out.println("Dane profilu nie istnieją");
+        }
 
         new Thread(() -> {
             try {
@@ -63,7 +83,7 @@ public class getMessage {
 
                         String File = reader.readLine();
                         String FileName = File.replace(" ", "_");
-                        System.out.println("odbieram plik " + FileName.substring(0,5));
+                        System.out.println("odbieram plik " + FileName.substring(0, 5));
 
                         int numberOfFiles = 0;
 
@@ -108,7 +128,7 @@ public class getMessage {
                         DeleteFiles deleteFiles = new DeleteFiles();
                         for (String pathFromFilesName : namesOfFilesToMerge) {
                             deleteFiles.DeleteFile(panel.biezacyKatalog + "Pliki\\" + pathFromFilesName);
-                             System.out.println("ODEBRANA CZESC PLIKU " + pathFromFilesName + " USUNIETA");
+                            System.out.println("ODEBRANA CZESC PLIKU " + pathFromFilesName + " USUNIETA");
                         }
                         namesOfFilesToMerge.clear();
                         System.out.println(">>>>>>>>>>>>>USUNĄŁEM CZESCI PRZYJETE<<<<<<<<<<<<<<<<<");
@@ -123,19 +143,85 @@ public class getMessage {
 
                         String blankMessage = reader.readLine(); // żeby nie wyświetlało w formie tekstowej obrazka
 
-                    } else {
+                    } else if (message.startsWith("c%l%")) {
+                        System.out.println("kolejny user:");
+
+                        // usuwa wszystkich żeby na nowo zapisac listę
+                        for (int i = 0; i < panel.usersActiveList.size(); i++) {   ////////////////////////////ogarnąć bo powiela użytkowniuków i nie wyśiwetla buttonów!!
+                            panel.usersActiveList.clear();
+                            if (panel.clicableUsers.size() > 0) {
+                                panel.clicableUsers.clear();
+                            }
+                        }
+
+                        //rozdzielnie nazw urżytkowników
+                        String clean = message.replaceFirst("c%l%", "");
+                        clean = clean.replace("[", "");
+                        clean = clean.replace("]", "");
+                        String[] cleanArray = clean.split(",");
+
+                        panel.usersActiveList.addAll(Arrays.asList(cleanArray));
+
+                        panel.showClientsList(panel.usersActiveList);
+
+                    } else if (message.startsWith("%%av")) {
+                        panel.avatars.clear();
+
+                        String clean = message.replaceFirst("%%av", "");
+                        clean = clean.replace("[", "");
+                        clean = clean.replace("]", "");
+                        String[] cleanArray = clean.split(",");
+
+                        panel.avatars.addAll(Arrays.asList(cleanArray));
+                    } else if (message.startsWith("%%ag")) {
+                        panel.ageOfClients.clear();
+
+                        String clean = message.replaceFirst("%%ag", "");
+                        clean = clean.replace("[", "");
+                        clean = clean.replace("]", "");
+                        String[] cleanArray = clean.split(",");
+
+                        panel.ageOfClients.addAll(Arrays.asList(cleanArray));
+                        System.out.println(panel.ageOfClients);
+
+                    } else if (message.startsWith("%%lo")) {
+                        panel.localizationOfClients.clear();
+
+                        String clean = message.replaceFirst("%%lo", "");
+                        clean = clean.replace("[", "");
+                        clean = clean.replace("]", "");
+                        String[] cleanArray = clean.split(",");
+
+                        panel.localizationOfClients.addAll(Arrays.asList(cleanArray));
+                        System.out.println(panel.localizationOfClients);
+
+                    } else if (message.startsWith("%%PRV;")) { /// czemu kurwa nie działa/>
+                        System.out.println("weiadomość PRYWATNA");
+                        String[] split = message.split(";");
+                        String user = split[1];
+
+                        appendToPrivChat(split[3],user);
+                    }
+                    else {
                         System.out.println("wiadomosc tekstowa..");
                         System.out.println(message);
                         appendToChatTextPane(message);
+
                     }
+
+
                 }
             } catch (IOException ex) {
                 System.out.println("stracono połączenie!");
+                JOptionPane.showMessageDialog(panel, "stracono połączenie z serwerem!");
                 ex.printStackTrace();
             } catch (BadLocationException e) {
                 throw new RuntimeException(e);
             }
-        }).start();
+        }).
+
+                start();
+
     }
 
 
@@ -252,6 +338,62 @@ public class getMessage {
     }
 
     void appendLinkToImage(File filePath, String FileName) throws BadLocationException {
+
+        HTMLDocument doc = (HTMLDocument) panel.chatTextPane.getDocument();
+        try {
+            // Sprawdź, czy treść istnieje w dokumencie
+            if (doc.getLength() > 0) {
+                // Dodaj nową linię przed nową wiadomością
+                doc.insertAfterEnd(doc.getCharacterElement(doc.getLength() - 1), "<br><a href='" + "file://"
+                        + filePath.getAbsolutePath() + "'>OTWÓRZ PLIK</a>" + " o nazwie " + FileName); //
+            }
+
+            // Dodaj wiadomość do dokumentu HTML
+            doc.insertAfterEnd(doc.getCharacterElement(doc.getLength()), "");
+        } catch (BadLocationException | IOException e) {
+            e.printStackTrace();
+        }
+        panel.chatTextPane.setCaretPosition(doc.getLength());
+    }
+
+    public void appendToPrivChat(String message,String user) { // zjebane dokonczyc!!
+
+        for (int i = 0; i < panel.tabbedPane.indexOfTab(user); i++) {
+
+        HTMLDocument doc = (HTMLDocument) panel.chatTextPane.getDocument();
+        HTMLEditorKit kit = (HTMLEditorKit) panel.chatTextPane.getEditorKit();
+
+        try {
+            kit.insertHTML(doc, doc.getLength(), message, 0, 0, null);
+            panel.chatTextPane.setCaretPosition(doc.getLength());
+        } catch (IOException | BadLocationException e) {
+            e.printStackTrace();
+        }
+        panel.chatTextPane.setCaretPosition(doc.getLength());
+        }
+
+    }
+
+    void appendVideoLinkPrivChat(File filePath, String videoFileName) throws BadLocationException {
+
+        HTMLDocument doc = (HTMLDocument) panel.chatTextPane.getDocument();
+        try {
+            // Sprawdź, czy treść istnieje w dokumencie
+            if (doc.getLength() > 0) {
+                // Dodaj nową linię przed nową wiadomością
+                doc.insertAfterEnd(doc.getCharacterElement(doc.getLength() - 1), "<br><a href='" + "file://"
+                        + filePath.getAbsolutePath() + "'>OTWÓRZ PLIK</a>" + " o nazwie " + videoFileName); //
+            }
+
+            // Dodaj wiadomość do dokumentu HTML
+            doc.insertAfterEnd(doc.getCharacterElement(doc.getLength()), "");
+        } catch (BadLocationException | IOException e) {
+            e.printStackTrace();
+        }
+        panel.chatTextPane.setCaretPosition(doc.getLength());
+    }
+
+    void appendLinkToImagePrivChat(File filePath, String FileName) throws BadLocationException {
 
         HTMLDocument doc = (HTMLDocument) panel.chatTextPane.getDocument();
         try {

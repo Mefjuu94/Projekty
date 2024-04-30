@@ -2,20 +2,18 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
+import java.awt.event.*;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Random;
 
-public class Panel extends JPanel implements MouseListener {
+import static java.lang.Math.abs;
+
+public class Panel extends JPanel implements MouseListener, MouseMotionListener {
 
     JFrame ramka;
     Ball ball;
     List<Ball> ballsList = new ArrayList<>();
+    List<Square> squareList = new ArrayList<>();
     int x = 10;
 
     JPanel controlPanel = new JPanel();
@@ -54,14 +52,15 @@ public class Panel extends JPanel implements MouseListener {
     int rectY;
     int rectWidth;
     boolean createRect;
-
+    int indexOfCatchBall = 0;
+    boolean ballCatchActive = false;
 
     boolean obliczenia = true;
     JPanel RadioPanel = new JPanel();
     JRadioButton radioButton = new JRadioButton("velocity toollTip");
     JRadioButton numberOfBall = new JRadioButton("number of Ball");
     JRadioButton raidusTooltip = new JRadioButton("raidus toolTip");
-    JRadioButton distance = new JRadioButton("distance to nearest");
+    JRadioButton clamp_method = new JRadioButton("Clamp method");
     boolean velocityTooltipVisible = true;
 
     JButton multipleBalls = new JButton("Multiple Balls");
@@ -72,12 +71,14 @@ public class Panel extends JPanel implements MouseListener {
 
     //wiele piłeczek
     JPanel multipleControlBallPanel = new JPanel();
+    JPanel multipleControlSquarePanel = new JPanel();
     ArrayList<JPanel> ballsPanels = new ArrayList<>();
+    ArrayList<JPanel> squarePanels = new ArrayList<>();
     Color[] colorsOfBalls;
     JScrollPane controlPanelScroll = new JScrollPane(multipleControlBallPanel);
+    JScrollPane controlPanelScrollsquare = new JScrollPane(multipleControlSquarePanel);
 
     JButton[] setVelocityXBalls;
-    //TODO ZROI PRZYCISKI NA OSOBNE OSIE
     JButton[] setVelocityYBalls;
     JTextField[] setVelFieldXBalls;
     JTextField[] setVelFieldYBalls;
@@ -88,12 +89,58 @@ public class Panel extends JPanel implements MouseListener {
     JButton[] setColorOfBallsButton;
     int[] clickOfcolors;
 
+    Square square;
+
+    JButton xPosition;
+    JTextField XPositionField;
+    JButton yPosition;
+    JTextField yPositionField;
+    JButton squareWidthButton;
+    JTextField squareWidth;
+    JButton setColorOfsquareButton;
+
+
+    ArrayList<JButton> setXpositionRect = new ArrayList<>();
+    ArrayList<JButton> setYpositionRect = new ArrayList<>();
+    ArrayList<JTextField> XPositionFieldSquares = new ArrayList<>();
+    ArrayList<JTextField> YPositionFieldSquares = new ArrayList<>();
+    ArrayList<JButton> setWidthsquares = new ArrayList<>();
+    ArrayList<JTextField> setWidthSquaresFields = new ArrayList<>();
+    ArrayList<JButton> setColorOfSquaresButton = new ArrayList<>();
+
+    boolean left, right, top, bottom;
+    double closeX;
+    double closeY;
+
+    public double getCloseX() {
+        return closeX;
+    }
+
+    public void setCloseX(double closeX) {
+        this.closeX = closeX;
+    }
+
+    public double getCloseY() {
+        return closeY;
+    }
+
+    public void setCloseY(double closeY) {
+        this.closeY = closeY;
+    }
+
+    boolean closestX;
+    boolean closestY;
+    JButton przycisk = new JButton("wyswietl coś");
+
+    JTabbedPane tabbedPane = new JTabbedPane();
+
 
     Panel(JFrame ramka) {
 
         this.setLayout(new BorderLayout());
         this.setBackground(Color.DARK_GRAY);
         this.ramka = ramka;
+        this.addMouseMotionListener(this);
 
         this.add(controlPanel, BorderLayout.EAST);
         Border controlPanelBorder = new TitledBorder("Control Panel");
@@ -103,12 +150,14 @@ public class Panel extends JPanel implements MouseListener {
         controlPanel.setPreferredSize(new Dimension(controlPanelWidth, 20));
         controlPanel.setBorder(controlPanelBorder);
 
-
         //restart i stop buttons:
         controlPanel.add(startButton);
         startButton.addMouseListener(this);
         controlPanel.add(restart);
         restart.addMouseListener(this);
+
+        controlPanel.add(przycisk);
+        przycisk.addMouseListener(this);
 
         RadioPanel.add(radioButton);
         radioButton.setSelected(true);
@@ -122,9 +171,9 @@ public class Panel extends JPanel implements MouseListener {
         raidusTooltip.setSelected(false);
         raidusTooltip.addMouseListener(this);
 
-        RadioPanel.add(distance);
-        distance.setSelected(false);
-        distance.addMouseListener(this);
+        RadioPanel.add(clamp_method);
+        clamp_method.setSelected(false);
+        clamp_method.addMouseListener(this);
 
         controlPanel.add(RadioPanel);
         Border RadioBorder = new TitledBorder("Radio Panel");
@@ -167,9 +216,9 @@ public class Panel extends JPanel implements MouseListener {
         double v = 7;
 
         ballsList.add(new Ball(10, ramka.getHeight() / 2 - (m1 / 2), m1, v, 30, Color.ORANGE, this));
-        ballsList.get(0).setRadius(m1 / 2.0);
+        ballsList.get(0).setRadius(m1 / 2);
         ballsList.add(new Ball(ramka.getWidth() - m2 - controlPanelWidth - 50, ramka.getHeight() / 2 - (m2 / 2), m2, v * -1, 210, Color.pink, this));
-        ballsList.get(1).setRadius(m2 / 2.0);
+        ballsList.get(1).setRadius(m2 / 2);
 
         controlPanel.add(leftBall);
         leftBall.setBackground(ballsList.get(0).color);
@@ -274,8 +323,11 @@ public class Panel extends JPanel implements MouseListener {
         setColorOfBallsButton = new JButton[numberOfBalls];
         clickOfcolors = new int[numberOfBalls];
 
-        controlPanelScroll.setPreferredSize(new Dimension(controlPanel.getWidth() - 10, (ramka.getHeight() - 300)));
+        controlPanelScroll.setPreferredSize(new Dimension(controlPanel.getWidth() - 10, (ramka.getHeight() - 380)));
         multipleControlBallPanel.setLayout(new BoxLayout(multipleControlBallPanel, BoxLayout.Y_AXIS));
+
+        controlPanelScrollsquare.setPreferredSize(new Dimension(controlPanel.getWidth() - 10, (ramka.getHeight() - 380)));
+        multipleControlSquarePanel.setLayout(new BoxLayout(multipleControlSquarePanel, BoxLayout.Y_AXIS));
 
 
         for (int i = 0; i < numberOfBalls; i++) {
@@ -291,13 +343,14 @@ public class Panel extends JPanel implements MouseListener {
             boolean[] reflect = new boolean[numberOfBalls];
 
             while (!repairPosition(mass, x, y)) {
-                mass = rand.nextInt(250);
+                mass = rand.nextInt(100) + 10;
                 x = rand.nextInt(ramka.getWidth() - 230 - mass);
                 y = rand.nextInt(ramka.getHeight() - mass - 100);
             }
 
             ballsList.add(new Ball(x, y, mass, velocityX, velocityY, 30, new Color(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)), this, reflect, i));
-            ballsList.get(i).setRadius(mass / 2.0);
+            ballsList.get(i).setRadius(mass / 2);
+            ballsList.get(i).originalY = y;
 
             Border panelsBorder = new TitledBorder("Ball: " + i);
             ballsPanels.add(new JPanel());
@@ -374,11 +427,108 @@ public class Panel extends JPanel implements MouseListener {
         }
 
 
-        controlPanel.add(controlPanelScroll);
+        //rect square!!!!
+
+
+        tabbedPane.addTab("balls", controlPanelScroll);
+        tabbedPane.addTab("squares", controlPanelScrollsquare);
+        controlPanel.add(tabbedPane);
 
         controlPanel.revalidate();
-        controlPanelScroll.setVisible(true);
 
+        controlPanelScroll.setVisible(true);
+        controlPanelScrollsquare.setVisible(true);
+    }
+
+    private void addSquarePanel(int i) {
+
+
+        Random rand = new Random();
+        //new ball random position:
+
+        Border panelsBorder = new TitledBorder("square: " + i);
+        squarePanels.add(new JPanel());
+        squarePanels.get(i).setBorder(panelsBorder);
+        squarePanels.get(i).setLayout(new BoxLayout(squarePanels.get(i), BoxLayout.Y_AXIS));
+
+        xPosition = new JButton("set X: " + i);
+        XPositionField = new JTextField(5);
+        yPosition = new JButton("set Y: " + i);
+        yPositionField = new JTextField(5);
+        squareWidthButton = new JButton("set Width : " + i);
+        squareWidth = new JTextField(5);
+        setColorOfsquareButton = new JButton("change Color of Rect : " + i);
+
+        setXpositionRect.add(xPosition);
+        XPositionFieldSquares.add(XPositionField);
+        setYpositionRect.add(yPosition);
+        YPositionFieldSquares.add(yPositionField);
+        setWidthsquares.add(squareWidthButton);
+        setWidthSquaresFields.add(squareWidth);
+        setColorOfSquaresButton.add(setColorOfsquareButton);
+
+        squarePanels.get(i).add(xPosition);
+        xPosition.addMouseListener(this);
+        squarePanels.get(i).add(XPositionField);
+        //setVelField.setDocument(); // TODO nowy dokument który zwraca w razie kopiowania null
+        XPositionField.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (!((c >= '0') && (c <= '9') ||
+                        (c == KeyEvent.VK_BACK_SPACE) ||
+                        (c == KeyEvent.VK_DELETE))) {
+                    getToolkit().beep(); // dzwięk!
+                    System.out.println("niedozwolony znak!");
+                    e.consume();
+                }
+            }
+        });
+
+        squarePanels.get(i).add(yPosition);
+        yPosition.addMouseListener(this);
+
+        squarePanels.get(i).add(yPositionField);
+        //setVelField.setDocument(); // TODO nowy dokument który zwraca w razie kopiowania null
+        yPositionField.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (!((c >= '0') && (c <= '9') ||
+                        (c == KeyEvent.VK_BACK_SPACE) ||
+                        (c == KeyEvent.VK_DELETE))) {
+                    getToolkit().beep(); // dzwięk!
+                    System.out.println("niedozwolony znak!");
+                    e.consume();
+                }
+            }
+        });
+
+        squarePanels.get(i).add(squareWidthButton);
+        squarePanels.get(i).add(squareWidth);
+
+        squareWidth.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (!((c >= '0') && (c <= '9') ||
+                        (c == KeyEvent.VK_BACK_SPACE) ||
+                        (c == KeyEvent.VK_DELETE))) {
+                    getToolkit().beep(); // dzwięk!
+                    System.out.println("niedozwolony znak!");
+                    e.consume();
+                }
+            }
+        });
+
+        setColorOfsquareButton.addMouseListener(this);
+        squareWidthButton.addMouseListener(this);
+
+        squarePanels.get(i).add(setColorOfsquareButton);
+
+        squarePanels.get(i).setBackground(squareList.get(i).getColor());
+        multipleControlSquarePanel.add(squarePanels.get(i));
+
+
+        tabbedPane.revalidate();
+        tabbedPane.repaint();
     }
 
 
@@ -389,23 +539,40 @@ public class Panel extends JPanel implements MouseListener {
         Graphics2D g2d = (Graphics2D) g;
 
         if (ballsList != null) {
-            for (int i = 0; i < ballsList.size(); i++) {
-                ballsList.get(i).paintBall(g2d);
-            }
+            for (int k = 0; k < ballsList.size(); k++) {
+                ballsList.get(k).paintBall(g2d);
 
-            if (startAnimation) {
-                // detekcja kolizjii
-                if (obliczenia) {
-                    CollisionDetect();
+
+                if (startAnimation) {
+                    // detekcja kolizjii
+                    if (obliczenia) {
+                        CollisionDetect();
+                    }
+                    reflectFromWalls();
                 }
-                reflectFromWalls();
-            }
 
-            if (createRect) {
-                g2d.drawRect(rectX, rectY, rectWidth, rectWidth);
-                colisionWithRect();
-            }
+                if (createRect) {
 
+                    for (int j = 0; j < squarePanels.size(); j++) {
+
+                        g2d.setColor(squareList.get(j).getColor());
+                        g2d.fillRect(squareList.get(j).getX(), squareList.get(j).getY(), squareList.get(j).getWidth(), squareList.get(j).getWidth());
+
+
+                        if (clamp_method.isSelected()) {
+                            for (int i = 0; i < ballsList.size(); i++) {
+                                g2d.setColor(Color.black);
+                                g2d.drawLine(ballsList.get(i).x + ballsList.get(i).radius, ballsList.get(i).y + ballsList.get(i).radius, (int) ballsList.get(i).closeX, (int) ballsList.get(i).closeY);
+                                g2d.setColor(ballsList.get(i).color);
+                                g2d.fillOval((int) ballsList.get(i).closeX - 5, (int) ballsList.get(i).closeY - 5, 10, 10);
+
+                            }
+                        }
+
+                        colisionWithRect(j);
+                    }
+                }
+            }
         }
 
 
@@ -417,51 +584,105 @@ public class Panel extends JPanel implements MouseListener {
 
     }
 
-    private void colisionWithRect() {
 
-
-        double distance;
-        double maxDistance;
-        double dx;
-        double dy;
+    private void colisionWithRect(int squareIndex) {
 
         for (Ball ball : ballsList) {
 
-            dx = (ball.x + ball.radius) - (rectX + (rectWidth / 2.0));
-            dy = (ball.y + ball.radius) - (rectY + (rectWidth / 2.0));
-            distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-            maxDistance = ball.radius + (rectWidth / 2.0);
-//            System.out.println(maxDistance);
+
+//            double dXOfBall = ball.x + ball.radius;
+//            double dYOfBall = ball.y + ball.radius;
+//
+//            double dx = (dXOfBall) - (ball.closeX);
+//            double dy = (dYOfBall) - (ball.closeY);
+//            double distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 
 
-            if (ball.y + ball.mass > rectY && ball.y < rectY + rectWidth) {
-
-                if (ball.x + ball.mass >= rectX && ball.x < rectX + rectWidth) { //ballsList.get(i).x + ballsList.get(i).mass >= rectX && ballsList.get(i).x < rectX + rectWidth &&
-                    System.out.println("zmieniam X");
-                    ball.vX *= -1;
-
-                }
-            }
-            if (ball.x + ball.mass > rectX && ball.x < rectX + rectWidth) {
-
-                if (ball.y + ball.mass >= rectY && ball.y < rectY + rectWidth) { //
-
-                    ball.vY *= -1;
-                    System.out.println("zmieniam y");
+//
+//
+//            ball.DISTANSE = (int) distance;
+//
 
 
-                }
 
-            }
+
+
+            clamp(ball, squareIndex);
+
+
         }
-
-
-//            if (ballsList.get(i).x + ballsList.get(i).mass >= rectX && ballsList.get(i).x < rectX + rectWidth &&
-//                    ballsList.get(i).y + ballsList.get(i).mass >= rectY && ballsList.get(i).y < rectY + rectWidth){
-
-
     }
 
+
+    public void clamp(Ball ball, int i) {
+        double dXOfBall = ball.x + ball.radius;
+        double dYOfBall = ball.y + ball.radius;
+
+        double DXofCloseX = (ball.x + ball.radius) - ball.closeX;
+        double DYofCloseY = (ball.y + ball.radius) - ball.closeY;
+        double distance = Math.sqrt(Math.pow(DXofCloseX, 2) + Math.pow(DYofCloseY, 2));
+
+        ball.closeX = dXOfBall;
+        ball.closeY = dYOfBall;
+
+
+        boolean rectangleX = ball.x + ball.mass > squareList.get(i).getX() && ball.x < squareList.get(i).getX() + squareList.get(i).getWidth();
+        boolean rectangleY = ball.y + ball.mass > squareList.get(i).getY() && ball.y < squareList.get(i).getY() + squareList.get(i).getWidth();
+        boolean rectangleBOX = rectangleX && rectangleY;
+
+        //clamping ani
+        if (dXOfBall < squareList.get(i).getX()) {
+            ball.closeX = squareList.get(i).getX();
+            closestX = true;
+            closestY = false;
+        }
+
+        if (dXOfBall > squareList.get(i).getX() + squareList.get(i).getWidth()) {
+            ball.closeX = squareList.get(i).getX() + squareList.get(i).getWidth();
+            closestX = true;
+            closestY = false;
+        }
+
+        if (dYOfBall < squareList.get(i).getY()) {
+            ball.closeY = squareList.get(i).getY();
+            closestX = false;
+            closestY = true;
+        }
+
+        if (dYOfBall > squareList.get(i).getY() + squareList.get(i).getWidth()) {
+            ball.closeY = squareList.get(i).getY() + squareList.get(i).getWidth();
+            closestX = false;
+            closestY = true;
+        }
+
+        int middleRectX = squareList.get(i).getX() + (rectWidth / 2);
+        int middleRectY = squareList.get(i).getY() + (rectWidth / 2);
+
+        left = ball.x + ball.mass < middleRectX;
+        right = ball.x > middleRectX ;
+        bottom = ball.y > middleRectY ;
+        top = ball.y + ball.mass < middleRectY ;
+
+        if(distance <= ball.radius) {
+            System.out.println("pilka w kwadracie");
+            squareList.get(i).setColor(Color.red);
+            double xPit = Math.sqrt(Math.pow(dXOfBall,2) + Math.pow( middleRectX,2));
+            double yPit = Math.sqrt(Math.pow(dYOfBall,2) + Math.pow( middleRectY,2));
+
+            if (left || right){
+                System.out.println("left or right");
+                ball.vX *= -1;
+                ball.hitObstacle = false;
+            }else {
+                System.out.println("top or bottom");
+                ball.vX *= -1;
+                ball.hitObstacle = false;
+            }
+
+        }else {
+            squareList.get(i).setColor(Color.blue);
+        }
+    }
 
     private void CollisionDetect() {
 
@@ -513,10 +734,11 @@ public class Panel extends JPanel implements MouseListener {
 
 
                         if (distance <= maxDistance && !ballsList.get(j).reflect[i]) {
-                            System.out.println("kolizja!" + distance + " " + i + " " + j);
+                            // System.out.println("kolizja!" + distance + " " + i + " " + j);
 
                             boolean[] f = new boolean[ballsList.size()];
                             ballsList.get(i).hitObstacle = true;
+                            ballsList.get(i).setIndexLastHit(9999);
 
                             ballsList.get(i).setFalseToReflect();
                             ballsList.get(j).setFalseToReflect();
@@ -568,7 +790,7 @@ public class Panel extends JPanel implements MouseListener {
                 if (ballsList.get(i).x <= 0 || ballsList.get(i).x + ballsList.get(i).mass >= (WIDTH - 220)) {
                     ballsList.get(i).vX = ballsList.get(i).vX * -1;
                     obliczenia = true;
-                    ballsList.get(i).hitObstacle = true;
+                    ballsList.get(i).setIndexLastHit(9999);
                 }
 
             }
@@ -578,7 +800,7 @@ public class Panel extends JPanel implements MouseListener {
                     ballsList.get(i).vX = ballsList.get(i).vX * -1;
                     ballsList.get(i).setFalseToReflect();
                     ballsList.get(i).hitObstacle = true;
-
+                    ballsList.get(i).setIndexLastHit(9999);
 
                 }
 
@@ -587,6 +809,7 @@ public class Panel extends JPanel implements MouseListener {
                     ballsList.get(i).setFalseToReflect();
                     ballsList.get(i).setFalseToReflect();
                     ballsList.get(i).hitObstacle = true;
+                    ballsList.get(i).setIndexLastHit(9999);
 
                 }
             }
@@ -629,15 +852,19 @@ public class Panel extends JPanel implements MouseListener {
         }
 
         if (e.getSource() == restart) {
-            ballsList.get(0).x = ballsList.get(0).originalX;
-            ballsList.get(0).vX = ballsList.get(0).getMyV();
 
-            ballsList.get(1).x = ballsList.get(1).originalX;
-            ballsList.get(1).vX = ballsList.get(1).getMyV();
-            ballsList.get(1).setX(ramka.getWidth() - ballsList.get(1).getMass() - 200 - 50);
+            for (int i = 0; i < ballsList.size(); i++) {
+
+            ballsList.get(i).x = ballsList.get(i).originalX;
+            ballsList.get(i).y = ballsList.get(i).originalY;
+            ballsList.get(i).vX = ballsList.get(i).getMyV();
+
             startAnimation = false;
             obliczenia = true;
+            }
             System.out.println("restart");
+            squareList.clear();
+            squarePanels.clear();
             startButton.setText("start");
         }
 
@@ -756,12 +983,12 @@ public class Panel extends JPanel implements MouseListener {
             String text = multipleModeSize.getText();
             sizeOfMultiple = Integer.parseInt(text);
 
-            if (sizeOfMultiple < 2) {
-                getToolkit().beep(); // dzwięk!
-                System.out.println("niedozwolona Wartośc!");
-                JOptionPane.showMessageDialog(controlPanel, "Invalid Value! Must be greater than 2!");
-                multipleMode = false;
-            }
+//            if (sizeOfMultiple < 2) {
+//                getToolkit().beep(); // dzwięk!
+//                System.out.println("niedozwolona Wartośc!");
+//                JOptionPane.showMessageDialog(controlPanel, "Invalid Value! Must be greater than 2!");
+//                multipleMode = false;
+//            }
 
 
             if (multipleMode) {
@@ -781,7 +1008,10 @@ public class Panel extends JPanel implements MouseListener {
                 for (int i = 0; i < ballsPanels.size(); i++) {
                     ballsPanels.get(i).removeAll();
                     controlPanelScroll.remove(ballsPanels.get(i));
-                    revalidate();
+                    tabbedPane.removeAll();
+                    tabbedPane.remove(controlPanelScroll);
+                    controlPanelScroll.revalidate();
+                    controlPanelScroll.repaint();
                 }
                 ballsList.clear();
                 System.out.println("bal panels lenght: " + ballsPanels.size());
@@ -831,7 +1061,7 @@ public class Panel extends JPanel implements MouseListener {
                         int M = Integer.parseInt(setMassFieldBalls[i].getText());
                         if (M > 0) {
                             ballsList.get(i).setMass(M);
-                            ballsList.get(i).setRadius(M / 2.0);
+                            ballsList.get(i).setRadius(M / 2);
                             System.out.println("Changed Mass of ball : " + i + " = " + M);
                         }
                     }
@@ -854,17 +1084,98 @@ public class Panel extends JPanel implements MouseListener {
             createRandomRect();
         }
 
+        if (e.getSource() == przycisk) {
+            for (int i = 0; i < ballsList.size(); i++) {
+                System.out.println("dystans piłki nr " + i + " = " + ballsList.get(i).DISTANSE);
+                System.out.println("closeX = " + ballsList.get(i).closeX);
+                System.out.println("closeY = " + ballsList.get(i).closeY);
+
+            }
+        }
+
+        for (int i = 0; i < squarePanels.size(); i++) {
+
+            if (e.getSource() == setXpositionRect.get(i)) {
+                System.out.println(i);
+                System.out.println(XPositionFieldSquares.get(i).getText());
+
+                if (XPositionFieldSquares.get(i).getText() == null || Objects.equals(XPositionFieldSquares.get(i).getText(), "")) {
+                    JOptionPane.showMessageDialog(controlPanel, "valuie must be greater than 0!");
+                } else {
+                    int X = Integer.parseInt(XPositionFieldSquares.get(i).getText());
+                    if (X >= 0) {
+                        squareList.get(i).setX(X);
+                        System.out.println("Changed X position of Square : " + i + " = " + X);
+                    }
+                }
+            }
+
+            if (e.getSource() == setYpositionRect.get(i)) {
+                if (YPositionFieldSquares.get(i).getText() == null || Objects.equals(YPositionFieldSquares.get(i).getText(), "")) {
+                    JOptionPane.showMessageDialog(controlPanel, "valuie must be greater than 0!");
+                } else {
+                    int Y = Integer.parseInt(YPositionFieldSquares.get(i).getText());
+                    if (Y >= 0) {
+                        squareList.get(i).setY(Y);
+                        System.out.println("Changed X position of Square : " + i + " = " + Y);
+                    }
+                }
+            }
+
+
+            if (e.getSource() == setWidthsquares.get(i)) {
+                if (setWidthSquaresFields.get(i).getText() == null || Objects.equals(setWidthSquaresFields.get(i).getText(), "")) {
+                    JOptionPane.showMessageDialog(controlPanel, "valuie must be greater than 0!");
+                } else {
+                    int M = Integer.parseInt(setWidthSquaresFields.get(i).getText());
+                    if (M > 0) {
+                        squareList.get(i).setWidth(M);
+                        System.out.println("Changed size of square : " + i + " = " + M);
+                    }
+                }
+            }
+
+            if (e.getSource() == setColorOfSquaresButton.get(i)) {
+                Random random = new Random();
+                Color color = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+                squareList.get(i).setColor(color);
+                squarePanels.get(i).setBackground(color);
+                System.out.println("Changed Color of SQUARE : " + i);
+            }
+            repaint();
+        }
+
+
     }
 
     private void createRandomRect() {
 
-        Random random = new Random();
+        Random rand = new Random();
+        //new ball random position:
+        rectWidth = rand.nextInt(250);
+        rectX = rand.nextInt(ramka.getWidth() - 250 - rectWidth);
+        rectY = rand.nextInt(ramka.getHeight() - rectWidth - 100);
+        Color color = new Color(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255));
 
-        rectX = ramka.getWidth() / 2;//random.nextInt(ramka.getWidth() - 300);
-        rectY = ramka.getHeight() / 2; //random.nextInt(ramka.getHeight() - 100);
-        rectWidth = 100;// random.nextInt(ramka.getWidth()/3);
 
-        createRect = true;
+        while (!repairPosition(rectWidth, rectX, rectY)) {
+            rectWidth = rand.nextInt(200) + 10;
+            rectX = rand.nextInt(ramka.getWidth() - 230 - rectWidth);
+            rectY = rand.nextInt(ramka.getHeight() - rectWidth - 100);
+        }
+
+        if (repairPosition(rectWidth, rectX, rectY)) {
+            square = new Square(rectX, rectY, rectWidth, rectWidth, color);
+            squareList.add(this.square);
+            addSquarePanel(squareList.size() - 1);
+            createRect = true;
+            System.out.println(rectWidth + " wielkosc");
+            for (Ball balls : ballsList) {
+                balls.manyHitSquare(squareList.size());
+            }
+        }
+
+
     }
 
     @Override
@@ -874,6 +1185,7 @@ public class Panel extends JPanel implements MouseListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
+
 
     }
 
@@ -886,4 +1198,37 @@ public class Panel extends JPanel implements MouseListener {
     public void mouseExited(MouseEvent e) {
 
     }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        for (int i = 0; i < ballsList.size(); i++) {
+
+            double mouseX = e.getX();
+            double mouseY = e.getY();
+
+            if (mouseX > ballsList.get(i).x && mouseX < ballsList.get(i).x + ballsList.get(i).mass &&
+                    mouseY > ballsList.get(i).y && mouseY < ballsList.get(i).y + ballsList.get(i).mass) {
+                indexOfCatchBall = i;
+                ballCatchActive = true;
+                ballsList.get(i).x = (int) (mouseX - ballsList.get(i).radius);
+                ballsList.get(i).y = (int) (mouseY - ballsList.get(i).radius);
+            }
+
+        }
+
+        if (ballCatchActive) {
+            double mouseX = e.getX();
+            double mouseY = e.getY();
+            ballsList.get(indexOfCatchBall).x = (int) (mouseX - ballsList.get(indexOfCatchBall).radius);
+            ballsList.get(indexOfCatchBall).y = (int) (mouseY - ballsList.get(indexOfCatchBall).radius);
+            ballCatchActive = false;
+        }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+
+    }
+
+
 }

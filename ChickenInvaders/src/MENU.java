@@ -403,11 +403,13 @@ public class MENU implements MouseListener, KeyListener {
                 panel.fullScreenMode = !panel.fullScreenMode;
                 setFullscreen.setText("SmallScreen mode");
                 panel.firstaid = new Help(panel.ramka.getWidth());
+                panel.ammo = new Ammo(panel.ramka.getWidth());
                 hero.x = panel.ramka.getWidth()/2-50;
             }else if (panel.getHeight() == screenHeight -71 && panel.getWidth() == screenWidth){
                 System.out.println("jest większe powienien zmienjszyc");
                 panel.ramka.setSize(800,830);
                 panel.firstaid = new Help(panel.ramka.getWidth());
+                panel.ammo = new Ammo(panel.ramka.getWidth());
                 setFullscreen.setText("Fullscreen Mode");
                 hero.x = panel.ramka.getWidth()/2-50;
                 panel.fullScreenMode = !panel.fullScreenMode;

@@ -34,17 +34,18 @@ public class Panel extends JPanel {
     String name = "";
     boolean death = false;
     RandomGameBonus gameBonus = new RandomGameBonus();
-    boolean bonusActivated = false;
+    Ammo ammo;
+    boolean bonusActivated = true;
     boolean speedIdUp = false;
     LocalDateTime czas = LocalDateTime.now();
     int czasNano;
 
-    int countTurn = 0;
 
     int enemiesNumber = 3; //(max 16x na szerokość ekranu)
     List<Enemy> enemies = new ArrayList<>();
     List<EnemyBullets> bosseBullets = new ArrayList<>();
     int iloscNaOS = 3;
+    int trzyRepeatPosition = 0;
 
 
     InfoPanel info = new InfoPanel();
@@ -114,22 +115,29 @@ public class Panel extends JPanel {
                 }
 
                 firstaid = new Help(ramka.getWidth());
+                ammo = new Ammo(ramka.getWidth());
 
 
-                if (ramka.getWidth() > WIDTH){
+                if (ramka.getWidth() > WIDTH) {
                     WIDTH = ramka.getWidth();
                     HEIGHT = ramka.getHeight();
                 }
 
-                max = ramka.getWidth() / 55;
-                CreateEnemiesAgainResize();
+                if (resizeMode) {
+                    max = ramka.getWidth() / 55;
+                    CreateEnemiesAgainResize();
+                } else {
+                    enemies.clear();
+                    CreateEnemiesAgain();
+                }
             }
         });
+
+        hero.setAmmo(enemiesNumber * 2);
 
     }
 
     public void CreateEnemiesAgainResize() {
-        enemies.clear();
 
         if (death) {
             enemiesNumber = 3;
@@ -139,27 +147,19 @@ public class Panel extends JPanel {
             enemiesNumber = (talentPoints.LEVEL * 10);
         }
 
+        hero.setAmmo(enemiesNumber * 2);
 
-        if (ramka.getWidth() > WIDTH){
+        if (ramka.getWidth() > WIDTH) {
             WIDTH = ramka.getWidth();
             HEIGHT = ramka.getHeight();
         }
 
-        max = WIDTH/55;
 
         if (talentPoints.LEVEL % 8 != 0) {
-            howManyEnemiesInLine();
-            int[] randomArray = generateRandomArray(5, 0, max);  //3,0,15
-            // size ramka.getwidth/160                        max ramka.getWidth/80
-
-            int alotOfEnemiesGap = enemiesNumber / 25;
-
-            for (int i = 0; i < enemiesNumber; i++) {
-                if (i % iloscNaOS == 0) {
-                    randomArray = generateRandomArray(iloscNaOS, 0, max);
-                }
-
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
+            //howManyEnemiesInLine();
+            Random rand = new Random();
+            for (int i = 0; i < enemies.size(); i++) {
+                enemies.get(i).x = rand.nextInt(WIDTH - 50);
             }
         } else {
             boos.ActiveBoss = true;
@@ -186,18 +186,6 @@ public class Panel extends JPanel {
 
     public static STATE State = STATE.MENU; /// zmienic na GAME zeby grac STATE.STATE.TalentPoints
 
-
-    public void howManyEnemiesInLine() {
-
-
-        if (ramka.getWidth() > 0) {
-            iloscNaOS = ramka.getWidth() / 160;
-        } else {
-            iloscNaOS = WIDTH / 160;
-        }
-        System.out.println("ilość na os = " + iloscNaOS);
-
-    }
 
 
     protected void paintComponent(Graphics g) {
@@ -265,6 +253,11 @@ public class Panel extends JPanel {
                 firstAidKolizje();
             }
 
+
+            ammo.odpalPomocAmmo(g2d, this);
+            ammoKolizje();
+
+
             //rysuj pieniążek!
             for (Coins c : coinsQuantity) {
                 c.paint(g2d, this);
@@ -299,9 +292,9 @@ public class Panel extends JPanel {
             // infopanel
             assert boos != null;
             if (!boos.ActiveBoss) {
-                this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney, this);
+                this.info.paintInfopanel(g2d, enemies.size(), health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney, hero.getAmmo(), this);
             } else {
-                this.info.paintInfopanel(g2d, boos.bossHP, health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney, this); //< info zamiast kurczków to hp bosa
+                this.info.paintInfopanel(g2d, boos.bossHP, health, hero.bulletCounter, firstaid.firstAidleft, coinsMoney, hero.getAmmo(), this); //< info zamiast kurczków to hp bosa
             }
 
         } else if (State == STATE.Pause) {
@@ -318,6 +311,28 @@ public class Panel extends JPanel {
         }
 
 
+    }
+
+    private void ammoKolizje() {
+
+        for (int i = 0; i < ammo.ammoQuantity; i++) {
+
+            if (ammo.y[i] + 40 >= hero.y && ammo.y[i] < hero.y + 48 && ammo.x[i] + 30 < hero.x + 48 && ammo.x[i] + 10 > hero.x) {
+                System.out.println("dostałem apteczkę!");
+                hero.setAmmo(hero.ammo + 30);
+                ammo.goDown[i] = false;
+                ammo.x[i] = -20;
+                ammo.y[i] = -20;
+
+            }
+            //przenieś i przestań ruszać
+            if (ammo.y[i] > getHeight()) {
+                ammo.goDown[i] = false;
+                ammo.x[i] = -20;
+                ammo.y[i] = -20;
+            }
+
+        }
     }
 
 
@@ -415,9 +430,9 @@ public class Panel extends JPanel {
             allShootsBulletsnumber = hero.allBulletsShoots;
             firstaid.firstAidQuantity += 1;
 
-            if (obstacle.quantity > 11){
+            if (obstacle.quantity > 11) {
                 obstacle.quantity = 12;
-            }else {
+            } else {
                 obstacle.quantity += 1;
             }
 
@@ -461,6 +476,7 @@ public class Panel extends JPanel {
                 }
 
             }
+
             bonusActivated = true;
             czas = LocalDateTime.now();
             czasNano = LocalDateTime.now().getSecond();
@@ -627,7 +643,7 @@ public class Panel extends JPanel {
         if (talentPoints.LEVEL > 8) {
             obstacle.quantity = 5;
         }
-        if (obstacle.quantity > 11){
+        if (obstacle.quantity > 11) {
             obstacle.quantity = 12;
         }
 
@@ -744,38 +760,34 @@ public class Panel extends JPanel {
         }
 
         enemiesNumber = (talentPoints.LEVEL * enemiesNumber) - (talentPoints.LEVEL * enemiesNumber / 3);
-        System.out.println(enemiesNumber);
 
         if (talentPoints.LEVEL > 4) {
             enemiesNumber = (talentPoints.LEVEL * 10);
         }
 
-        if (ramka.getWidth() > WIDTH){
+        hero.setAmmo(enemiesNumber * 2);
+
+        if (ramka.getWidth() > WIDTH || ramka.getWidth() != WIDTH) {
             WIDTH = ramka.getWidth();
             HEIGHT = ramka.getHeight();
         }
 
-        max = WIDTH/55;
-
         if (talentPoints.LEVEL % 8 != 0) {
-            howManyEnemiesInLine();
-            int[] randomArray = generateRandomArray(5, 0, max);  //3,0,15
-            // size ramka.getwidth/160                        max ramka.getWidth/80
-
-            int alotOfEnemiesGap = enemiesNumber / 25;
-            
-            for (int i = 0; i < enemiesNumber; i++) {
-                System.out.println(enemiesNumber + " ile przeciwnikow");
-                if (i % iloscNaOS == 0) {
-                    randomArray = generateRandomArray(iloscNaOS, 0, max);
+            if (enemiesNumber < 1) {
+                if (talentPoints.LEVEL < 5) {
+                    enemiesNumber = (talentPoints.LEVEL * enemiesNumber) - (talentPoints.LEVEL * enemiesNumber / 3);
                 }
 
-                enemies.add(new Enemy(randomArray[i % iloscNaOS] * 50, (int) Math.floor((i / iloscNaOS)) * (-alotOfEnemiesGap * 50), talentPoints));
+                if (talentPoints.LEVEL > 4) {
+                    enemiesNumber = (talentPoints.LEVEL * 10);
+                }
             }
+
         } else {
             boos.ActiveBoss = true;
         }
 
+        EnemiesSpot(enemiesNumber);
 
         if (talentPoints.LEVEL > 0) {
             obstacle = new Obstacle(this);
@@ -784,50 +796,58 @@ public class Panel extends JPanel {
         }
 
         firstaid = new Help(WIDTH);
-
     }
 
 
-    public static int[] generateRandomArray(int size, int min, int max) {
+    private void EnemiesSpot(int enemiesNumber) {
 
-        if (max - min + 1 < size) {
-            throw new IllegalArgumentException("Cannot generate unique array. Range is too small.");
+        System.out.println("enemies spot!");
+
+        System.out.println(enemiesNumber + " to jest ilość enemies");
+
+        Random random = new Random();
+        int enemyX;
+        int enemyY;
+
+        for (int i = 0; i < enemiesNumber; i++) {
+
+            enemyX = random.nextInt(WIDTH - 100);
+            enemyY = random.nextInt(HEIGHT + (enemiesNumber * 50)) * -1; //  jst ok zmienić tylko przy resize na więcej w lini X
+
+            enemies.add(new Enemy(enemyX, enemyY, talentPoints));
+
+            if( i > 0 ) {
+                if (!changePosition(i)) {
+                    enemies.remove(i); // jak sie pozycvja nakłada wyrzuć obiekt i zmniejsz licznik żeby jeszcze raz
+                    //stworzył
+                    i = i - 1;
+                }
+                System.out.println("kurczak nr: " + i + " stworzony!" );
+            }
+
+
         }
 
-        int[] randomArray = new int[size];
-        Set<Integer> uniqueSet = new HashSet<>();
+
+        System.out.println(enemies.size() + " to jest wielkość listy enemies");
+    }
+
+
+    private boolean changePosition(int i) {
         Random random = new Random();
 
-        //Tworzy tablicę o rozmiarze size, która będzie przechowywać wygenerowane losowe liczby.
-        //Tworzy zbiór (Set) uniqueSet, który będzie przechowywał unikalne liczby.
-        //Używamy Set do zapewnienia, że nie będzie duplikatów w naszych wygenerowanych liczbach.
+        for (int j = 0; j < enemies.size() -1; j++) {
+            if (enemies.get(j).x >= enemies.get(i).x && enemies.get(j).x <= enemies.get(i).x + 50 &&
+                    enemies.get(j).y >= enemies.get(i).y && enemies.get(j).y <= enemies.get(i).y + 50) {
+                System.out.println("to trzeba zmienić! " + i);
+                System.out.println("enemy 1: " + enemies.get(i).x + " enemy 2: " + enemies.get(j).x);
+                System.out.println("enemy 1: " + enemies.get(i).y + " enemy 2: " + enemies.get(j).y);
 
-        while (uniqueSet.size() < size) {
-            int randomNum = random.nextInt(max - min + 1) + min;
-            uniqueSet.add(randomNum);
+                return false;
+            }
         }
-        //Pętla while wykonuje się, dopóki rozmiar uniqueSet (ilość unikalnych liczb w zbiorze) jest mniejszy niż size (żądana liczba unikalnych liczb w tablicy).
-        //Generuje losową liczbę (randomNum) w zakresie od min do max (włącznie) za pomocą random.nextInt(max - min + 1) + min.
-        //Następnie dodaje tę losową liczbę do uniqueSet.
-
-        int index = 0;
-        for (int number : uniqueSet) {
-            randomArray[index++] = number;
-        }
-
-        //Przechodzi przez każdą unikalną liczbę w uniqueSet za pomocą pętli for-each.
-        //Przypisuje każdą z tych unikalnych liczb do odpowiedniego indeksu w tablicy randomArray.
-
-        return randomArray;
+        return true;
     }
-
-
-    //metoda generateRandomArray generuje tablicę randomArray o podanej
-    // wielkości size, zawierającą losowe, unikalne liczby z
-    // zakresu od min do max (włącznie). Jeśli próbujemy wygenerować
-    // więcej unikalnych liczb, niż jest możliwe z danego zakresu, metoda wyrzuci
-    // wyjątek. W przypadku przykładu z 3, 0, 15 oznacza to, że chcemy
-    // wygenerować tablicę 3 unikalnych liczb z zakresu od 0 do 15 (włącznie).
 
 
     public Dimension getPreferredSize() {

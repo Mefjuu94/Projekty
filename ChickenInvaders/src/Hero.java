@@ -11,7 +11,19 @@ public class Hero implements KeyListener {
     public boolean right;
     public boolean shoot;
 
+    List<Integer> listToRight = new ArrayList<>();
+
     Panel panel;
+
+    public void setAmmo(int ammo) {
+        this.ammo = ammo;
+    }
+
+    public int getAmmo() {
+        return ammo;
+    }
+
+    public int ammo;
 
     public int x = 250;
     public int y = 750;
@@ -100,20 +112,21 @@ public class Hero implements KeyListener {
         this.panel = (Panel) panel;
 
         this.heroIcon.paintIcon(panel, g2d, this.x, this.y);
-        this.paintBullets(g2d,panel);
+        this.paintBullets(g2d);
 
     }
 
 
-    public void paintBullets(Graphics2D g2d, JPanel panel) {
+    public void paintBullets(Graphics2D g2d) {
 
         g2d.setColor(Color.WHITE);
 
+
         for (int i = 0; i < bullets.size(); i++) {
             g2d.fillOval(bullets.get(i).xShoot, bullets.get(i).yShoot, 6, 6);
+            bullets.get(i).xShoot += bullets.get(i).xDegree;
             bullets.get(i).yShoot -= bullets.get(i).turn;
         }
-
 
     }
 
@@ -133,46 +146,84 @@ public class Hero implements KeyListener {
     public void strzal() {
 
         if (bigShoot){
-            bullets.add(new Bullet(x + 20, y ,panel.obstacle.getQuantity())); // twórz pocisk)=
-            bulletCounter++;
-            allBulletsShoots++;
+            if (ammo >0) {
+                bullets.add(new Bullet(x + 20, y, panel.obstacle.getQuantity(), 0)); // twórz pocisk)=
+                ammo = ammo - 1;
+                bulletCounter++;
+                allBulletsShoots++;
+            }
+
         }else {
-            bullets.add(new Bullet(x + 20, y,panel.obstacle.getQuantity())); // twórz pocisk)=
-            bulletCounter++;
-            allBulletsShoots++;
+            if (panel.bonusActivated && panel.gameBonus.chooseBonus() == 3 && !trippeShoots){
+                if (ammo > 0) {
+                    bullets.add(new Bullet(x + 40, y + 20, panel.obstacle.getQuantity(), 8));
+                    ammo = ammo - 1;
+                    bulletCounter++;
+                    allBulletsShoots++;
+                }
+                if (ammo > 0) {
+                    bullets.add(new Bullet(x, y + 20, panel.obstacle.getQuantity(), -8));
+                    ammo = ammo - 1;
+                    bulletCounter++;
+                    allBulletsShoots++;
+                }
+            }else {
+                if (ammo > 0) {
+                    bullets.add(new Bullet(x + 20, y, panel.obstacle.getQuantity(), 0)); // twórz pocisk)=
+                    ammo = ammo - 1;
+                    bulletCounter++;
+                    allBulletsShoots++;
+                }
+            }
+
             //setTurnOfBullet.add(8);
         }
 
         if (trippeShoots){
-            bullets.add(new Bullet(x, y + 20,panel.obstacle.getQuantity())); // twórz pocisk)=
-            bulletCounter++;
-            allBulletsShoots++;
+            if (panel.bonusActivated && panel.gameBonus.chooseBonus() == 3){
+                if (ammo > 0) {
+                    bullets.add(new Bullet(x, y + 20, panel.obstacle.getQuantity(), -8));
+                    ammo = ammo - 1;
+                    bulletCounter++;
+                    allBulletsShoots++;
+                }
+            }else {
+                if (ammo > 0) {
+                    bullets.add(new Bullet(x, y + 20, panel.obstacle.getQuantity(), 0)); // twórz pocisk)=
+                    ammo = ammo - 1;
+                    bulletCounter++;
+                    allBulletsShoots++;
+                }
+            }
+
 //            setTurnOfBullet.add(8);
 
-            bullets.add(new Bullet(x + 40, y + 20,panel.obstacle.getQuantity())); // twórz pocisk)=
-            bulletCounter++;
-            allBulletsShoots++;
+            if (panel.bonusActivated && panel.gameBonus.chooseBonus() == 3){
+                if (ammo > 0) {
+                    bullets.add(new Bullet(x + 40, y + 20, panel.obstacle.getQuantity(), 8));
+                    ammo = ammo - 1;
+                    bulletCounter++;
+                    allBulletsShoots++;
+                }
+            }else {
+                if (ammo > 0) {
+                    bullets.add(new Bullet(x + 40, y + 20, panel.obstacle.getQuantity(), 0)); // twórz pocisk)=
+                    ammo = ammo - 1;
+                    bulletCounter++;
+                    allBulletsShoots++;
+                }
+            }
+
             //setTurnOfBullet.add(8);
         }
 
-
+        System.out.println("Ammo left : " + ammo);
 
     }
 
 
     public void removeBullets() {
 
-        //generyk
-//                Iterator<Bullet> i = bullets.iterator();
-//
-//        while (i.hasNext()) {
-//
-//            Bullet bullet = i.next();
-//            if (bullet.yShoot < -5 || bullet.yShoot > panel.getHeight() + 5) {
-//                i.remove();
-//                System.out.println("usunieto " + bullets.size());
-//            }
-//        }
 
         for (int i = 0; i < bullets.size(); i++) {
             if (bullets.get(i).yShoot < -5 || bullets.get(i).yShoot > panel.getHeight()) {

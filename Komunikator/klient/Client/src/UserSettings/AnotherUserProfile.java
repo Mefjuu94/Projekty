@@ -1,15 +1,22 @@
 package UserSettings;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
+import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
-import java.util.Base64;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
-public class AnotherUserProfile extends JPanel implements ActionListener {
-
+public class AnotherUserProfile extends Panel implements ActionListener {
 
     private JLabel nameLabel;
     private JLabel ageLabel;
@@ -17,18 +24,30 @@ public class AnotherUserProfile extends JPanel implements ActionListener {
 
     JPanel informationsAboutUser = new JPanel();
 
+    JTabbedPane tabbedPane;
     JPanel avatarPlace = new JPanel();
     ImageIcon defaultAvatar = new ImageIcon("resourceFilesImgGif/Default_avatar.png");
     JLabel avatar = new JLabel();
     JButton addToFavorites = new JButton("Add Friend");
+    JButton privateChat = new JButton("Private Chat");
+    public boolean priv = false;
 
 
+    JEditorPane chatTextPane = new JEditorPane();
+    String nameOfUser = "";
     JPanel favorites = new JPanel();
     JScrollPane scrollFavorites = new JScrollPane(favorites);
+    ArrayList<JButton> clicableUsers;
 
+    public List<String> openPrivChat;
 
     public AnotherUserProfile(String name, String age, String location
-            , String avatarImageBase64) throws IOException {
+            , String avatarImageBase64,List<String> openPrivChat) throws IOException {
+
+
+        this.nameOfUser = name;
+        this.openPrivChat = openPrivChat;
+
 
         //defaultAvatar = new ImageIcon(Base64.getDecoder().decode(avatarImageBase64));
 
@@ -77,6 +96,9 @@ public class AnotherUserProfile extends JPanel implements ActionListener {
             }
         }
         this.add(scrollFavorites, BorderLayout.SOUTH);
+        privateChat.addActionListener(this);
+        privateChat.setVisible(true);
+        this.add(privateChat);
     }
 
     private ImageIcon scaleAvatar(ImageIcon newAvatarSize) throws IOException {
@@ -85,7 +107,26 @@ public class AnotherUserProfile extends JPanel implements ActionListener {
 
     }
 
-    @Override
+    public void setTextInPrivChat(String message){
+        HTMLDocument doc = (HTMLDocument) chatTextPane.getDocument();
+        HTMLEditorKit kit = (HTMLEditorKit) chatTextPane.getEditorKit();
+
+        try {
+            kit.insertHTML(doc, doc.getLength(), message, 0, 0, null);
+            chatTextPane.setCaretPosition(doc.getLength());
+        } catch (IOException | BadLocationException e) {
+            e.printStackTrace();
+        }
+        chatTextPane.setCaretPosition(doc.getLength());
+
+    }
+
+    public ArrayList<Boolean> firstAtemptMessage(ArrayList<Boolean> firstAtemptMessage){
+        firstAtemptMessage.add(true);
+        return firstAtemptMessage;
+    }
+
+        @Override
     public void actionPerformed(ActionEvent e) {
 
 
@@ -95,9 +136,9 @@ public class AnotherUserProfile extends JPanel implements ActionListener {
                     BufferedReader bufferedReader = new BufferedReader(new FileReader("src/friends.txt"));
                     String allFriends = bufferedReader.readLine();
                     FileWriter writer = new FileWriter("src/friends.txt");
-                    if (allFriends == null){
+                    if (allFriends == null) {
                         writer.append(nameLabel.getText());
-                    }else {
+                    } else {
                         writer.append(allFriends).append(";").append(nameLabel.getText());
                     }
                     writer.close();
@@ -131,7 +172,7 @@ public class AnotherUserProfile extends JPanel implements ActionListener {
 
                     bufferedReader = new BufferedReader(new FileReader("src/friends.txt"));
                     allFriends = bufferedReader.readLine();
-                    String replace = allFriends.replace(";;",";");
+                    String replace = allFriends.replace(";;", ";");
 
                     writer = new FileWriter("src/friends.txt");
                     writer.append(replace);
@@ -144,9 +185,18 @@ public class AnotherUserProfile extends JPanel implements ActionListener {
                     throw new RuntimeException(ex);
                 }
             }
-
-
-
         }
+
+
+            if (e.getSource() == privateChat) {
+
+                openPrivChat.add(nameOfUser);
+                openPrivChat.add("true");
+                System.out.println("klikłem privat czat!");
+
+            }
+
+
+
     }
 }

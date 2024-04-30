@@ -20,8 +20,8 @@ public class TalentPoints implements ActionListener {
 
     ImageIcon shoot3x = new ImageIcon("src/ICONS/shoot3x.png");
     JButton trippleShoot = new JButton(shoot3x);
-    boolean tripleShoots = true;
-    int trippleShootsPoints = 10;
+    boolean tripleShoots = false;
+    int trippleShootsPoints = 0;
     JLabel trippleShootshPointsLabel = new JLabel("Tripple shoot: " + trippleShootsPoints + " / 10");
 
     ImageIcon biggerShootIcon = new ImageIcon("src/ICONS/BigSHoot.png");
@@ -30,7 +30,7 @@ public class TalentPoints implements ActionListener {
     int bigShootsPoints = 0;
     JLabel BigShootPointsLabel = new JLabel("BIG shoot: " + bigShootsPoints + " / 1");
 
-    int LEVEL = 1; // default 1
+    int LEVEL = 6; // default 1
     public int score = 10;
 
     JPanel buttonsAndScore = new JPanel();
